@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { DEPTS, REGIONS, B2B_CATS, COPRO_CATS, B2B_GROUPS, COPRO_GROUPS } from "@/lib/constants";
 import {
-  Send, Square, Sparkles, MapPin, Building2, Home, Search, PenLine,
+  Send, Square, Sparkles, MapPin, Building2, Home, Search, PenLine, Loader2,
   Plus, X, Play, RotateCcw, ChevronRight, FolderPlus, Folder,
 } from "lucide-react";
 
@@ -153,6 +153,33 @@ export default function SearchPanel({
 
   const [freeSearchInput, setFreeSearchInput] = useState('');
   const [freeSearchTerms, setFreeSearchTerms] = useState([]);
+  const [nlInput, setNlInput] = useState('');
+  const [nlParsing, setNlParsing] = useState(false);
+  const [nlError, setNlError] = useState('');
+
+  const handleNlSubmit = async () => {
+    if (!nlInput.trim() || nlParsing) return;
+    setNlParsing(true);
+    setNlError('');
+    try {
+      const res = await fetch('/api/parse-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: nlInput.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      if (data.terms && data.terms.length > 0) {
+        setFreeSearchTerms(data.terms);
+        setSearchType('custom');
+        setStep(1);
+      }
+    } catch (err) {
+      setNlError(err.message || 'Erreur lors de l\'analyse');
+    } finally {
+      setNlParsing(false);
+    }
+  };
 
   const addFreeSearch = () => {
     if (freeSearchInput.trim()) {
@@ -271,6 +298,8 @@ export default function SearchPanel({
     setCustomInput('');
     setFreeSearchTerms([]);
     setFreeSearchInput('');
+    setNlInput('');
+    setNlError('');
     setSelectedFolder(null);
     setNewFolderName('');
     setShowNewFolder(false);
@@ -343,19 +372,43 @@ export default function SearchPanel({
                 <Sparkles size={15} />
                 Les deux
               </button>
-              <button
-                onClick={() => handleTypeSelect('custom')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line-hover text-sm font-medium text-content-secondary hover:border-amber-500/30 hover:text-amber-400 hover:bg-amber-600/10 transition-all active:scale-[0.97]"
-              >
-                <PenLine size={15} />
-                Recherche libre
-              </button>
+            </div>
+          )}
+
+          {step === 0 && !searchType && (
+            <div className="pl-10 space-y-2 animate-in fade-in duration-500">
+              <p className="text-[10px] uppercase tracking-wider text-content-faint font-semibold">ou decrivez ce que vous cherchez</p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <PenLine size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-faint" />
+                  <input
+                    type="text"
+                    value={nlInput}
+                    onChange={(e) => setNlInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleNlSubmit()}
+                    placeholder="Ex: je cherche des restaurants haut de gamme et des hotels 4 etoiles..."
+                    disabled={nlParsing}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-line-hover bg-surface-input text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-amber-500/40 transition disabled:opacity-50"
+                  />
+                </div>
+                <button
+                  onClick={handleNlSubmit}
+                  disabled={!nlInput.trim() || nlParsing}
+                  className="px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {nlParsing ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  {nlParsing ? 'Analyse...' : 'Analyser'}
+                </button>
+              </div>
+              {nlError && (
+                <p className="text-xs text-red-400">{nlError}</p>
+              )}
             </div>
           )}
 
           {searchType && (
             <UserMessage>
-              {searchType === 'b2b' ? 'B2B — Entreprises' : searchType === 'copro' ? 'Copropriete — Syndics' : searchType === 'custom' ? 'Recherche libre' : 'B2B + Copropriete'}
+              {searchType === 'b2b' ? 'B2B — Entreprises' : searchType === 'copro' ? 'Copropriete — Syndics' : searchType === 'custom' ? `"${nlInput}"` : 'B2B + Copropriete'}
             </UserMessage>
           )}
 
