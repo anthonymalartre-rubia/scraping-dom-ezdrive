@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { getSupabase } from '@/lib/supabase';
-import { DEPTS } from '@/lib/constants';
+import { DEPTS, REGIONS } from '@/lib/constants';
 import TopBar from '@/components/TopBar';
 import Sidebar from '@/components/Sidebar';
 import UsageBanner from '@/components/UsageBanner';
@@ -33,6 +33,56 @@ function escapeCSV(value) {
   // Escape double quotes
   str = str.replace(/"/g, '""');
   return `"${str}"`;
+}
+
+// Generate a descriptive label for search sessions
+function generateSessionLabel(depts, b2bCats, coproCats, customQueries) {
+  // Build category part
+  let catPart = '';
+  const allCats = [...(b2bCats || []), ...(coproCats || [])];
+  const customs = customQueries || [];
+
+  if (allCats.length === 0 && customs.length > 0) {
+    catPart = customs.length === 1 ? customs[0] : `${customs.length} recherches`;
+  } else if (allCats.length === 1) {
+    // Capitalize first letter
+    catPart = allCats[0].charAt(0).toUpperCase() + allCats[0].slice(1);
+  } else if (b2bCats.length > 0 && coproCats.length > 0) {
+    catPart = 'B2B + Copro';
+  } else if (b2bCats.length > 0) {
+    catPart = b2bCats.length <= 2 ? b2bCats.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ') : `B2B (${b2bCats.length} cat.)`;
+  } else if (coproCats.length > 0) {
+    catPart = coproCats.length <= 2 ? coproCats.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ') : `Copro (${coproCats.length} cat.)`;
+  }
+
+  // Build department part
+  let deptPart = '';
+  const totalDepts = Object.keys(DEPTS).length;
+
+  if (depts.length >= totalDepts - 2) {
+    deptPart = 'France entiere';
+  } else if (depts.length === 1) {
+    deptPart = DEPTS[depts[0]]?.name || depts[0];
+  } else {
+    // Check if depts match a region
+    const matchedRegion = Object.values(REGIONS).find(r => {
+      const rDepts = r.depts.sort();
+      const sDepts = [...depts].sort();
+      return rDepts.length === sDepts.length && rDepts.every((d, i) => d === sDepts[i]);
+    });
+    if (matchedRegion) {
+      deptPart = matchedRegion.name;
+    } else {
+      deptPart = `${depts.length} depts`;
+    }
+  }
+
+  const label = catPart && deptPart
+    ? `${catPart} \u2014 ${deptPart}`
+    : catPart || deptPart || 'Recherche';
+
+  // Truncate to ~40 chars
+  return label.length > 42 ? label.slice(0, 39) + '...' : label;
 }
 
 export default function Dashboard() {
@@ -274,7 +324,7 @@ export default function Dashboard() {
         query_count: taskList.length,
         results_count: 0,
         status: 'running',
-        label: `Recherche ${new Date().toLocaleDateString('fr-FR')}`,
+        label: generateSessionLabel(depts, b2bCats, coproCats, customQueries),
         folder_id: folderId || null,
       }).select().single();
       session = sessionData;

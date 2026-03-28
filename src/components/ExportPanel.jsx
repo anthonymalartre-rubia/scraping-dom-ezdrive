@@ -153,29 +153,36 @@ export default function ExportPanel({ prospects, onDownloadCSV }) {
       {/* Preview */}
       <div className="rounded-2xl border border-line bg-surface-card overflow-hidden">
         <div className="px-5 py-3 border-b border-line">
-          <h3 className="text-xs uppercase tracking-wider text-content-faint font-semibold">Aperçu (5 premiers)</h3>
+          <h3 className="text-xs uppercase tracking-wider text-content-faint font-semibold">Aperçu CSV</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-line bg-surface-deep">
                 <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Nom</th>
+                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Adresse</th>
+                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Telephone</th>
                 <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Email</th>
-                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Tel</th>
-                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Dept</th>
+                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Note</th>
+                <th className="px-4 py-2.5 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Type</th>
               </tr>
             </thead>
             <tbody>
               {prospects.slice(0, 5).map((p) => (
                 <tr key={p.id} className="border-b border-line/50">
-                  <td className="px-4 py-2 text-content-primary truncate max-w-[180px]">{p.nom}</td>
-                  <td className="px-4 py-2 text-green-400/70 truncate max-w-[180px]">{p.email || <span className="text-content-dim">—</span>}</td>
-                  <td className="px-4 py-2 text-content-secondary font-mono">{p.telephone || <span className="text-content-dim">—</span>}</td>
-                  <td className="px-4 py-2 text-content-muted font-mono">{p.departement}</td>
+                  <td className="px-4 py-2 text-content-primary truncate max-w-[140px]">{p.nom || '\u2014'}</td>
+                  <td className="px-4 py-2 text-content-secondary truncate max-w-[140px]">{p.adresse || '\u2014'}</td>
+                  <td className="px-4 py-2 text-content-secondary font-mono">{p.telephone || '\u2014'}</td>
+                  <td className="px-4 py-2 text-green-400/70 truncate max-w-[140px]">{p.email || '\u2014'}</td>
+                  <td className="px-4 py-2 text-amber-400 font-mono">{p.note != null ? p.note : '\u2014'}</td>
+                  <td className="px-4 py-2 text-content-muted">{p.type || '\u2014'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="px-5 py-2.5 border-t border-line text-[11px] text-content-muted">
+          5 premieres lignes sur {prospects.length} total
         </div>
       </div>
     </div>

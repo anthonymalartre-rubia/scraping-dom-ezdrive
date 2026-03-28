@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, memo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, memo } from "react";
 import {
   Download,
   Trash2,
@@ -31,6 +31,13 @@ import {
   Columns3,
   CheckSquare,
   SquareIcon,
+  CheckCircle,
+  ShieldCheck,
+  Eye,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 import { DEPTS } from "@/lib/constants";
 import { computeLeadScore, getScoreLabel } from "@/lib/scoring";
@@ -43,6 +50,184 @@ function InfoTooltip({ text, wide }) {
       <Info size={11} className="text-content-faint group-hover/info:text-content-tertiary transition-colors" />
       <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 bg-surface-elevated border border-line-hover rounded-lg text-[10px] text-content-secondary leading-relaxed opacity-0 group-hover/info:opacity-100 pointer-events-none transition-opacity z-30 shadow-xl whitespace-normal ${wide ? 'w-56' : 'w-44'}`}>
         {text}
+      </div>
+    </div>
+  );
+}
+
+function EnrichmentProgressBanner({
+  isEnriching, isDeepEnriching, isWaterfallEnriching,
+  enrichProgress, deepEnrichProgress, waterfallProgress,
+  onStopEnrichment,
+  enrichStartTime, justFinished, onDismissFinished,
+}) {
+  const isRunning = isEnriching || isDeepEnriching || isWaterfallEnriching;
+  if (!isRunning && !justFinished) return null;
+
+  let progress, methodLabel, accentFrom, accentTo;
+  if (isWaterfallEnriching || (justFinished && justFinished.type === "waterfall")) {
+    progress = waterfallProgress;
+    methodLabel = "Waterfall Pro";
+    accentFrom = "from-orange-500";
+    accentTo = "to-amber-500";
+  } else if (isDeepEnriching || (justFinished && justFinished.type === "deep")) {
+    progress = deepEnrichProgress;
+    methodLabel = "Deep Enrich";
+    accentFrom = "from-purple-500";
+    accentTo = "to-indigo-500";
+  } else {
+    progress = enrichProgress;
+    methodLabel = "Scraping";
+    accentFrom = "from-indigo-500";
+    accentTo = "to-purple-500";
+  }
+
+  const current = progress?.current || 0;
+  const total = progress?.total || 0;
+  const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+  const currentSite = progress?.currentSite || "";
+
+  const logs = progress?.logs || [];
+  const successCount = logs.filter(function (l) {
+    return l.startsWith("Found:") || l.startsWith("+ ") || /^\s+[~\u2713]/.test(l);
+  }).length;
+  const errorCount = logs.filter(function (l) {
+    return l.startsWith("Error:") || l.startsWith("x ") || /^\s+\u2717/.test(l);
+  }).length;
+
+  const waterfallStats = waterfallProgress?.stats || {};
+  const waterfallFound = Object.values(waterfallStats).reduce(function (a, b) { return a + b; }, 0);
+
+  const emailsFound = (isWaterfallEnriching || (justFinished && justFinished.type === "waterfall"))
+    ? waterfallFound
+    : (progress?.foundScrape || 0) + (progress?.foundGuess || 0) || successCount;
+
+  let etaStr = "";
+  if (isRunning && current > 0 && total > 0 && enrichStartTime) {
+    const elapsed = (Date.now() - enrichStartTime) / 1000;
+    const rate = current / elapsed;
+    const remaining = total - current;
+    const etaSeconds = Math.round(remaining / rate);
+    if (etaSeconds < 60) {
+      etaStr = "~" + etaSeconds + "s";
+    } else if (etaSeconds < 3600) {
+      const mins = Math.floor(etaSeconds / 60);
+      const secs = etaSeconds % 60;
+      etaStr = "~" + mins + "m" + (secs > 0 ? " " + secs + "s" : "");
+    } else {
+      const hrs = Math.floor(etaSeconds / 3600);
+      const mins = Math.floor((etaSeconds % 3600) / 60);
+      etaStr = "~" + hrs + "h " + mins + "m";
+    }
+  }
+
+  if (justFinished && !isRunning) {
+    const totalEmails = justFinished.emailsFound || 0;
+    const totalProspects = justFinished.total || 0;
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-[60] md:left-64">
+        <div className="mx-auto max-w-6xl px-4 pb-4">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-emerald-500/30 bg-surface-card shadow-2xl shadow-emerald-900/10 backdrop-blur-xl">
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <CheckCircle2 size={18} className="text-emerald-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-content-primary">{"Enrichissement termin\u00e9"}</div>
+              <div className="text-xs text-content-muted mt-0.5">
+                {totalEmails}{" email"}{totalEmails > 1 ? "s" : ""}{" trouv\u00e9"}{totalEmails > 1 ? "s" : ""}{" sur "}{totalProspects}{" prospect"}{totalProspects > 1 ? "s" : ""}
+                {justFinished.errors > 0 && (
+                  <span className="text-red-400 ml-2">{"("}{justFinished.errors}{" erreur"}{justFinished.errors > 1 ? "s" : ""}{")"}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-right hidden sm:block">
+                <div className="text-lg font-bold font-mono text-emerald-400 tabular-nums">
+                  {totalProspects > 0 ? Math.round((totalEmails / totalProspects) * 100) : 0}%
+                </div>
+                <div className="text-[10px] text-content-faint">{"taux de succ\u00e8s"}</div>
+              </div>
+              <button onClick={onDismissFinished} className="p-2 rounded-lg text-content-faint hover:text-content-secondary hover:bg-surface-elevated transition" aria-label="Fermer">
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-[60] md:left-64">
+      <div className="mx-auto max-w-6xl px-4 pb-4">
+        <div className="rounded-2xl border border-line-hover bg-surface-card shadow-2xl backdrop-blur-xl overflow-hidden">
+          <div className="h-1.5 bg-surface-elevated">
+            <div className={`h-full bg-gradient-to-r ${accentFrom} ${accentTo} transition-all duration-500 ease-out`} style={{ width: pct + "%" }} />
+          </div>
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <Loader2 size={16} className="text-indigo-400 animate-spin" />
+                <span className="text-xs font-semibold text-content-primary">{methodLabel}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-mono text-content-secondary tabular-nums">{current}{" / "}{total}{" prospects enrichis"}</span>
+                <span className="text-[10px] font-mono text-content-muted tabular-nums">{"("}{pct}{"%)"}</span>
+              </div>
+              {currentSite && (
+                <div className="hidden sm:flex items-center gap-1.5 min-w-0 flex-1">
+                  <Globe size={11} className="text-content-faint shrink-0" />
+                  <span className="text-[11px] text-content-muted truncate font-mono">{currentSite}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-3 ml-auto shrink-0">
+                <div className="hidden sm:flex items-center gap-2.5">
+                  <div className="flex items-center gap-1" title={"Emails trouv\u00e9s"}>
+                    <CheckCircle2 size={12} className="text-emerald-400" />
+                    <span className="text-[11px] font-mono text-emerald-400 tabular-nums">{emailsFound}</span>
+                  </div>
+                  {errorCount > 0 && (
+                    <div className="flex items-center gap-1" title="Erreurs">
+                      <XCircle size={12} className="text-red-400/70" />
+                      <span className="text-[11px] font-mono text-red-400/70 tabular-nums">{errorCount}</span>
+                    </div>
+                  )}
+                </div>
+                {etaStr && (
+                  <div className="hidden md:flex items-center gap-1 text-content-muted" title={"Temps restant estim\u00e9"}>
+                    <Clock size={11} />
+                    <span className="text-[11px] font-mono tabular-nums">{etaStr}</span>
+                  </div>
+                )}
+                <button onClick={onStopEnrichment} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600/10 border border-red-600/20 text-red-400 text-xs font-semibold transition hover:bg-red-600/20 active:scale-[0.98]">
+                  <Square size={12} />
+                  <span className="hidden sm:inline">Stop</span>
+                </button>
+              </div>
+            </div>
+            <div className="sm:hidden flex items-center gap-3 mt-2 text-[11px]">
+              <div className="flex items-center gap-1">
+                <CheckCircle2 size={11} className="text-emerald-400" />
+                <span className="font-mono text-emerald-400 tabular-nums">{emailsFound}</span>
+              </div>
+              {errorCount > 0 && (
+                <div className="flex items-center gap-1">
+                  <XCircle size={11} className="text-red-400/70" />
+                  <span className="font-mono text-red-400/70 tabular-nums">{errorCount}</span>
+                </div>
+              )}
+              {etaStr && (
+                <div className="flex items-center gap-1 text-content-muted">
+                  <Clock size={11} />
+                  <span className="font-mono tabular-nums">{etaStr}</span>
+                </div>
+              )}
+              {currentSite && (
+                <span className="text-content-muted truncate font-mono flex-1 min-w-0">{currentSite}</span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -70,6 +255,59 @@ const EMAIL_METHOD_INFO = {
   findymail: { label: "Findymail", color: "text-sky-400", tip: "Email verifie avec taux de delivrabilite eleve via Findymail" },
   guess: { label: "Email probable (contact@)", color: "text-amber-400", tip: "Aucun email trouve — contact@domaine.com est genere automatiquement. Fiabilite faible, a verifier manuellement" },
 };
+
+// Email quality badge component
+function EmailBadge({ method }) {
+  if (!method) return null;
+
+  // Group methods into quality tiers
+  if (method === 'scrape' || method === 'deep-verified' || method === 'anymail' || method === 'findymail') {
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-green-500/15 text-green-400 border border-green-500/20 whitespace-nowrap">
+        <CheckCircle size={8} className="flex-shrink-0" />
+        Verifie
+      </span>
+    );
+  }
+
+  if (method === 'apollo') {
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/20 whitespace-nowrap">
+        <Zap size={8} className="flex-shrink-0" />
+        Apollo
+      </span>
+    );
+  }
+
+  if (method === 'serper' || method === 'enrichly') {
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 whitespace-nowrap">
+        <ShieldCheck size={8} className="flex-shrink-0" />
+        {method === 'serper' ? 'Google' : 'Enrichly'}
+      </span>
+    );
+  }
+
+  if (method === 'deep-pattern') {
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/20 whitespace-nowrap">
+        <ShieldCheck size={8} className="flex-shrink-0" />
+        Pattern
+      </span>
+    );
+  }
+
+  if (method === 'guess') {
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20 whitespace-nowrap">
+        <AlertTriangle size={8} className="flex-shrink-0" />
+        Probable
+      </span>
+    );
+  }
+
+  return null;
+}
 
 const folderColorClass = (color) => {
   const map = { indigo: 'bg-indigo-500', blue: 'bg-blue-500', purple: 'bg-purple-500', green: 'bg-green-500', amber: 'bg-amber-500', rose: 'bg-rose-500' };
@@ -168,6 +406,7 @@ export default memo(function ResultsPanel({
   const [actionMenuId, setActionMenuId] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showColumnPicker, setShowColumnPicker] = useState(false);
+  const [showExportPreview, setShowExportPreview] = useState(false);
   const [visibleCols, setVisibleCols] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -177,6 +416,52 @@ export default memo(function ResultsPanel({
     }
     return { type: true, nom: true, telephone: true, email: true, site: true, note: true, dept: true, score: true, tags: true };
   });
+
+  // Enrichment progress tracking
+  const enrichStartTimeRef = useRef(null);
+  const [justFinished, setJustFinished] = useState(null);
+  const prevEnrichingRef = useRef(false);
+
+  const isAnyEnriching = isEnriching || isDeepEnriching || isWaterfallEnriching;
+
+  useEffect(() => {
+    // Detect start: was not enriching, now is
+    if (isAnyEnriching && !prevEnrichingRef.current) {
+      enrichStartTimeRef.current = Date.now();
+      setJustFinished(null);
+    }
+    // Detect end: was enriching, now is not
+    if (!isAnyEnriching && prevEnrichingRef.current) {
+      const progress = prevEnrichingRef.wasWaterfall ? waterfallProgress
+        : prevEnrichingRef.wasDeep ? deepEnrichProgress
+        : enrichProgress;
+      const logs = progress?.logs || [];
+      const found = logs.filter(function (l) {
+        return l.startsWith("Found:") || l.startsWith("+ ") || /^\s+[~\u2713]/.test(l);
+      }).length;
+      const errors = logs.filter(function (l) {
+        return l.startsWith("Error:") || l.startsWith("x ") || /^\s+\u2717/.test(l);
+      }).length;
+      const waterfallStats = waterfallProgress?.stats || {};
+      const waterfallFoundCount = Object.values(waterfallStats).reduce(function (a, b) { return a + b; }, 0);
+      const emailsFound = prevEnrichingRef.wasWaterfall
+        ? waterfallFoundCount
+        : (progress?.foundScrape || 0) + (progress?.foundGuess || 0) || found;
+
+      setJustFinished({
+        type: prevEnrichingRef.wasWaterfall ? "waterfall" : prevEnrichingRef.wasDeep ? "deep" : "basic",
+        total: progress?.total || 0,
+        emailsFound: emailsFound,
+        errors: errors,
+      });
+      enrichStartTimeRef.current = null;
+      // Auto-dismiss after 15 seconds
+      setTimeout(function () { setJustFinished(null); }, 15000);
+    }
+    prevEnrichingRef.current = isAnyEnriching;
+    prevEnrichingRef.wasWaterfall = isWaterfallEnriching;
+    prevEnrichingRef.wasDeep = isDeepEnriching;
+  }, [isAnyEnriching, isWaterfallEnriching, isDeepEnriching, enrichProgress, deepEnrichProgress, waterfallProgress]);
 
   const COLUMNS = [
     { key: 'type', label: 'Type', required: false },
@@ -298,10 +583,14 @@ export default memo(function ResultsPanel({
     const total = folderProspects.length;
     const phones = folderProspects.filter((p) => p.telephone).length;
     const emails = folderProspects.filter((p) => p.email).length;
-    const verifiedEmails = folderProspects.filter((p) => p.email && p.email_method && p.email_method !== 'guess').length;
+    const verifiedMethods = new Set(['scrape', 'deep-verified', 'anymail', 'findymail']);
+    const verifiedEmails = folderProspects.filter((p) => p.email && verifiedMethods.has(p.email_method)).length;
+    const apolloEmails = folderProspects.filter((p) => p.email && p.email_method === 'apollo').length;
+    const guessedEmails = folderProspects.filter((p) => p.email && p.email_method === 'guess').length;
+    const otherEmails = emails - verifiedEmails - apolloEmails - guessedEmails;
     const websites = folderProspects.filter((p) => p.site_web).length;
     const emailPct = total > 0 ? Math.round((emails / total) * 100) : 0;
-    return { total, phones, emails, verifiedEmails, websites, emailPct };
+    return { total, phones, emails, verifiedEmails, apolloEmails, guessedEmails, otherEmails, websites, emailPct };
   }, [folderProspects]);
 
   const prospectsWithoutEmail = useMemo(() => {
@@ -459,7 +748,7 @@ export default memo(function ResultsPanel({
           </div>
         </div>
 
-        {/* Emails — with completion bar */}
+        {/* Emails — with completion bar and breakdown */}
         <div className="flex items-center gap-3 p-4 rounded-2xl border border-line bg-surface-card hover:border-line-hover transition-colors">
           <div className="p-2 rounded-lg bg-green-500/10">
             <Mail size={16} className="text-green-400" />
@@ -471,10 +760,37 @@ export default memo(function ResultsPanel({
             </div>
             <div className="text-[10px] text-content-faint uppercase tracking-wider flex items-center">
               Emails
-              <InfoTooltip text={`${stats.verifiedEmails} verifies, ${stats.emails - stats.verifiedEmails} devines. La couleur de l'email indique la source.`} />
+              <InfoTooltip text={`${stats.verifiedEmails} verifies, ${stats.apolloEmails} Apollo, ${stats.guessedEmails} probables${stats.otherEmails > 0 ? `, ${stats.otherEmails} autres` : ''}. Le badge indique la fiabilite de chaque email.`} wide />
             </div>
-            <div className="w-full h-1 bg-surface-elevated rounded-full mt-1.5 overflow-hidden">
-              <div className="h-full bg-green-500/60 rounded-full transition-all duration-500" style={{ width: `${stats.emailPct}%` }} />
+            {stats.emails > 0 && (
+              <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                {stats.verifiedEmails > 0 && (
+                  <span className="text-[9px] text-green-400 font-medium">{stats.verifiedEmails} verif.</span>
+                )}
+                {stats.apolloEmails > 0 && (
+                  <span className="text-[9px] text-blue-400 font-medium">{stats.apolloEmails} Apollo</span>
+                )}
+                {stats.guessedEmails > 0 && (
+                  <span className="text-[9px] text-amber-400 font-medium">{stats.guessedEmails} prob.</span>
+                )}
+                {stats.otherEmails > 0 && (
+                  <span className="text-[9px] text-cyan-400 font-medium">{stats.otherEmails} autres</span>
+                )}
+              </div>
+            )}
+            <div className="w-full h-1.5 bg-surface-elevated rounded-full mt-1.5 overflow-hidden flex">
+              {stats.verifiedEmails > 0 && (
+                <div className="h-full bg-green-500/70 transition-all duration-500" style={{ width: `${(stats.verifiedEmails / stats.total) * 100}%` }} />
+              )}
+              {stats.apolloEmails > 0 && (
+                <div className="h-full bg-blue-500/70 transition-all duration-500" style={{ width: `${(stats.apolloEmails / stats.total) * 100}%` }} />
+              )}
+              {stats.otherEmails > 0 && (
+                <div className="h-full bg-cyan-500/70 transition-all duration-500" style={{ width: `${(stats.otherEmails / stats.total) * 100}%` }} />
+              )}
+              {stats.guessedEmails > 0 && (
+                <div className="h-full bg-amber-500/40 transition-all duration-500" style={{ width: `${(stats.guessedEmails / stats.total) * 100}%` }} />
+              )}
             </div>
           </div>
         </div>
@@ -726,6 +1042,68 @@ export default memo(function ResultsPanel({
           <FileSpreadsheet size={14} />
           <span className="hidden sm:inline">Zoho</span>
         </button>
+
+        {/* Export Preview */}
+        <div className="relative">
+          <button
+            onClick={() => setShowExportPreview(!showExportPreview)}
+            disabled={folderProspects.length === 0}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition disabled:opacity-30 ${
+              showExportPreview
+                ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-400'
+                : 'border-line hover:bg-surface-elevated text-content-tertiary hover:text-content-primary'
+            }`}
+            title="Aperçu de l'export"
+          >
+            <Eye size={14} />
+            <span className="hidden sm:inline">Aperçu</span>
+          </button>
+          {showExportPreview && folderProspects.length > 0 && (
+            <div className="absolute right-0 top-full mt-2 z-50 w-[600px] max-w-[90vw] rounded-xl border border-line bg-surface-elevated shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-line flex items-center justify-between">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-content-faint">Aperçu CSV</h4>
+                <button onClick={() => setShowExportPreview(false)} className="p-1 rounded hover:bg-surface-card text-content-muted hover:text-content-primary transition">
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-line bg-surface-deep">
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Nom</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Adresse</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Telephone</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Email</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Note</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-faint uppercase tracking-wider text-[10px]">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {folderProspects.slice(0, 5).map((p) => (
+                      <tr key={p.id} className="border-b border-line/50 hover:bg-surface-card/50">
+                        <td className="px-3 py-2 text-content-primary truncate max-w-[120px]">{p.nom || '\u2014'}</td>
+                        <td className="px-3 py-2 text-content-secondary truncate max-w-[140px]">{p.adresse || '\u2014'}</td>
+                        <td className="px-3 py-2 text-content-secondary font-mono">{p.telephone || '\u2014'}</td>
+                        <td className="px-3 py-2 text-green-400/70 truncate max-w-[140px]">{p.email || '\u2014'}</td>
+                        <td className="px-3 py-2 text-amber-400 font-mono">{p.note != null ? p.note : '\u2014'}</td>
+                        <td className="px-3 py-2">
+                          {p.type ? (
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${getTypeStyle(p.type)}`}>
+                              {p.type}
+                            </span>
+                          ) : '\u2014'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-4 py-2.5 border-t border-line text-[11px] text-content-muted">
+                5 premieres lignes sur {folderProspects.length} total
+              </div>
+            </div>
+          )}
+        </div>
         <button
           onClick={handleDeleteAll}
           disabled={folderProspects.length === 0}
@@ -781,28 +1159,27 @@ export default memo(function ResultsPanel({
         </select>
       </div>
 
-      {/* Email method legend */}
-      <div className="hidden sm:flex flex-wrap gap-3 px-1 items-center">
-        <span className="text-[10px] text-content-dim font-medium uppercase tracking-wider">Sources :</span>
-        {Object.entries(EMAIL_METHOD_INFO).map(([method, info]) => (
-          <div key={method} className="relative group/legend flex items-center gap-1.5 cursor-help">
-            <div className={`w-1.5 h-1.5 rounded-full ${
-              method === 'scrape' ? 'bg-green-400' :
-              method === 'deep-verified' ? 'bg-purple-400' :
-              method === 'deep-pattern' ? 'bg-purple-400/70' :
-              method === 'serper' ? 'bg-yellow-400' :
-              method === 'apollo' ? 'bg-orange-400' :
-              method === 'enrichly' ? 'bg-cyan-400' :
-              method === 'anymail' ? 'bg-teal-400' :
-              method === 'findymail' ? 'bg-sky-400' :
-              'bg-amber-400'
-            }`} />
-            <span className="text-[10px] text-content-faint group-hover/legend:text-content-tertiary transition-colors">{info.label}</span>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 bg-surface-elevated border border-line-hover rounded-lg text-[10px] text-content-secondary leading-relaxed w-52 opacity-0 group-hover/legend:opacity-100 pointer-events-none transition-opacity z-30 shadow-xl">
-              {info.tip}
+      {/* Email quality legend */}
+      <div className="hidden sm:flex flex-wrap gap-3 px-3 py-2.5 items-center rounded-xl border border-line/50 bg-surface-card/50">
+        <span className="text-[10px] text-content-muted font-semibold uppercase tracking-wider">Qualite email :</span>
+        {[
+          { method: 'scrape', badge: <EmailBadge method="scrape" /> },
+          { method: 'apollo', badge: <EmailBadge method="apollo" /> },
+          { method: 'serper', badge: <EmailBadge method="serper" /> },
+          { method: 'deep-pattern', badge: <EmailBadge method="deep-pattern" /> },
+          { method: 'guess', badge: <EmailBadge method="guess" /> },
+        ].map(({ method, badge }) => {
+          const info = EMAIL_METHOD_INFO[method];
+          return (
+            <div key={method} className="relative group/legend flex items-center gap-1.5 cursor-help">
+              {badge}
+              <span className="text-[10px] text-content-faint group-hover/legend:text-content-tertiary transition-colors">{info.label}</span>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 bg-surface-elevated border border-line-hover rounded-lg text-[10px] text-content-secondary leading-relaxed w-56 opacity-0 group-hover/legend:opacity-100 pointer-events-none transition-opacity z-30 shadow-xl">
+                {info.tip}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Bulk action bar */}
@@ -893,12 +1270,12 @@ export default memo(function ResultsPanel({
                   </a>
                 )}
                 {p.email ? (
-                  <div className="flex items-center gap-2 text-xs min-h-[32px]">
+                  <div className="flex items-center gap-2 text-xs min-h-[32px] flex-wrap">
                     <Mail size={12} className="text-content-faint flex-shrink-0" />
                     <span className={`truncate ${methodInfo?.color || 'text-content-secondary'}`}>
                       {p.email}
-                      {p.email_method === 'guess' && <span className="ml-1 text-[10px] opacity-50">~</span>}
                     </span>
+                    <EmailBadge method={p.email_method} />
                     <button
                       onClick={() => copyEmail(p.email, p.id)}
                       className="p-1 rounded hover:bg-surface-elevated transition flex-shrink-0"
@@ -911,9 +1288,10 @@ export default memo(function ResultsPanel({
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-xs text-content-faint italic min-h-[32px]">
+                  <div className="flex items-center gap-2 text-xs min-h-[32px]">
                     <Mail size={12} className="text-content-dim flex-shrink-0" />
-                    Non enrichi
+                    <span className="text-content-dim">—</span>
+                    <span className="text-content-faint italic text-[10px]">Non trouve</span>
                   </div>
                 )}
                 {p.site_web && (
@@ -1121,38 +1499,39 @@ export default memo(function ResultsPanel({
                           placeholder="Email"
                         />
                       ) : p.email ? (
-                        <div className="group/email flex items-center gap-1.5 relative">
-                          <span
-                            className={`cursor-default ${methodInfo?.color || 'text-content-secondary'}`}
-                            onMouseEnter={() => setTooltipId(p.id)}
-                            onMouseLeave={() => setTooltipId(null)}
-                          >
-                            {p.email}
-                            {p.email_method === 'guess' && <span className="ml-1 text-[10px] opacity-50">~</span>}
-                            {p.email_method === 'deep-verified' && <span className="ml-1 text-[10px] opacity-50">&#10003;</span>}
-                            {p.email_method === 'deep-pattern' && <span className="ml-1 text-[10px] opacity-50">&#8776;</span>}
-                          </span>
-                          <button
-                            onClick={() => copyEmail(p.email, p.id)}
-                            className="opacity-0 group-hover/email:opacity-100 p-0.5 rounded hover:bg-surface-elevated transition-all"
-                            title="Copier l'email"
-                          >
-                            {copiedEmail === p.id ? (
-                              <Check size={12} className="text-green-400" />
-                            ) : (
-                              <Copy size={12} className="text-content-faint" />
-                            )}
-                          </button>
+                        <div className="group/email relative">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`cursor-default truncate max-w-[180px] ${methodInfo?.color || 'text-content-secondary'}`}
+                              onMouseEnter={() => setTooltipId(p.id)}
+                              onMouseLeave={() => setTooltipId(null)}
+                            >
+                              {p.email}
+                            </span>
+                            <EmailBadge method={p.email_method} />
+                            <button
+                              onClick={() => copyEmail(p.email, p.id)}
+                              className="opacity-0 group-hover/email:opacity-100 p-0.5 rounded hover:bg-surface-elevated transition-all flex-shrink-0"
+                              title="Copier l'email"
+                            >
+                              {copiedEmail === p.id ? (
+                                <Check size={12} className="text-green-400" />
+                              ) : (
+                                <Copy size={12} className="text-content-faint" />
+                              )}
+                            </button>
+                          </div>
                           {tooltipId === p.id && methodInfo && (
-                            <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-surface-elevated border border-line-hover rounded-lg text-[10px] text-content-secondary whitespace-nowrap z-10 shadow-lg">
-                              {methodInfo.label}
+                            <div className="absolute bottom-full left-0 mb-1 px-2.5 py-1.5 bg-surface-elevated border border-line-hover rounded-lg text-[10px] text-content-secondary whitespace-normal max-w-[250px] z-10 shadow-lg leading-relaxed">
+                              <div className="font-semibold text-content-primary mb-0.5">{methodInfo.label}</div>
+                              {methodInfo.tip}
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-content-faint italic">
-                          <Mail size={10} className="text-content-dim" />
-                          Non enrichi
+                        <span className="inline-flex items-center gap-1.5 text-[10px] text-content-dim">
+                          <span>—</span>
+                          <span className="italic text-content-faint">Non trouve</span>
                         </span>
                       )}
                     </td>
@@ -1346,6 +1725,23 @@ export default memo(function ResultsPanel({
           </div>
         )}
       </div>
+
+      {/* Enrichment progress sticky banner */}
+      <EnrichmentProgressBanner
+        isEnriching={isEnriching}
+        isDeepEnriching={isDeepEnriching}
+        isWaterfallEnriching={isWaterfallEnriching}
+        enrichProgress={enrichProgress}
+        deepEnrichProgress={deepEnrichProgress}
+        waterfallProgress={waterfallProgress}
+        onStopEnrichment={onStopEnrichment}
+        enrichStartTime={enrichStartTimeRef.current}
+        justFinished={justFinished}
+        onDismissFinished={() => setJustFinished(null)}
+      />
+
+      {/* Bottom padding when banner is visible */}
+      {(isAnyEnriching || justFinished) && <div className="h-20" />}
     </div>
   );
 })

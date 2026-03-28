@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { DEPTS, REGIONS, B2B_CATS, COPRO_CATS, B2B_GROUPS, COPRO_GROUPS } from "@/lib/constants";
 import {
   Send, Square, Sparkles, MapPin, Building2, Home, Search, PenLine, Loader2,
-  Plus, X, Play, RotateCcw, ChevronRight, FolderPlus, Folder,
+  Plus, X, Play, RotateCcw, ChevronRight, FolderPlus, Folder, Zap,
+  UtensilsCrossed, Briefcase, Building, Hotel, HardHat, ShoppingBag, ArrowRight,
 } from "lucide-react";
 
 function BotMessage({ children, icon: Icon, delay = 0 }) {
@@ -86,6 +87,63 @@ const FOLDER_COLORS = [
   { value: 'green', label: 'Vert', class: 'bg-green-500' },
   { value: 'amber', label: 'Ambre', class: 'bg-amber-500' },
   { value: 'rose', label: 'Rose', class: 'bg-rose-500' },
+];
+
+const QUICK_SEARCH_PRESETS = [
+  {
+    id: 'restaurants-paris',
+    name: 'Restaurants a Paris',
+    subtitle: '1 dept, 1 categorie',
+    icon: UtensilsCrossed,
+    type: 'b2b',
+    depts: ['75'],
+    cats: ['restaurant'],
+  },
+  {
+    id: 'b2b-idf',
+    name: 'B2B Ile-de-France',
+    subtitle: '8 depts, toutes categories',
+    icon: Briefcase,
+    type: 'b2b',
+    depts: ['75', '77', '78', '91', '92', '93', '94', '95'],
+    cats: 'ALL_B2B',
+  },
+  {
+    id: 'syndics-france',
+    name: 'Syndics toute France',
+    subtitle: '101 depts, toutes categories',
+    icon: Building,
+    type: 'copro',
+    depts: 'ALL',
+    cats: 'ALL_COPRO',
+  },
+  {
+    id: 'hotels-cote-azur',
+    name: "Hotels Cote d'Azur",
+    subtitle: '3 depts, 4 categories',
+    icon: Hotel,
+    type: 'b2b',
+    depts: ['06', '83', '13'],
+    cats: ['hôtel', "chambre d'hôtes", 'résidence hôtelière', 'camping'],
+  },
+  {
+    id: 'artisans-btp-lyon',
+    name: 'Artisans BTP Lyon',
+    subtitle: '1 dept, ' + (B2B_GROUPS['BTP & Construction']?.length || 0) + ' categories',
+    icon: HardHat,
+    type: 'b2b',
+    depts: ['69'],
+    cats: B2B_GROUPS['BTP & Construction'],
+  },
+  {
+    id: 'commerces-bordeaux',
+    name: 'Commerces Bordeaux',
+    subtitle: '1 dept, ' + (B2B_GROUPS['Commerce & Distribution']?.length || 0) + ' categories',
+    icon: ShoppingBag,
+    type: 'b2b',
+    depts: ['33'],
+    cats: B2B_GROUPS['Commerce & Distribution'],
+  },
 ];
 
 export default function SearchPanel({
@@ -306,6 +364,29 @@ export default function SearchPanel({
     setConfirmed(false);
   };
 
+  const handlePresetSearch = (preset) => {
+    const depts = preset.depts === 'ALL' ? Object.keys(DEPTS) : preset.depts;
+    let cats;
+    if (preset.cats === 'ALL_B2B') cats = [...B2B_CATS];
+    else if (preset.cats === 'ALL_COPRO') cats = [...COPRO_CATS];
+    else cats = [...preset.cats];
+
+    setSearchType(preset.type);
+    setSelectedDepts(depts);
+    setSelectedCats(cats);
+    setCustomQueries([]);
+    setCustomInput('');
+    setFreeSearchTerms([]);
+    setFreeSearchInput('');
+    setNlInput('');
+    setNlError('');
+    setSelectedFolder(null);
+    setNewFolderName('');
+    setShowNewFolder(false);
+    setConfirmed(false);
+    setStep(4);
+  };
+
   const b2bCount = selectedCats.filter((c) => B2B_CATS.includes(c)).length;
   const coproCount = selectedCats.filter((c) => COPRO_CATS.includes(c)).length;
   const totalQueries = selectedDepts.length * selectedCats.length + customQueries.length;
@@ -348,6 +429,45 @@ export default function SearchPanel({
           <BotMessage>
             Quel type de prospects recherchez-vous ?
           </BotMessage>
+
+          {/* Quick search presets */}
+          {step === 0 && !searchType && (
+            <div className="pl-2 sm:pl-10 space-y-3 animate-in fade-in duration-300">
+              <div className="flex items-center gap-2">
+                <Zap size={14} className="text-amber-400" />
+                <span className="text-xs font-semibold text-amber-400">Recherches rapides</span>
+              </div>
+              <p className="text-[10px] text-content-muted -mt-1">Lancez une recherche en 1 clic</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {QUICK_SEARCH_PRESETS.map((preset) => {
+                  const PresetIcon = preset.icon;
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() => handlePresetSearch(preset)}
+                      className="group flex items-center gap-3 px-3.5 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all active:scale-[0.97] text-left"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition">
+                        <PresetIcon size={15} className="text-amber-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-content-primary truncate">{preset.name}</div>
+                        <div className="text-[10px] text-content-muted">{preset.subtitle}</div>
+                      </div>
+                      <ArrowRight size={14} className="text-amber-500/40 group-hover:text-amber-400 transition flex-shrink-0" />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Separator */}
+              <div className="flex items-center gap-3 pt-1">
+                <div className="flex-1 h-px bg-line" />
+                <span className="text-[10px] text-content-faint uppercase tracking-wider font-medium">ou configurez votre recherche</span>
+                <div className="flex-1 h-px bg-line" />
+              </div>
+            </div>
+          )}
 
           {step === 0 && !searchType && (
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 pl-2 sm:pl-10 animate-in fade-in duration-300">
