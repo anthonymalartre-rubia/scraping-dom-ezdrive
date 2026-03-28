@@ -495,9 +495,9 @@ export default function LandingPage() {
             <span className="text-violet-400 text-[10px] font-semibold">.ai</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-zinc-600">
-            <span>Métropole</span>
-            <span>Outre-mer</span>
-            <span>101 départements</span>
+            <Link href="/cgu" className="hover:text-zinc-400 transition">CGU</Link>
+            <Link href="/confidentialite" className="hover:text-zinc-400 transition">Confidentialité</Link>
+            <Link href="/rgpd" className="hover:text-zinc-400 transition">RGPD</Link>
           </div>
           <p className="text-[11px] text-zinc-700">
             &copy; 2026 Prospectia.ai

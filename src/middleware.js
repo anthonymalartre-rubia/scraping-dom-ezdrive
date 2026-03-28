@@ -1,8 +1,93 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { checkRateLimit } from './lib/rateLimit';
+
+// Auth-related paths that should be rate-limited on POST
+const RATE_LIMITED_PATHS = ['/login', '/signup', '/forgot-password'];
+const RATE_LIMITED_API_PREFIX = '/api/auth/';
+
+// Rate limit config: 5 attempts per 15 minutes
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Extract client IP from request headers with fallbacks.
+ */
+function getClientIp(request) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    // x-forwarded-for can contain multiple IPs; take the first (client IP)
+    return forwarded.split(',')[0].trim();
+  }
+  return (
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    '127.0.0.1'
+  );
+}
+
+/**
+ * Check whether a request should be rate-limited.
+ * Only POST requests to auth-related routes are limited.
+ */
+function shouldRateLimit(request) {
+  if (request.method !== 'POST') return false;
+
+  const pathname = request.nextUrl.pathname;
+
+  // Check auth page paths
+  for (const path of RATE_LIMITED_PATHS) {
+    if (pathname.startsWith(path)) return true;
+  }
+
+  // Check /api/auth/* routes
+  if (pathname.startsWith(RATE_LIMITED_API_PREFIX)) return true;
+
+  return false;
+}
 
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname;
+
+  // --- Rate limiting for auth-related POST requests ---
+  if (shouldRateLimit(request)) {
+    const ip = getClientIp(request);
+    const key = `${ip}:${pathname}`;
+    const result = checkRateLimit(key, MAX_ATTEMPTS, WINDOW_MS);
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: 'Trop de tentatives. Veuillez r\u00e9essayer dans quelques minutes.',
+          retryAfter: result.resetAt.toISOString(),
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil(
+              (result.resetAt.getTime() - Date.now()) / 1000
+            ).toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': result.resetAt.toISOString(),
+          },
+        }
+      );
+    }
+
+    // Attach rate limit headers to the response for successful requests
+    const response = NextResponse.next({ request });
+    response.headers.set(
+      'X-RateLimit-Remaining',
+      result.remaining.toString()
+    );
+    response.headers.set(
+      'X-RateLimit-Reset',
+      result.resetAt.toISOString()
+    );
+    return response;
+  }
+
+  // --- Existing auth/redirect logic (unchanged) ---
 
   // Skip auth check entirely for public routes (saves ~100ms per request)
   const isPublicRoute =
