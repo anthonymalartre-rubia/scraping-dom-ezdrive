@@ -2,14 +2,10 @@
 
 import { useState } from 'react';
 import { AlertTriangle, X, ArrowUpRight } from 'lucide-react';
-
-const LIMIT_LABELS = {
-  searches: 'recherches',
-  enrichments: 'enrichissements',
-  exports: 'exports',
-};
+import { useI18n } from '@/lib/i18n';
 
 export default function UpgradeBanner({ plan, usage, onUpgrade }) {
+  const { t } = useI18n();
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed || !plan || !usage) return null;
@@ -18,9 +14,9 @@ export default function UpgradeBanner({ plan, usage, onUpgrade }) {
   if (plan.id !== 'free') return null;
 
   const items = [
-    { key: 'searches', label: 'recherches', current: usage.searches || 0, limit: plan.limits.searches_per_month },
-    { key: 'enrichments', label: 'enrichissements', current: usage.enrichments || 0, limit: plan.limits.enrichments_per_month },
-    { key: 'exports', label: 'exports', current: usage.exports || 0, limit: plan.limits.exports_per_month },
+    { key: 'searches', label: t('upgrade.searches'), current: usage.searches || 0, limit: plan.limits.searches_per_month },
+    { key: 'enrichments', label: t('upgrade.enrichments'), current: usage.enrichments || 0, limit: plan.limits.enrichments_per_month },
+    { key: 'exports', label: t('upgrade.exports'), current: usage.exports || 0, limit: plan.limits.exports_per_month },
   ];
 
   // Find the highest usage item that is at 80%+
@@ -51,8 +47,8 @@ export default function UpgradeBanner({ plan, usage, onUpgrade }) {
           <div className="flex items-center justify-between gap-2 mb-2">
             <p className={`text-sm font-medium ${accentText}`}>
               {isMaxed
-                ? `Limite de ${top.label} atteinte`
-                : `Vous avez utilisé ${pct}% de vos ${top.label} ce mois`}
+                ? t('upgrade.limitReached', { type: top.label })
+                : t('upgrade.usageWarning', { type: top.label, pct })}
             </p>
             <button
               onClick={() => setDismissed(true)}
@@ -83,7 +79,7 @@ export default function UpgradeBanner({ plan, usage, onUpgrade }) {
               onClick={onUpgrade}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 transition-all shadow-lg shadow-violet-500/20 shrink-0"
             >
-              Passer Pro <ArrowUpRight className="h-3 w-3" />
+              {t('upgrade.upgradePro')} <ArrowUpRight className="h-3 w-3" />
             </button>
           </div>
         </div>

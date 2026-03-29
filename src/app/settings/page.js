@@ -10,11 +10,13 @@ import {
   BookOpen, BarChart3, ArrowUpRight, ShieldAlert, Filter,
 } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
+import { useI18n } from '@/lib/i18n';
 
 export default function SettingsPage() {
   const router = useRouter();
   const supabase = getSupabase();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { t } = useI18n();
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -103,17 +105,17 @@ export default function SettingsPage() {
   }
 
   const passwordStrength = getPasswordStrength(newPassword);
-  const strengthLabels = ['', 'Faible', 'Moyen', 'Bon', 'Excellent'];
+  const strengthLabels = ['', t('settings.weak'), t('settings.medium'), t('settings.good'), t('settings.excellent')];
   const strengthColors = ['', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500'];
 
   async function handleChangePassword(e) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      showToast('Les mots de passe ne correspondent pas', 'error');
+      showToast(t('settings.passwordMismatch'), 'error');
       return;
     }
     if (newPassword.length < 6) {
-      showToast('Le mot de passe doit contenir au moins 6 caracteres', 'error');
+      showToast(t('settings.passwordMinLength'), 'error');
       return;
     }
 
@@ -125,22 +127,22 @@ export default function SettingsPage() {
         password: currentPassword,
       });
       if (signInError) {
-        showToast('Mot de passe actuel incorrect', 'error');
+        showToast(t('settings.wrongPassword'), 'error');
         setPasswordLoading(false);
         return;
       }
 
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
-        showToast(error.message || 'Erreur lors du changement de mot de passe', 'error');
+        showToast(error.message || t('settings.passwordChangeError'), 'error');
       } else {
-        showToast('Mot de passe mis a jour avec succes');
+        showToast(t('settings.passwordUpdated'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       }
     } catch (err) {
-      showToast('Erreur reseau', 'error');
+      showToast(t('settings.networkError'), 'error');
     }
     setPasswordLoading(false);
   }
@@ -154,16 +156,16 @@ export default function SettingsPage() {
         .update({ filter_personal_emails: newValue })
         .eq('id', user.id);
       if (error) {
-        showToast('Erreur lors de la mise a jour', 'error');
+        showToast(t('settings.updateError'), 'error');
       } else {
         setFilterPersonalEmails(newValue);
         showToast(newValue
-          ? 'Filtrage des emails personnels active'
-          : 'Filtrage des emails personnels desactive — vous etes responsable de la conformite RGPD'
+          ? t('settings.filterActiveDesc')
+          : t('settings.filterInactiveDesc')
         , newValue ? 'success' : 'error');
       }
     } catch {
-      showToast('Erreur reseau', 'error');
+      showToast(t('settings.networkError'), 'error');
     }
     setFilterLoading(false);
   }
@@ -179,10 +181,10 @@ export default function SettingsPage() {
       if (res.ok && data.url) {
         window.location.href = data.url;
       } else {
-        showToast(data.error || 'Erreur Stripe', 'error');
+        showToast(data.error || t('settings.stripeError'), 'error');
       }
     } catch (err) {
-      showToast('Erreur reseau', 'error');
+      showToast(t('settings.networkError'), 'error');
     }
     setBillingLoading(false);
   }
@@ -199,10 +201,10 @@ export default function SettingsPage() {
       if (res.ok && data.url) {
         window.location.href = data.url;
       } else {
-        showToast(data.error || 'Erreur Stripe', 'error');
+        showToast(data.error || t('settings.stripeError'), 'error');
       }
     } catch (err) {
-      showToast('Erreur reseau', 'error');
+      showToast(t('settings.networkError'), 'error');
     }
     setBillingLoading(false);
   }
@@ -220,11 +222,11 @@ export default function SettingsPage() {
         await supabase.auth.signOut();
         router.push('/login');
       } else {
-        showToast(data.error || 'Erreur lors de la suppression', 'error');
+        showToast(data.error || t('settings.deleteError'), 'error');
         setDeleteLoading(false);
       }
     } catch (err) {
-      showToast('Erreur reseau', 'error');
+      showToast(t('settings.networkError'), 'error');
       setDeleteLoading(false);
     }
   }
@@ -269,19 +271,19 @@ export default function SettingsPage() {
               <div className="p-2 rounded-lg bg-red-500/20">
                 <AlertTriangle className="h-5 w-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold">Supprimer mon compte</h3>
+              <h3 className="text-lg font-semibold">{t('settings.deleteMyAccount')}</h3>
             </div>
             <p className="text-sm text-content-secondary mb-2">
-              Cette action est irreversible. Toutes vos donnees seront definitivement supprimees :
+              {t('settings.deleteIrreversible')}
             </p>
             <ul className="text-xs text-content-tertiary mb-4 space-y-1 ml-4 list-disc">
-              <li>Tous vos prospects</li>
-              <li>Vos dossiers et tags</li>
-              <li>Vos donnees d'utilisation</li>
-              <li>Votre compte utilisateur</li>
+              <li>{t('settings.deleteDataProspects')}</li>
+              <li>{t('settings.deleteDataFolders')}</li>
+              <li>{t('settings.deleteDataUsage')}</li>
+              <li>{t('settings.deleteDataAccount')}</li>
             </ul>
             <p className="text-sm text-content-secondary mb-3">
-              Tapez <span className="font-mono text-red-400 font-semibold">SUPPRIMER</span> pour confirmer :
+              {t('settings.typeToConfirm')} <span className="font-mono text-red-400 font-semibold">SUPPRIMER</span> {t('settings.toConfirm')}
             </p>
             <input
               type="text"
@@ -295,14 +297,14 @@ export default function SettingsPage() {
                 onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
                 className="px-4 py-2 rounded-lg text-sm bg-surface-elevated hover:bg-surface-active transition-colors"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText !== 'SUPPRIMER' || deleteLoading}
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-40"
               >
-                {deleteLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : 'Supprimer definitivement'}
+                {deleteLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : t('settings.deleteForever')}
               </button>
             </div>
           </div>
@@ -316,7 +318,7 @@ export default function SettingsPage() {
             <ArrowLeft className="h-4 w-4 text-content-tertiary" />
           </button>
           <User className="h-5 w-5 text-violet-400" />
-          <h1 className="text-lg font-semibold">Parametres</h1>
+          <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
         </div>
       </div>
 
@@ -329,8 +331,8 @@ export default function SettingsPage() {
               <User className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Profil</h2>
-              <p className="text-xs text-content-tertiary">Informations de votre compte</p>
+              <h2 className="text-base font-semibold">{t('settings.profile')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.accountInfo')}</p>
             </div>
           </div>
 
@@ -338,7 +340,7 @@ export default function SettingsPage() {
             {/* Email */}
             <div>
               <label className="text-xs text-content-tertiary mb-1.5 block flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" /> Email
+                <Mail className="h-3.5 w-3.5" /> {t('common.email')}
               </label>
               <div className="px-3 py-2.5 rounded-lg bg-surface-base border border-line text-sm text-content-secondary">
                 {user?.email || '--'}
@@ -348,7 +350,7 @@ export default function SettingsPage() {
             {/* Created at */}
             <div>
               <label className="text-xs text-content-tertiary mb-1.5 block flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5" /> Date d'inscription
+                <Calendar className="h-3.5 w-3.5" /> {t('settings.registrationDate')}
               </label>
               <div className="px-3 py-2.5 rounded-lg bg-surface-base border border-line text-sm text-content-secondary">
                 {formatDate(user?.created_at)}
@@ -358,7 +360,7 @@ export default function SettingsPage() {
             {/* Plan badge */}
             <div>
               <label className="text-xs text-content-tertiary mb-1.5 block flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5" /> Plan actuel
+                <Shield className="h-3.5 w-3.5" /> {t('settings.currentPlan')}
               </label>
               <div className="flex items-center gap-2">
                 <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
@@ -370,7 +372,7 @@ export default function SettingsPage() {
                 </span>
                 {currentPlan.price > 0 && (
                   <span className="text-xs text-content-muted">
-                    {(currentPlan.price / 100).toFixed(0)} EUR/mois
+                    {(currentPlan.price / 100).toFixed(0)} {t('settings.eurPerMonth')}
                   </span>
                 )}
               </div>
@@ -385,16 +387,16 @@ export default function SettingsPage() {
               {theme === 'dark' ? <Moon className="h-5 w-5 text-violet-400" /> : <Sun className="h-5 w-5 text-violet-400" />}
             </div>
             <div>
-              <h2 className="text-base font-semibold">Apparence</h2>
-              <p className="text-xs text-content-tertiary">Personnalisez l'interface</p>
+              <h2 className="text-base font-semibold">{t('settings.appearance')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.customizeInterface')}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Theme</p>
+              <p className="text-sm font-medium">{t('settings.theme')}</p>
               <p className="text-xs text-content-tertiary mt-0.5">
-                {theme === 'dark' ? 'Mode sombre active' : 'Mode clair active'}
+                {theme === 'dark' ? t('settings.darkActivated') : t('settings.lightActivated')}
               </p>
             </div>
             <button
@@ -419,20 +421,20 @@ export default function SettingsPage() {
               <Filter className={`h-5 w-5 ${filterPersonalEmails ? 'text-violet-400' : 'text-amber-400'}`} />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Filtrage RGPD des emails</h2>
-              <p className="text-xs text-content-tertiary">Filtrer automatiquement les emails personnels (@gmail, @hotmail, etc.)</p>
+              <h2 className="text-base font-semibold">{t('settings.gdprEmailFilter')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.gdprEmailFilterDesc')}</p>
             </div>
           </div>
 
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <p className="text-sm font-medium mb-1">
-                {filterPersonalEmails ? 'Filtrage actif' : 'Filtrage desactive'}
+                {filterPersonalEmails ? t('settings.filterActive') : t('settings.filterInactive')}
               </p>
               <p className="text-xs text-content-tertiary leading-relaxed">
                 {filterPersonalEmails
-                  ? 'Les emails personnels (@gmail, @hotmail, @orange, @free, etc.) sont automatiquement exclus des resultats d\'enrichissement. Seuls les emails professionnels (domaine entreprise) sont retournes.'
-                  : 'Les emails personnels ne sont plus filtres. Tous les emails trouves seront retournes, y compris les @gmail, @hotmail, etc.'
+                  ? t('settings.filterInfo')
+                  : t('settings.filterWarning')
                 }
               </p>
             </div>
@@ -459,19 +461,19 @@ export default function SettingsPage() {
               <div className="flex items-start gap-3">
                 <ShieldAlert className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-400 mb-2">Avertissement RGPD</p>
+                  <p className="text-sm font-semibold text-amber-400 mb-2">{t('settings.gdprWarningTitle')}</p>
                   <p className="text-xs text-content-secondary leading-relaxed mb-2">
-                    En desactivant ce filtre, vous recevrez des emails personnels (type @gmail.com, @hotmail.com) dans vos resultats d&apos;enrichissement. Ces adresses sont des <strong className="text-content-primary">donnees personnelles</strong> au sens du RGPD.
+                    {t('settings.gdprWarningP1')}
                   </p>
                   <p className="text-xs text-content-secondary leading-relaxed mb-2">
-                    <strong className="text-content-primary">Obligations legales :</strong> Vous n&apos;avez <strong className="text-amber-400">pas le droit</strong> de contacter ces personnes sans avoir prealablement obtenu leur consentement explicite (opt-in). L&apos;envoi d&apos;emails commerciaux non sollicites a des adresses personnelles est une violation du RGPD (Art. 6) et de la directive ePrivacy, passible d&apos;amendes pouvant atteindre 20 millions d&apos;euros ou 4% du chiffre d&apos;affaires annuel.
+                    {t('settings.gdprWarningP2')}
                   </p>
                   <p className="text-xs text-content-secondary leading-relaxed mb-3">
-                    <strong className="text-content-primary">Responsabilite :</strong> En desactivant ce filtre, vous devenez seul responsable de la conformite RGPD de vos campagnes de prospection. Prospectia.ai ne pourra en aucun cas etre tenu responsable de l&apos;utilisation que vous faites de ces donnees personnelles.
+                    {t('settings.gdprWarningP3')}
                   </p>
                   <div className="flex items-center gap-2 text-[10px] text-amber-400/70 uppercase tracking-wider font-semibold">
                     <ShieldAlert className="h-3 w-3" />
-                    Vous acceptez ces conditions en desactivant le filtre
+                    {t('settings.gdprAcceptConditions')}
                   </div>
                 </div>
               </div>
@@ -486,16 +488,16 @@ export default function SettingsPage() {
               <BookOpen className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Guide de demarrage</h2>
-              <p className="text-xs text-content-tertiary">Revisitez le tutoriel de prise en main</p>
+              <h2 className="text-base font-semibold">{t('settings.gettingStarted')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.gettingStartedDesc')}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Tutoriel interactif</p>
+              <p className="text-sm font-medium">{t('settings.interactiveTutorial')}</p>
               <p className="text-xs text-content-tertiary mt-0.5">
-                Redecouvrez les fonctionnalites de Prospectia.ai etape par etape.
+                {t('settings.interactiveTutorialDesc')}
               </p>
             </div>
             <button
@@ -506,7 +508,7 @@ export default function SettingsPage() {
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors shrink-0"
             >
               <BookOpen className="h-4 w-4" />
-              Revoir le guide
+              {t('settings.reviewGuide')}
             </button>
           </div>
         </div>
@@ -518,21 +520,21 @@ export default function SettingsPage() {
               <Lock className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Changer le mot de passe</h2>
-              <p className="text-xs text-content-tertiary">Mettez a jour votre mot de passe de connexion</p>
+              <h2 className="text-base font-semibold">{t('settings.changePassword')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.changePasswordDesc')}</p>
             </div>
           </div>
 
           <form onSubmit={handleChangePassword} className="space-y-4">
             {/* Current password */}
             <div>
-              <label className="text-xs text-content-tertiary mb-1.5 block">Mot de passe actuel</label>
+              <label className="text-xs text-content-tertiary mb-1.5 block">{t('settings.currentPassword')}</label>
               <div className="relative">
                 <input
                   type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={e => setCurrentPassword(e.target.value)}
-                  placeholder="Votre mot de passe actuel"
+                  placeholder={t('settings.currentPasswordPlaceholder')}
                   required
                   className="w-full px-3 py-2.5 pr-10 rounded-lg bg-surface-base border border-line text-sm text-content-primary placeholder-content-muted focus:outline-none focus:border-violet-500"
                 />
@@ -548,13 +550,13 @@ export default function SettingsPage() {
 
             {/* New password */}
             <div>
-              <label className="text-xs text-content-tertiary mb-1.5 block">Nouveau mot de passe</label>
+              <label className="text-xs text-content-tertiary mb-1.5 block">{t('settings.newPassword')}</label>
               <div className="relative">
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  placeholder="Min. 6 caracteres"
+                  placeholder={t('settings.minCharsPlaceholder')}
                   required
                   minLength={6}
                   className="w-full px-3 py-2.5 pr-10 rounded-lg bg-surface-base border border-line text-sm text-content-primary placeholder-content-muted focus:outline-none focus:border-violet-500"
@@ -595,13 +597,13 @@ export default function SettingsPage() {
 
             {/* Confirm password */}
             <div>
-              <label className="text-xs text-content-tertiary mb-1.5 block">Confirmer le nouveau mot de passe</label>
+              <label className="text-xs text-content-tertiary mb-1.5 block">{t('settings.confirmPassword')}</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Repetez le mot de passe"
+                  placeholder={t('settings.repeatPasswordPlaceholder')}
                   required
                   minLength={6}
                   className="w-full px-3 py-2.5 pr-10 rounded-lg bg-surface-base border border-line text-sm text-content-primary placeholder-content-muted focus:outline-none focus:border-violet-500"
@@ -615,7 +617,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               {confirmPassword && newPassword !== confirmPassword && (
-                <p className="text-[10px] text-red-400 mt-1">Les mots de passe ne correspondent pas</p>
+                <p className="text-[10px] text-red-400 mt-1">{t('settings.passwordMismatch')}</p>
               )}
             </div>
 
@@ -625,7 +627,7 @@ export default function SettingsPage() {
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {passwordLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              Mettre a jour le mot de passe
+              {t('settings.updatePassword')}
             </button>
           </form>
         </div>
@@ -637,9 +639,9 @@ export default function SettingsPage() {
               <BarChart3 className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Utilisation ce mois</h2>
+              <h2 className="text-base font-semibold">{t('settings.usageThisMonth')}</h2>
               <p className="text-xs text-content-tertiary">
-                Plan {currentPlan.name} — Renouvellement le {(() => {
+                {t('settings.planLabel')} {currentPlan.name} — {t('settings.renewalOn')} {(() => {
                   const now = new Date();
                   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                   return nextMonth.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
@@ -650,9 +652,9 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             {[
-              { label: 'Recherches', current: userUsage?.searches || 0, limit: currentPlan.limits.searches_per_month },
-              { label: 'Enrichissements', current: userUsage?.enrichments || 0, limit: currentPlan.limits.enrichments_per_month },
-              { label: 'Exports', current: userUsage?.exports || 0, limit: currentPlan.limits.exports_per_month },
+              { label: t('settings.searches'), current: userUsage?.searches || 0, limit: currentPlan.limits.searches_per_month },
+              { label: t('settings.enrichments'), current: userUsage?.enrichments || 0, limit: currentPlan.limits.enrichments_per_month },
+              { label: t('settings.exports'), current: userUsage?.exports || 0, limit: currentPlan.limits.exports_per_month },
             ].map(({ label, current, limit }) => {
               const isUnlimited = limit === -1;
               const pct = isUnlimited ? 0 : Math.min(100, Math.round((current / limit) * 100));
@@ -670,7 +672,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm text-content-secondary">{label}</span>
                     <span className={`text-sm font-medium ${textColor}`}>
-                      {current} / {isUnlimited ? '\u221e' : limit} {label.toLowerCase()} utilisé{label !== 'Exports' ? 'e' : ''}s
+                      {current} / {isUnlimited ? '\u221e' : limit} {t('settings.used')}
                     </span>
                   </div>
                   {!isUnlimited && (
@@ -694,7 +696,7 @@ export default function SettingsPage() {
           {planId === 'free' && (
             <div className="mt-5 pt-4 border-t border-line flex items-center justify-between">
               <p className="text-sm text-content-secondary">
-                Passez Pro pour des limites plus élevées
+                {t('settings.upgradeProPrompt')}
               </p>
               <button
                 onClick={handleUpgradePro}
@@ -702,7 +704,7 @@ export default function SettingsPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-40"
               >
                 {billingLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
-                Passer Pro
+                {t('settings.upgradePro')}
               </button>
             </div>
           )}
@@ -715,8 +717,8 @@ export default function SettingsPage() {
               <CreditCard className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Plan & Facturation</h2>
-              <p className="text-xs text-content-tertiary">Gerez votre abonnement et vos limites</p>
+              <h2 className="text-base font-semibold">{t('settings.planAndBilling')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.planAndBillingDesc')}</p>
             </div>
           </div>
 
@@ -733,38 +735,38 @@ export default function SettingsPage() {
                 </span>
                 {currentPlan.price > 0 && (
                   <span className="text-sm text-content-secondary">
-                    {(currentPlan.price / 100).toFixed(0)} EUR/mois
+                    {(currentPlan.price / 100).toFixed(0)} {t('settings.eurPerMonth')}
                   </span>
                 )}
                 {currentPlan.price === 0 && (
-                  <span className="text-sm text-content-muted">Gratuit</span>
+                  <span className="text-sm text-content-muted">{t('common.free')}</span>
                 )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3 rounded-lg bg-surface-card border border-line">
-                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">Recherches/mois</div>
+                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">{t('settings.searchesPerMonth')}</div>
                 <div className="text-sm font-semibold">
-                  {currentPlan.limits.searches_per_month === -1 ? 'Illimite' : currentPlan.limits.searches_per_month}
+                  {currentPlan.limits.searches_per_month === -1 ? t('common.unlimited') : currentPlan.limits.searches_per_month}
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-surface-card border border-line">
-                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">Enrichissements/mois</div>
+                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">{t('settings.enrichmentsPerMonth')}</div>
                 <div className="text-sm font-semibold">
-                  {currentPlan.limits.enrichments_per_month === -1 ? 'Illimite' : currentPlan.limits.enrichments_per_month}
+                  {currentPlan.limits.enrichments_per_month === -1 ? t('common.unlimited') : currentPlan.limits.enrichments_per_month}
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-surface-card border border-line">
-                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">Dossiers</div>
+                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">{t('settings.folders')}</div>
                 <div className="text-sm font-semibold">
-                  {currentPlan.limits.folders === -1 ? 'Illimite' : currentPlan.limits.folders}
+                  {currentPlan.limits.folders === -1 ? t('common.unlimited') : currentPlan.limits.folders}
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-surface-card border border-line">
-                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">Exports/mois</div>
+                <div className="text-[10px] uppercase tracking-wider text-content-muted mb-1">{t('settings.exportsPerMonth')}</div>
                 <div className="text-sm font-semibold">
-                  {currentPlan.limits.exports_per_month === -1 ? 'Illimite' : currentPlan.limits.exports_per_month}
+                  {currentPlan.limits.exports_per_month === -1 ? t('common.unlimited') : currentPlan.limits.exports_per_month}
                 </div>
               </div>
             </div>
@@ -779,7 +781,7 @@ export default function SettingsPage() {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors disabled:opacity-40"
               >
                 {billingLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                Gerer l'abonnement
+                {t('settings.manageSubscription')}
               </button>
             )}
             {planId === 'free' && (
@@ -789,7 +791,7 @@ export default function SettingsPage() {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 transition-all disabled:opacity-40 shadow-lg shadow-violet-500/20"
               >
                 {billingLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                Passer au Pro
+                {t('settings.upgradeToPro')}
               </button>
             )}
           </div>
@@ -802,13 +804,13 @@ export default function SettingsPage() {
               <Trash2 className="h-5 w-5 text-red-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-red-400">Zone dangereuse</h2>
-              <p className="text-xs text-content-tertiary">Actions irreversibles sur votre compte</p>
+              <h2 className="text-base font-semibold text-red-400">{t('settings.dangerZone')}</h2>
+              <p className="text-xs text-content-tertiary">{t('settings.dangerZoneDesc')}</p>
             </div>
           </div>
 
           <p className="text-sm text-content-secondary mb-4">
-            La suppression de votre compte est definitive. Toutes vos donnees (prospects, dossiers, tags, historique) seront supprimees.
+            {t('settings.deleteAccountWarning')}
           </p>
 
           <button
@@ -816,7 +818,7 @@ export default function SettingsPage() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
-            Supprimer mon compte
+            {t('settings.deleteMyAccount')}
           </button>
         </div>
       </div>

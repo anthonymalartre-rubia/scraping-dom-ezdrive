@@ -16,13 +16,14 @@ import {
   BarChart3,
   FileSpreadsheet,
 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 const STATUS_CONFIG = {
-  ok: { label: 'Valide', color: 'emerald', icon: CheckCircle2 },
-  catch_all: { label: 'Catch-all', color: 'amber', icon: AlertTriangle },
-  invalid: { label: 'Invalide', color: 'red', icon: XCircle },
-  disposable: { label: 'Jetable', color: 'orange', icon: Trash2 },
-  unknown: { label: 'Inconnu', color: 'zinc', icon: HelpCircle },
+  ok: { labelKey: 'verifier.statuses.ok', color: 'emerald', icon: CheckCircle2 },
+  catch_all: { labelKey: 'verifier.statuses.catch_all', color: 'amber', icon: AlertTriangle },
+  invalid: { labelKey: 'verifier.statuses.invalid', color: 'red', icon: XCircle },
+  disposable: { labelKey: 'verifier.statuses.disposable', color: 'orange', icon: Trash2 },
+  unknown: { labelKey: 'verifier.statuses.unknown', color: 'zinc', icon: HelpCircle },
 };
 
 function parseCSVEmails(text) {
@@ -36,6 +37,7 @@ function parseCSVEmails(text) {
 }
 
 export default function EmailVerifier({ userPlan }) {
+  const { t } = useI18n();
   const [emails, setEmails] = useState([]);
   const [results, setResults] = useState(null);
   const [stats, setStats] = useState(null);
@@ -57,7 +59,7 @@ export default function EmailVerifier({ userPlan }) {
       const text = event.target.result;
       const parsed = parseCSVEmails(text);
       if (parsed.length === 0) {
-        setError('Aucun email trouve dans le fichier.');
+        setError(t('verifier.noEmailsFound'));
         return;
       }
       setEmails(parsed);
@@ -68,13 +70,13 @@ export default function EmailVerifier({ userPlan }) {
     reader.readAsText(file);
     // Reset input so same file can be re-uploaded
     e.target.value = '';
-  }, []);
+  }, [t]);
 
   const handleManualAdd = useCallback(() => {
     if (!manualInput.trim()) return;
     const parsed = parseCSVEmails(manualInput);
     if (parsed.length === 0) {
-      setError('Aucun email valide detecte.');
+      setError(t('verifier.noValidEmails'));
       return;
     }
     setEmails(prev => {
@@ -86,7 +88,7 @@ export default function EmailVerifier({ userPlan }) {
     setResults(null);
     setStats(null);
     setError(null);
-  }, [manualInput]);
+  }, [manualInput, t]);
 
   const handleVerify = useCallback(async () => {
     if (emails.length === 0) return;
@@ -112,12 +114,12 @@ export default function EmailVerifier({ userPlan }) {
         if (!res.ok) {
           const data = await res.json();
           if (res.status === 403) {
-            setError('Cette fonctionnalite est reservee au plan Enterprise.');
+            setError(t('verifier.upgradeMsg'));
             setIsVerifying(false);
             return;
           }
           if (res.status === 429) {
-            setError('Limite de verifications atteinte pour ce mois.');
+            setError(t('verifier.limitReached'));
             break;
           }
           throw new Error(data.error || 'Erreur serveur');
@@ -145,13 +147,13 @@ export default function EmailVerifier({ userPlan }) {
     } finally {
       setIsVerifying(false);
     }
-  }, [emails]);
+  }, [emails, t]);
 
   const handleExportResults = useCallback(() => {
     if (!results || results.length === 0) return;
     const header = 'Email,Statut,Sous-statut,Free,Role\n';
     const rows = results.map(r =>
-      `"${r.email}","${STATUS_CONFIG[r.result]?.label || r.result}","${r.subresult || ''}","${r.free ? 'Oui' : 'Non'}","${r.role ? 'Oui' : 'Non'}"`
+      `"${r.email}","${t(STATUS_CONFIG[r.result]?.labelKey) || r.result}","${r.subresult || ''}","${r.free ? 'Oui' : 'Non'}","${r.role ? 'Oui' : 'Non'}"`
     ).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -160,7 +162,7 @@ export default function EmailVerifier({ userPlan }) {
     a.download = `verification-emails-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [results]);
+  }, [results, t]);
 
   const handleClear = useCallback(() => {
     setEmails([]);
@@ -180,16 +182,16 @@ export default function EmailVerifier({ userPlan }) {
         <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
           <ShieldCheck size={28} className="text-violet-400" />
         </div>
-        <h2 className="text-xl font-semibold text-content-primary">Verification d'emails</h2>
+        <h2 className="text-xl font-semibold text-content-primary">{t('verifier.title')}</h2>
         <p className="text-sm text-content-muted max-w-md">
-          Verifiez la validite de vos emails en masse via SMTP (sans envoyer de message).
-          Cette fonctionnalite est reservee au plan Enterprise.
+          {t('verifier.subtitle')}
+          {' '}{t('verifier.upgradeMsg')}
         </p>
         <a
           href="/settings"
           className="mt-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition"
         >
-          Passer a Enterprise
+          {t('verifier.upgradeBtn')}
         </a>
       </div>
     );
@@ -201,10 +203,10 @@ export default function EmailVerifier({ userPlan }) {
       <div>
         <h2 className="text-xl font-semibold text-content-primary flex items-center gap-2">
           <ShieldCheck size={22} className="text-violet-400" />
-          Verification d'emails
+          {t('verifier.title')}
         </h2>
         <p className="text-sm text-content-muted mt-1">
-          Importez une liste d'emails pour verifier leur validite via SMTP — sans envoyer de message.
+          {t('verifier.importSubtitle')}
         </p>
       </div>
 
@@ -212,7 +214,7 @@ export default function EmailVerifier({ userPlan }) {
       <div className="rounded-xl border border-line bg-surface-card p-5 space-y-4">
         <h3 className="text-sm font-semibold text-content-secondary flex items-center gap-2">
           <FileSpreadsheet size={15} className="text-content-muted" />
-          Importer des emails
+          {t('verifier.importTitle')}
         </h3>
 
         {/* File upload */}
@@ -222,7 +224,7 @@ export default function EmailVerifier({ userPlan }) {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-line-hover bg-surface-alt hover:bg-surface-elevated text-sm text-content-secondary transition"
           >
             <Upload size={15} />
-            Importer un fichier CSV / TXT
+            {t('verifier.importFile')}
           </button>
           <input
             ref={fileInputRef}
@@ -240,7 +242,7 @@ export default function EmailVerifier({ userPlan }) {
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
-            placeholder="Ou collez des emails ici (separes par des virgules, espaces ou retours a la ligne)"
+            placeholder={t('verifier.pasteLabel')}
             className="flex-1 px-3 py-2.5 rounded-xl border border-line bg-surface-base text-sm text-content-primary placeholder:text-content-faint focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition"
           />
           <button
@@ -248,7 +250,7 @@ export default function EmailVerifier({ userPlan }) {
             disabled={!manualInput.trim()}
             className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition"
           >
-            Ajouter
+            {t('verifier.addBtn')}
           </button>
         </div>
 
@@ -257,14 +259,14 @@ export default function EmailVerifier({ userPlan }) {
           <div className="flex items-center justify-between pt-2 border-t border-line">
             <div className="flex items-center gap-2 text-sm text-content-secondary">
               <Mail size={14} className="text-violet-400" />
-              <span className="font-medium">{emails.length}</span> email{emails.length > 1 ? 's' : ''} pret{emails.length > 1 ? 's' : ''} a verifier
+              <span className="font-medium">{emails.length}</span> {t('verifier.readyCount', { count: emails.length })}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleClear}
                 className="px-3 py-1.5 rounded-lg text-xs text-content-muted hover:text-red-400 hover:bg-red-500/10 transition"
               >
-                Tout effacer
+                {t('verifier.clearAll')}
               </button>
               <button
                 onClick={handleVerify}
@@ -274,12 +276,12 @@ export default function EmailVerifier({ userPlan }) {
                 {isVerifying ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    Verification... ({progress.done}/{progress.total})
+                    {t('verifier.verifying')} ({progress.done}/{progress.total})
                   </>
                 ) : (
                   <>
                     <Play size={14} />
-                    Lancer la verification
+                    {t('verifier.startVerify')}
                   </>
                 )}
               </button>
@@ -300,16 +302,16 @@ export default function EmailVerifier({ userPlan }) {
         <div className="rounded-xl border border-line bg-surface-card p-5 space-y-4">
           <h3 className="text-sm font-semibold text-content-secondary flex items-center gap-2">
             <BarChart3 size={15} className="text-content-muted" />
-            Resultats de la verification
+            {t('verifier.resultsTitle')}
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { key: 'valid', value: stats.valid, label: 'Valides', color: 'emerald' },
-              { key: 'catch_all', value: stats.catch_all, label: 'Catch-all', color: 'amber' },
-              { key: 'invalid', value: stats.invalid, label: 'Invalides', color: 'red' },
-              { key: 'disposable', value: stats.disposable, label: 'Jetables', color: 'orange' },
-              { key: 'unknown', value: stats.unknown, label: 'Inconnus', color: 'zinc' },
+              { key: 'valid', value: stats.valid, label: t('verifier.statsLabels.valid'), color: 'emerald' },
+              { key: 'catch_all', value: stats.catch_all, label: t('verifier.statsLabels.catchAll'), color: 'amber' },
+              { key: 'invalid', value: stats.invalid, label: t('verifier.statsLabels.invalid'), color: 'red' },
+              { key: 'disposable', value: stats.disposable, label: t('verifier.statsLabels.disposable'), color: 'orange' },
+              { key: 'unknown', value: stats.unknown, label: t('verifier.statsLabels.unknown'), color: 'zinc' },
             ].map(({ key, value, label, color }) => (
               <button
                 key={key}
@@ -360,7 +362,7 @@ export default function EmailVerifier({ userPlan }) {
             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-line hover:bg-surface-elevated text-sm text-content-secondary transition"
           >
             <Download size={14} />
-            Exporter les resultats (CSV)
+            {t('verifier.exportResults')}
           </button>
         </div>
       )}
@@ -388,7 +390,7 @@ export default function EmailVerifier({ userPlan }) {
                       <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-${cfg.color}-500/10 text-${cfg.color}-400 border border-${cfg.color}-500/20`}>
                           <Icon size={11} />
-                          {cfg.label}
+                          {t(cfg.labelKey)}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-xs text-content-muted hidden sm:table-cell">
@@ -397,10 +399,10 @@ export default function EmailVerifier({ userPlan }) {
                       <td className="px-4 py-2.5 hidden md:table-cell">
                         <div className="flex gap-1.5">
                           {r.free && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20">Free</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20">{t('verifier.free')}</span>
                           )}
                           {r.role && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">Role</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">{t('verifier.role')}</span>
                           )}
                           {!r.free && !r.role && (
                             <span className="text-xs text-content-faint">—</span>
@@ -415,8 +417,8 @@ export default function EmailVerifier({ userPlan }) {
           </div>
           {filter !== 'all' && (
             <div className="px-4 py-2 bg-surface-alt border-t border-line text-[11px] text-content-muted">
-              Filtre actif : {STATUS_CONFIG[filter]?.label} ({filteredResults.length} / {results.length})
-              <button onClick={() => setFilter('all')} className="ml-2 text-violet-400 hover:underline">Tout afficher</button>
+              {t('verifier.activeFilter')} : {t(STATUS_CONFIG[filter]?.labelKey)} ({filteredResults.length} / {results.length})
+              <button onClick={() => setFilter('all')} className="ml-2 text-violet-400 hover:underline">{t('verifier.showAll')}</button>
             </div>
           )}
         </div>

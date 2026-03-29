@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { LogOut, Menu, Loader2, Sun, Moon } from 'lucide-react';
+import { LogOut, Menu, Loader2, Sun, Moon, Globe } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
+import { useI18n } from '@/lib/i18n';
 
 export default function TopBar({ user, onToggleSidebar, searchProgress, isSearching }) {
   const router = useRouter();
   const supabase = getSupabase();
   const [loggingOut, setLoggingOut] = useState(false);
   const { theme, toggle } = useTheme();
+  const { t, locale, setLocale } = useI18n();
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -31,7 +33,7 @@ export default function TopBar({ user, onToggleSidebar, searchProgress, isSearch
           <button
             onClick={onToggleSidebar}
             className="md:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-elevated active:scale-95 transition-all"
-            aria-label="Ouvrir le menu"
+            aria-label={t('topbar.openMenu')}
           >
             <Menu size={20} />
           </button>
@@ -58,13 +60,22 @@ export default function TopBar({ user, onToggleSidebar, searchProgress, isSearch
           </div>
         )}
 
-        {/* Right: theme toggle + user */}
+        {/* Right: lang toggle + theme toggle + user */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+            className="p-2.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated active:scale-95 transition-all flex items-center gap-1.5"
+            title={locale === 'fr' ? 'Switch to English' : 'Passer en francais'}
+            aria-label={locale === 'fr' ? 'Switch to English' : 'Passer en francais'}
+          >
+            <Globe size={16} />
+            <span className="text-xs font-semibold">{locale === 'fr' ? 'FR' : 'EN'}</span>
+          </button>
           <button
             onClick={toggle}
             className="p-2.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated active:scale-95 transition-all"
-            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-            aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            title={theme === 'dark' ? t('topbar.lightMode') : t('topbar.darkMode')}
+            aria-label={theme === 'dark' ? t('topbar.switchLight') : t('topbar.switchDark')}
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
@@ -84,8 +95,8 @@ export default function TopBar({ user, onToggleSidebar, searchProgress, isSearch
                 onClick={handleLogout}
                 disabled={loggingOut}
                 className="p-2.5 rounded-lg text-content-muted hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all disabled:opacity-50"
-                title="Se déconnecter"
-                aria-label="Se déconnecter"
+                title={t('topbar.logout')}
+                aria-label={t('topbar.logout')}
               >
                 {loggingOut ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
               </button>

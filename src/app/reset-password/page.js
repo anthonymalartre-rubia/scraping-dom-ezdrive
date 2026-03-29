@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { getSupabase } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
@@ -16,9 +17,9 @@ function getPasswordStrength(password) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  if (score <= 1) return { score: 1, label: 'Faible', color: 'bg-red-500' };
-  if (score <= 3) return { score: 2, label: 'Moyen', color: 'bg-yellow-500' };
-  return { score: 3, label: 'Fort', color: 'bg-green-500' };
+  if (score <= 1) return { score: 1, labelKey: 'settings.weak', color: 'bg-red-500' };
+  if (score <= 3) return { score: 2, labelKey: 'settings.medium', color: 'bg-yellow-500' };
+  return { score: 3, labelKey: 'settings.strong', color: 'bg-green-500' };
 }
 
 export default function ResetPasswordPage() {
@@ -32,6 +33,7 @@ export default function ResetPasswordPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const supabase = getSupabase();
+  const { t } = useI18n();
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -44,12 +46,12 @@ export default function ResetPasswordPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t('auth.resetMismatch'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      setError(t('auth.resetMinLength'));
       return;
     }
 
@@ -60,9 +62,9 @@ export default function ResetPasswordPage() {
 
       if (error) {
         if (error.message.includes('same_password')) {
-          setError('Le nouveau mot de passe doit être différent de l\'ancien.');
+          setError(t('auth.resetDiffError'));
         } else if (error.message.includes('session') || error.message.includes('expired') || error.message.includes('invalid')) {
-          setError('Le lien de réinitialisation a expiré ou est invalide. Veuillez en demander un nouveau.');
+          setError(t('auth.resetExpired'));
         } else {
           setError(error.message);
         }
@@ -73,7 +75,7 @@ export default function ResetPasswordPage() {
         }, 3000);
       }
     } catch (err) {
-      setError('Une erreur est survenue. Réessayez.');
+      setError(t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -92,11 +94,11 @@ export default function ResetPasswordPage() {
             <CheckCircle2 className="h-7 w-7 text-white" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-content-primary">Mot de passe modifié</h1>
+            <h1 className="text-2xl font-bold text-content-primary">{t('auth.resetSuccess')}</h1>
             <p className="text-sm text-content-tertiary leading-relaxed">
-              Votre mot de passe a été réinitialisé avec succès.
+              {t('auth.resetSuccessDesc')}
               <br />
-              Vous allez être redirigé vers la page de connexion...
+              {t('auth.resetRedirect')}
             </p>
           </div>
 
@@ -105,7 +107,7 @@ export default function ResetPasswordPage() {
               href="/login"
               className="inline-block text-sm text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200"
             >
-              Aller à la connexion
+              {t('auth.goToLogin')}
             </Link>
           </div>
         </div>
@@ -126,9 +128,9 @@ export default function ResetPasswordPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
             <span className="text-lg font-bold text-white">P</span>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-content-primary">Nouveau mot de passe</h1>
+          <h1 className="mt-4 text-2xl font-bold text-content-primary">{t('auth.resetTitle')}</h1>
           <p className="mt-2 text-sm text-content-tertiary">
-            Choisissez un nouveau mot de passe pour votre compte
+            {t('auth.resetDesc')}
           </p>
         </div>
 
@@ -143,7 +145,7 @@ export default function ResetPasswordPage() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Nouveau mot de passe
+              {t('auth.resetTitle')}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -155,7 +157,7 @@ export default function ResetPasswordPage() {
                 required
                 minLength={6}
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="button"
@@ -184,7 +186,7 @@ export default function ResetPasswordPage() {
                   strength.score === 2 ? 'text-yellow-400' :
                   'text-green-400'
                 }`}>
-                  {strength.label}
+                  {t(strength.labelKey)}
                 </p>
               </div>
             )}
@@ -192,7 +194,7 @@ export default function ResetPasswordPage() {
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Confirmer le mot de passe
+              {t('settings.confirmPassword')}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -204,7 +206,7 @@ export default function ResetPasswordPage() {
                 required
                 minLength={6}
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="button"
@@ -225,10 +227,10 @@ export default function ResetPasswordPage() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Modification...</span>
+                <span>{t('auth.resetting')}</span>
               </>
             ) : (
-              'Réinitialiser le mot de passe'
+              t('auth.resetAction')
             )}
           </button>
         </form>
@@ -238,7 +240,7 @@ export default function ResetPasswordPage() {
             href="/login"
             className="text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200"
           >
-            Retour à la connexion
+            {t('auth.backToLogin')}
           </Link>
         </p>
       </div>

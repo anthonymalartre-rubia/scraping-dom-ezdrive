@@ -6,65 +6,60 @@ import {
   ChevronRight, ChevronLeft, X, MapPin, BarChart3,
   Filter, FolderOpen, CheckCircle2,
 } from 'lucide-react';
-
-const STEPS = [
-  {
-    icon: Sparkles,
-    iconGradient: 'from-indigo-500 to-purple-600',
-    title: 'Bienvenue sur Prospectia.ai !',
-    description:
-      'Generez des leads B2B qualifies partout en France en quelques clics.',
-    highlights: null,
-  },
-  {
-    icon: Search,
-    iconGradient: 'from-blue-500 to-cyan-500',
-    title: 'Choisissez vos departements et categories',
-    description:
-      'Lancez une recherche automatique via Google Places pour trouver des prospects.',
-    highlights: [
-      { icon: MapPin, text: '101 departements couverts' },
-      { icon: BarChart3, text: '150+ categories metier' },
-      { icon: Filter, text: 'Recherche en langage naturel' },
-    ],
-  },
-  {
-    icon: Mail,
-    iconGradient: 'from-emerald-500 to-teal-500',
-    title: 'Enrichissez vos leads automatiquement',
-    description:
-      'Nous trouvons les emails professionnels de vos prospects par scraping intelligent.',
-    highlights: [
-      { icon: CheckCircle2, text: 'Emails verifies et scores' },
-      { icon: BarChart3, text: 'Scoring de qualite automatique' },
-    ],
-  },
-  {
-    icon: Download,
-    iconGradient: 'from-orange-500 to-amber-500',
-    title: 'Exportez vers votre CRM',
-    description:
-      'Telechargez en CSV standard ou format Zoho CRM, pret a importer.',
-    highlights: [
-      { icon: Filter, text: 'Filtres avances' },
-      { icon: CheckCircle2, text: 'Multi-selection par lots' },
-      { icon: FolderOpen, text: 'Organisation en dossiers' },
-    ],
-  },
-  {
-    icon: Rocket,
-    iconGradient: 'from-indigo-500 to-purple-600',
-    title: 'Pret a prospecter ?',
-    description:
-      'Vous pouvez revoir ce guide a tout moment depuis les parametres.',
-    highlights: null,
-  },
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function OnboardingOverlay({ onClose, onStartSearch }) {
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [animating, setAnimating] = useState(false);
+
+  const STEPS = [
+    {
+      icon: Sparkles,
+      iconGradient: 'from-indigo-500 to-purple-600',
+      title: t('onboarding.welcome'),
+      description: t('onboarding.welcomeDesc'),
+      highlights: null,
+    },
+    {
+      icon: Search,
+      iconGradient: 'from-blue-500 to-cyan-500',
+      title: t('onboarding.step1Title'),
+      description: t('onboarding.step1Desc'),
+      highlights: t('onboarding.step1Features').map((text, i) => ({
+        icon: [MapPin, BarChart3, Filter][i],
+        text,
+      })),
+    },
+    {
+      icon: Mail,
+      iconGradient: 'from-emerald-500 to-teal-500',
+      title: t('onboarding.step2Title'),
+      description: t('onboarding.step2Desc'),
+      highlights: t('onboarding.step2Features').map((text, i) => ({
+        icon: [CheckCircle2, BarChart3][i],
+        text,
+      })),
+    },
+    {
+      icon: Download,
+      iconGradient: 'from-orange-500 to-amber-500',
+      title: t('onboarding.step3Title'),
+      description: t('onboarding.step3Desc'),
+      highlights: t('onboarding.step3Features').map((text, i) => ({
+        icon: [Filter, CheckCircle2, FolderOpen][i],
+        text,
+      })),
+    },
+    {
+      icon: Rocket,
+      iconGradient: 'from-indigo-500 to-purple-600',
+      title: t('onboarding.readyTitle'),
+      description: t('onboarding.readyDesc'),
+      highlights: null,
+    },
+  ];
 
   const isLast = step === STEPS.length - 1;
   const isFirst = step === 0;
@@ -129,7 +124,7 @@ export default function OnboardingOverlay({ onClose, onStartSearch }) {
         <button
           onClick={handleClose}
           className="absolute top-5 right-4 text-content-tertiary hover:text-content-primary transition-colors z-10"
-          aria-label="Fermer"
+          aria-label={t('common.close')}
         >
           <X size={18} />
         </button>
@@ -184,7 +179,7 @@ export default function OnboardingOverlay({ onClose, onStartSearch }) {
               <button
                 key={i}
                 onClick={() => goToStep(i)}
-                aria-label={`Etape ${i + 1}`}
+                aria-label={`${t('onboarding.step')} ${i + 1}`}
                 className={`rounded-full transition-all duration-300 ${
                   i === step
                     ? 'w-7 h-2 bg-indigo-500'
@@ -204,7 +199,7 @@ export default function OnboardingOverlay({ onClose, onStartSearch }) {
                 onClick={handleClose}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-content-tertiary hover:text-content-secondary border border-line-hover hover:border-content-faint transition-colors"
               >
-                Passer
+                {t('onboarding.skip')}
               </button>
             ) : (
               <button
@@ -212,7 +207,7 @@ export default function OnboardingOverlay({ onClose, onStartSearch }) {
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-content-tertiary hover:text-content-secondary border border-line-hover hover:border-content-faint transition-colors flex items-center justify-center gap-1.5"
               >
                 <ChevronLeft size={15} />
-                Precedent
+                {t('common.previous')}
               </button>
             )}
 
@@ -223,12 +218,12 @@ export default function OnboardingOverlay({ onClose, onStartSearch }) {
             >
               {isLast ? (
                 <>
-                  Commencer ma premiere recherche
+                  {t('onboarding.startBtn')}
                   <Rocket size={15} />
                 </>
               ) : (
                 <>
-                  Suivant
+                  {t('common.next')}
                   <ChevronRight size={15} />
                 </>
               )}

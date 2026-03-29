@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabase } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { Mail, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -13,6 +14,7 @@ export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
   const supabase = getSupabase();
+  const { t } = useI18n();
 
   useEffect(() => {
     setMounted(true);
@@ -34,7 +36,7 @@ export default function ForgotPasswordPage() {
         setSuccess(true);
       }
     } catch (err) {
-      setError('Une erreur est survenue. Réessayez.');
+      setError(t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -53,12 +55,12 @@ export default function ForgotPasswordPage() {
             <CheckCircle2 className="h-7 w-7 text-white" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-content-primary">Email envoyé</h1>
+            <h1 className="text-2xl font-bold text-content-primary">{t('auth.emailSent')}</h1>
             <p className="text-sm text-content-tertiary leading-relaxed">
-              Un email de réinitialisation a été envoyé à{' '}
+              {t('auth.resetEmailSent')}{' '}
               <span className="text-content-primary font-medium">{email}</span>.
               <br />
-              Cliquez sur le lien pour définir un nouveau mot de passe.
+              {t('auth.resetClickLink')}
             </p>
           </div>
 
@@ -68,7 +70,7 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour à la connexion
+              {t('auth.backToLogin')}
             </Link>
           </div>
         </div>
@@ -89,9 +91,9 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
             <span className="text-lg font-bold text-white">P</span>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-content-primary">Mot de passe oublié</h1>
+          <h1 className="mt-4 text-2xl font-bold text-content-primary">{t('auth.forgotTitle')}</h1>
           <p className="mt-2 text-sm text-content-tertiary">
-            Entrez votre email pour recevoir un lien de réinitialisation
+            {t('auth.forgotDesc')}
           </p>
         </div>
 
@@ -106,7 +108,7 @@ export default function ForgotPasswordPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Email
+              {t('common.email')}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -117,7 +119,7 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-4 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="vous@exemple.com"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
           </div>
@@ -130,10 +132,10 @@ export default function ForgotPasswordPage() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Envoi...</span>
+                <span>{t('auth.sending')}</span>
               </>
             ) : (
-              'Envoyer le lien'
+              t('auth.sendLink')
             )}
           </button>
         </form>
@@ -144,7 +146,7 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Retour à la connexion
+            {t('auth.backToLogin')}
           </Link>
         </p>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { DEPTS, REGIONS, B2B_CATS, COPRO_CATS, B2B_GROUPS, COPRO_GROUPS, COUNTRIES, getRegionsForCountry, getDeptsForCountry } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n";
 import {
   Send, Square, Sparkles, MapPin, Building2, Home, Search, PenLine, Loader2,
   Plus, X, Play, RotateCcw, ChevronRight, FolderPlus, Folder, Zap,
@@ -133,8 +134,8 @@ function OnboardingHint({ storageKey, children }) {
 const QUICK_SEARCH_PRESETS = [
   {
     id: 'restaurants-paris',
-    name: 'Restaurants a Paris',
-    subtitle: '1 dept, 1 categorie',
+    nameKey: 'search.examples.restaurants',
+    subtitleKey: 'search.estimatedExamples.small',
     icon: UtensilsCrossed,
     type: 'b2b',
     depts: ['75'],
@@ -142,8 +143,8 @@ const QUICK_SEARCH_PRESETS = [
   },
   {
     id: 'b2b-idf',
-    name: 'B2B Ile-de-France',
-    subtitle: '8 depts, toutes categories',
+    nameKey: 'search.examples.b2b',
+    subtitleKey: 'search.estimatedExamples.medium',
     icon: Briefcase,
     type: 'b2b',
     depts: ['75', '77', '78', '91', '92', '93', '94', '95'],
@@ -151,8 +152,8 @@ const QUICK_SEARCH_PRESETS = [
   },
   {
     id: 'syndics-france',
-    name: 'Syndics toute France',
-    subtitle: '101 depts, toutes categories',
+    nameKey: 'search.examples.syndics',
+    subtitleKey: 'search.estimatedExamples.large',
     icon: Building,
     type: 'copro',
     depts: 'ALL',
@@ -160,8 +161,8 @@ const QUICK_SEARCH_PRESETS = [
   },
   {
     id: 'hotels-cote-azur',
-    name: "Hotels Cote d'Azur",
-    subtitle: '3 depts, 4 categories',
+    nameKey: 'search.examples.hotels',
+    subtitleKey: 'search.estimatedExamples.custom',
     icon: Hotel,
     type: 'b2b',
     depts: ['06', '83', '13'],
@@ -169,8 +170,8 @@ const QUICK_SEARCH_PRESETS = [
   },
   {
     id: 'artisans-btp-lyon',
-    name: 'Artisans BTP Lyon',
-    subtitle: '1 dept, ' + (B2B_GROUPS['BTP & Construction']?.length || 0) + ' categories',
+    nameKey: 'search.examples.artisans',
+    subtitleKey: 'search.estimatedExamples.artisans',
     icon: HardHat,
     type: 'b2b',
     depts: ['69'],
@@ -178,8 +179,8 @@ const QUICK_SEARCH_PRESETS = [
   },
   {
     id: 'commerces-bordeaux',
-    name: 'Commerces Bordeaux',
-    subtitle: '1 dept, ' + (B2B_GROUPS['Commerce & Distribution']?.length || 0) + ' categories',
+    nameKey: 'search.examples.commerce',
+    subtitleKey: 'search.estimatedExamples.commerce',
     icon: ShoppingBag,
     type: 'b2b',
     depts: ['33'],
@@ -196,6 +197,7 @@ export default function SearchPanel({
   folders = [],
   onCreateFolder,
 }) {
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [searchType, setSearchType] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState('FR');
@@ -287,14 +289,14 @@ export default function SearchPanel({
         body: JSON.stringify({ query: nlInput.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
+      if (!res.ok) throw new Error(data.error || t('common.error'));
       if (data.terms && data.terms.length > 0) {
         setFreeSearchTerms(data.terms);
         setSearchType('custom');
         setStep(1);
       }
     } catch (err) {
-      setNlError(err.message || 'Erreur lors de l\'analyse');
+      setNlError(err.message || t('search.analysisError'));
     } finally {
       setNlParsing(false);
     }
@@ -432,7 +434,7 @@ export default function SearchPanel({
       if (!linkedinUrl.trim()) return;
       // Validate LinkedIn URL
       if (!linkedinUrl.includes('linkedin.com/in/')) {
-        setCompanyError('URL LinkedIn invalide. Format attendu : https://linkedin.com/in/nom-prenom');
+        setCompanyError(t('search.linkedinPlaceholder'));
         return;
       }
     } else {
@@ -459,13 +461,13 @@ export default function SearchPanel({
       const data = await res.json();
 
       if (!res.ok) {
-        setCompanyError(data.error || `Erreur ${res.status}`);
+        setCompanyError(data.error || `${t('common.error')} ${res.status}`);
         return;
       }
 
       setCompanyResults(data);
     } catch (err) {
-      setCompanyError(err.message || 'Erreur de connexion');
+      setCompanyError(err.message || t('search.connectionError'));
     } finally {
       setCompanySearching(false);
     }
@@ -519,17 +521,17 @@ export default function SearchPanel({
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-content-primary mb-1">Recherche</h2>
-        <p className="text-sm text-content-muted">Definissez votre cible en quelques etapes</p>
+        <h2 className="text-xl font-bold text-content-primary mb-1">{t('search.title')}</h2>
+        <p className="text-sm text-content-muted">{t('search.subtitle')}</p>
       </div>
 
       {!apiKeySet && (
         <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 mb-6">
           <Sparkles size={18} className="text-amber-500 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-amber-400">Configuration requise</p>
+            <p className="text-sm font-medium text-amber-400">{t('search.configRequired')}</p>
             <p className="text-xs text-content-tertiary mt-1">
-              Definissez <code className="px-1.5 py-0.5 rounded bg-surface-elevated text-content-secondary text-[11px]">GOOGLE_PLACES_API_KEY</code> dans les variables Vercel.
+              {t('search.configRequiredDesc')}
             </p>
           </div>
         </div>
@@ -543,14 +545,14 @@ export default function SearchPanel({
 
           {/* Step 1: Type */}
           <BotMessage>
-            Quel type de prospects recherchez-vous ?
+            {t('search.whatType')}
           </BotMessage>
 
           {/* Onboarding hint for new users */}
           {step === 0 && !searchType && (
             <div className="pl-2 sm:pl-10">
               <OnboardingHint storageKey="hint_search_dismissed">
-                Commencez par une recherche rapide pour decouvrir la plateforme
+                {t('search.onboardingHint')}
               </OnboardingHint>
             </div>
           )}
@@ -560,9 +562,9 @@ export default function SearchPanel({
             <div className="pl-2 sm:pl-10 space-y-3 animate-in fade-in duration-300">
               <div className="flex items-center gap-2">
                 <Zap size={14} className="text-amber-400" />
-                <span className="text-xs font-semibold text-amber-400">Recherches rapides</span>
+                <span className="text-xs font-semibold text-amber-400">{t('search.quickSearches')}</span>
               </div>
-              <p className="text-[10px] text-content-muted -mt-1">Lancez une recherche en 1 clic</p>
+              <p className="text-[10px] text-content-muted -mt-1">{t('search.quickSearchDesc')}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {QUICK_SEARCH_PRESETS.map((preset) => {
                   const PresetIcon = preset.icon;
@@ -576,8 +578,8 @@ export default function SearchPanel({
                         <PresetIcon size={15} className="text-amber-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-content-primary truncate">{preset.name}</div>
-                        <div className="text-[10px] text-content-muted">{preset.subtitle}</div>
+                        <div className="text-sm font-medium text-content-primary truncate">{t(preset.nameKey)}</div>
+                        <div className="text-[10px] text-content-muted">{t(preset.subtitleKey)}</div>
                       </div>
                       <ArrowRight size={14} className="text-amber-500/40 group-hover:text-amber-400 transition flex-shrink-0" />
                     </button>
@@ -588,7 +590,7 @@ export default function SearchPanel({
               {/* Separator */}
               <div className="flex items-center gap-3 pt-1">
                 <div className="flex-1 h-px bg-line" />
-                <span className="text-[10px] text-content-faint uppercase tracking-wider font-medium">ou configurez votre recherche</span>
+                <span className="text-[10px] text-content-faint uppercase tracking-wider font-medium">{t('search.orConfigureSearch')}</span>
                 <div className="flex-1 h-px bg-line" />
               </div>
             </div>
@@ -601,28 +603,28 @@ export default function SearchPanel({
                 className="flex items-center gap-2 px-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl border border-line-hover text-sm font-medium text-content-secondary hover:border-blue-500/30 hover:text-blue-400 hover:bg-blue-600/10 transition-all active:scale-[0.97]"
               >
                 <Building2 size={15} />
-                B2B — Entreprises
+                {t('search.b2bCompanies')}
               </button>
               <button
                 onClick={() => handleTypeSelect('copro')}
                 className="flex items-center gap-2 px-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl border border-line-hover text-sm font-medium text-content-secondary hover:border-purple-500/30 hover:text-purple-400 hover:bg-purple-600/10 transition-all active:scale-[0.97]"
               >
                 <Home size={15} />
-                Copropriete — Syndics
+                {t('search.coproSyndics')}
               </button>
               <button
                 onClick={() => handleTypeSelect('both')}
                 className="flex items-center gap-2 px-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl border border-line-hover text-sm font-medium text-content-secondary hover:border-indigo-500/30 hover:text-indigo-400 hover:bg-indigo-600/10 transition-all active:scale-[0.97]"
               >
                 <Sparkles size={15} />
-                Les deux
+                {t('search.both')}
               </button>
             </div>
           )}
 
           {step === 0 && !searchType && (
             <div className="pl-2 sm:pl-10 space-y-2 animate-in fade-in duration-500">
-              <p className="text-[10px] uppercase tracking-wider text-content-faint font-semibold">ou decrivez ce que vous cherchez</p>
+              <p className="text-[10px] uppercase tracking-wider text-content-faint font-semibold">{t('search.orDescribe')}</p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <PenLine size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-faint" />
@@ -631,7 +633,7 @@ export default function SearchPanel({
                     value={nlInput}
                     onChange={(e) => setNlInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleNlSubmit()}
-                    placeholder="Ex: je cherche des restaurants haut de gamme et des hotels 4 etoiles..."
+                    placeholder={t('search.nlPlaceholder')}
                     disabled={nlParsing}
                     className="w-full pl-9 pr-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl border border-line-hover bg-surface-input text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-amber-500/40 transition disabled:opacity-50"
                   />
@@ -642,7 +644,7 @@ export default function SearchPanel({
                   className="px-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {nlParsing ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                  {nlParsing ? 'Analyse...' : 'Analyser'}
+                  {nlParsing ? t('search.analyzing') : t('search.analyze')}
                 </button>
               </div>
               {nlError && (
@@ -656,7 +658,7 @@ export default function SearchPanel({
             <div className="pl-2 sm:pl-10 space-y-3 animate-in fade-in duration-500">
               <div className="flex items-center gap-3 pt-1">
                 <div className="flex-1 h-px bg-line" />
-                <span className="text-[10px] text-content-faint uppercase tracking-wider font-medium">Prospection ciblee</span>
+                <span className="text-[10px] text-content-faint uppercase tracking-wider font-medium">{t('search.targetedProspecting')}</span>
                 <div className="flex-1 h-px bg-line" />
               </div>
 
@@ -670,8 +672,8 @@ export default function SearchPanel({
                       <Building2 size={15} className="text-emerald-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-content-primary">Recherche entreprise</div>
-                      <div className="text-[10px] text-content-muted">Trouver les contacts cles</div>
+                      <div className="text-sm font-medium text-content-primary">{t('search.companySearch')}</div>
+                      <div className="text-[10px] text-content-muted">{t('search.findKeyContacts')}</div>
                     </div>
                     <ArrowRight size={14} className="text-emerald-500/40 group-hover:text-emerald-400 transition flex-shrink-0" />
                   </button>
@@ -683,8 +685,8 @@ export default function SearchPanel({
                       <LinkedInIcon size={15} className="text-blue-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-content-primary">Profil LinkedIn</div>
-                      <div className="text-[10px] text-content-muted">Enrichir un profil LinkedIn</div>
+                      <div className="text-sm font-medium text-content-primary">{t('search.linkedinProfile')}</div>
+                      <div className="text-[10px] text-content-muted">{t('search.enrichLinkedin')}</div>
                     </div>
                     <ArrowRight size={14} className="text-blue-500/40 group-hover:text-blue-400 transition flex-shrink-0" />
                   </button>
@@ -696,7 +698,7 @@ export default function SearchPanel({
                 <div className="space-y-3 animate-in fade-in duration-300">
                   <div className="flex items-center gap-2">
                     <Building2 size={14} className="text-emerald-400" />
-                    <span className="text-xs font-semibold text-emerald-400">Recherche entreprise</span>
+                    <span className="text-xs font-semibold text-emerald-400">{t('search.companySearch')}</span>
                   </div>
                   <div className="space-y-2">
                     <div className="relative">
@@ -706,7 +708,7 @@ export default function SearchPanel({
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleCompanySearch()}
-                        placeholder="Nom de l'entreprise (ex: Decathlon, BNP Paribas...)"
+                        placeholder={t('search.companyNamePlaceholder')}
                         className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-xl border border-line-hover bg-surface-input text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-emerald-500/40 transition"
                       />
                     </div>
@@ -717,7 +719,7 @@ export default function SearchPanel({
                         value={companyDomain}
                         onChange={(e) => setCompanyDomain(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleCompanySearch()}
-                        placeholder="Domaine (ex: decathlon.fr) — optionnel"
+                        placeholder={t('search.domainPlaceholder')}
                         className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-xl border border-line-hover bg-surface-input text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-emerald-500/40 transition"
                       />
                     </div>
@@ -729,7 +731,7 @@ export default function SearchPanel({
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-surface-elevated disabled:text-content-faint text-white text-sm font-semibold transition active:scale-[0.97] disabled:cursor-not-allowed"
                     >
                       {companySearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                      {companySearching ? 'Recherche...' : 'Trouver les contacts'}
+                      {companySearching ? t('search.searching') : t('search.findContacts')}
                     </button>
                     <button
                       onClick={resetCompanySearch}
@@ -746,7 +748,7 @@ export default function SearchPanel({
                 <div className="space-y-3 animate-in fade-in duration-300">
                   <div className="flex items-center gap-2">
                     <LinkedInIcon size={14} className="text-blue-400" />
-                    <span className="text-xs font-semibold text-blue-400">Enrichissement profil LinkedIn</span>
+                    <span className="text-xs font-semibold text-blue-400">{t('search.linkedinEnrichment')}</span>
                   </div>
                   <div className="relative">
                     <LinkedInIcon size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-faint" />
@@ -766,7 +768,7 @@ export default function SearchPanel({
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-surface-elevated disabled:text-content-faint text-white text-sm font-semibold transition active:scale-[0.97] disabled:cursor-not-allowed"
                     >
                       {companySearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                      {companySearching ? 'Recherche...' : 'Enrichir le profil'}
+                      {companySearching ? t('search.searching') : t('search.enrichProfile')}
                     </button>
                     <button
                       onClick={resetCompanySearch}
@@ -791,14 +793,14 @@ export default function SearchPanel({
                     <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 space-y-2">
                       <div className="flex items-center gap-2">
                         <Building2 size={14} className="text-emerald-400" />
-                        <span className="text-sm font-semibold text-emerald-400">{companyResults.company.name || 'Entreprise'}</span>
+                        <span className="text-sm font-semibold text-emerald-400">{companyResults.company.name || t('search.company')}</span>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-content-secondary">
                         {companyResults.company.industry && (
-                          <span>Secteur: {companyResults.company.industry}</span>
+                          <span>{t('search.sector')}: {companyResults.company.industry}</span>
                         )}
                         {companyResults.company.employees && (
-                          <span>Employes: ~{companyResults.company.employees}</span>
+                          <span>{t('search.employees')}: ~{companyResults.company.employees}</span>
                         )}
                         {companyResults.company.domain && (
                           <span className="flex items-center gap-1">
@@ -829,7 +831,7 @@ export default function SearchPanel({
                       <div className="flex items-center gap-2">
                         <Users size={13} className="text-content-muted" />
                         <span className="text-[10px] uppercase tracking-wider text-content-faint font-semibold">
-                          {companyResults.contacts.length} contact{companyResults.contacts.length > 1 ? 's' : ''} trouve{companyResults.contacts.length > 1 ? 's' : ''}
+                          {t('search.contactsFound', { count: companyResults.contacts.length })}
                         </span>
                       </div>
                       {companyResults.contacts.map((contact, i) => (
@@ -841,7 +843,7 @@ export default function SearchPanel({
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-content-primary">
-                                  {contact.name || 'Contact'}
+                                  {contact.name || t('search.contact')}
                                 </div>
                                 {contact.title && (
                                   <div className="text-[10px] text-content-muted">{contact.title}</div>
@@ -883,13 +885,13 @@ export default function SearchPanel({
                     </div>
                     {companyResults.source && (
                       <div className="text-[10px] text-content-faint text-right">
-                        Source : {companyResults.source === 'apollo' ? 'Apollo.io' : companyResults.source === 'serper' ? 'Serper.dev' : companyResults.source.includes('guess') ? 'Email deviné (pattern)' : companyResults.source}
+                        {t('search.source')} : {companyResults.source === 'apollo' ? 'Apollo.io' : companyResults.source === 'serper' ? 'Serper.dev' : companyResults.source.includes('guess') ? t('search.guessedEmail') : companyResults.source}
                       </div>
                     )}
                   </>
                   ) : (
                     <div className="text-center py-4 text-sm text-content-muted">
-                      Aucun contact trouve. Essayez avec un nom d'entreprise different ou ajoutez le domaine.
+                      {t('search.noContactsFound')}
                     </div>
                   )}
 
@@ -899,7 +901,7 @@ export default function SearchPanel({
                     className="flex items-center gap-2 text-sm text-content-muted hover:text-content-secondary transition"
                   >
                     <RotateCcw size={13} />
-                    Nouvelle recherche
+                    {t('search.newSearch')}
                   </button>
                 </div>
               )}
@@ -908,7 +910,7 @@ export default function SearchPanel({
 
           {searchType && (
             <UserMessage>
-              {searchType === 'b2b' ? 'B2B — Entreprises' : searchType === 'copro' ? 'Copropriete — Syndics' : searchType === 'custom' ? `"${nlInput}"` : 'B2B + Copropriete'}
+              {searchType === 'b2b' ? t('search.b2bCompanies') : searchType === 'copro' ? t('search.coproSyndics') : searchType === 'custom' ? `"${nlInput}"` : t('search.b2bAndCopro')}
             </UserMessage>
           )}
 
@@ -917,7 +919,7 @@ export default function SearchPanel({
             <>
               <BotMessage icon={MapPin} delay={step === 1 ? 400 : 0}>
                 <div>
-                  Dans quel pays et quelles zones ? <span className="text-content-muted">Selectionnez un pays puis les regions</span>
+                  {t('search.whichCountry')} <span className="text-content-muted">{t('search.selectCountryThenRegions')}</span>
                 </div>
               </BotMessage>
 
@@ -950,21 +952,21 @@ export default function SearchPanel({
                         type="text"
                         value={deptSearch}
                         onChange={(e) => setDeptSearch(e.target.value)}
-                        placeholder={selectedCountry === 'FR' ? 'Rechercher un departement...' : selectedCountry === 'CH' ? 'Rechercher un canton...' : 'Rechercher une province...'}
+                        placeholder={selectedCountry === 'FR' ? t('search.searchDept') : selectedCountry === 'CH' ? t('search.searchCanton') : t('search.searchProvince')}
                         className="w-full pl-8 pr-3 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 bg-surface-card border border-line rounded-lg text-xs text-content-primary placeholder-content-faint focus:outline-none focus:border-indigo-500/30 transition"
                       />
                     </div>
                     <button onClick={selectAllDepts} className="px-2.5 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-surface-card border border-line text-[10px] text-content-muted hover:text-content-primary transition whitespace-nowrap">
-                      Tout
+                      {t('search.selectAll')}
                     </button>
                     <button onClick={clearAllDepts} className="px-2.5 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-surface-card border border-line text-[10px] text-content-muted hover:text-content-primary transition whitespace-nowrap">
-                      Aucun
+                      {t('search.none')}
                     </button>
                   </div>
                   {/* Selected count */}
                   {selectedDepts.length > 0 && (
                     <div className="text-[10px] text-indigo-400 font-medium">
-                      {COUNTRIES[selectedCountry]?.flag} {selectedDepts.length} {selectedCountry === 'FR' ? 'departement' : selectedCountry === 'CH' ? 'canton' : 'province'}{selectedDepts.length > 1 ? 's' : ''} selectionne{selectedDepts.length > 1 ? 's' : ''}
+                      {COUNTRIES[selectedCountry]?.flag} {t('search.zonesSelected', { count: selectedDepts.length })}
                     </div>
                   )}
                   {/* Regions */}
@@ -1031,7 +1033,7 @@ export default function SearchPanel({
                     disabled={selectedDepts.length === 0}
                     className="flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition disabled:text-content-faint disabled:cursor-not-allowed min-h-[44px] sm:min-h-0"
                   >
-                    Continuer <ChevronRight size={14} />
+                    {t('search.continue')} <ChevronRight size={14} />
                   </button>
                 </div>
               )}
@@ -1039,7 +1041,7 @@ export default function SearchPanel({
               {step > 1 && (
                 <UserMessage>
                   {COUNTRIES[selectedCountry]?.flag} {selectedDepts.length > 10
-                    ? `${selectedDepts.length} zones selectionnees`
+                    ? t('search.zonesSelectedCount', { count: selectedDepts.length })
                     : selectedDepts.map((d) => activeDepts[d]?.name || d).join(', ')}
                 </UserMessage>
               )}
@@ -1052,13 +1054,13 @@ export default function SearchPanel({
               {searchType === 'custom' ? (
                 <BotMessage icon={PenLine} delay={step === 2 ? 400 : 0}>
                   <div>
-                    Quels types d'entreprises recherchez-vous ? <span className="text-content-muted">Tapez vos termes de recherche</span>
+                    {t('search.whatBusinessTypes')} <span className="text-content-muted">{t('search.typeSearchTerms')}</span>
                   </div>
                 </BotMessage>
               ) : (
                 <BotMessage icon={searchType === 'copro' ? Home : Building2} delay={step === 2 ? 400 : 0}>
                   <div>
-                    Quelles categories ? <span className="text-content-muted">(toutes selectionnees par defaut)</span>
+                    {t('search.whichCategories')} <span className="text-content-muted">{t('search.allSelectedByDefault')}</span>
                   </div>
                 </BotMessage>
               )}
@@ -1071,7 +1073,7 @@ export default function SearchPanel({
                       value={freeSearchInput}
                       onChange={(e) => setFreeSearchInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addFreeSearch()}
-                      placeholder="Ex: boulangerie, coiffeur, cabinet comptable, salle de sport..."
+                      placeholder={t('search.freeSearchPlaceholder')}
                       className="flex-1 bg-surface-deep border border-line rounded-xl px-4 py-3 sm:py-2.5 min-h-[44px] text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-amber-500/40 transition"
                     />
                     <button
@@ -1099,7 +1101,7 @@ export default function SearchPanel({
                     disabled={freeSearchTerms.length === 0}
                     className="flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition disabled:text-content-faint disabled:cursor-not-allowed"
                   >
-                    Continuer <ChevronRight size={14} />
+                    {t('search.continue')} <ChevronRight size={14} />
                   </button>
                 </div>
               )}
@@ -1114,7 +1116,7 @@ export default function SearchPanel({
                         type="text"
                         value={catSearch}
                         onChange={(e) => setCatSearch(e.target.value)}
-                        placeholder="Rechercher une catégorie..."
+                        placeholder={t('search.searchCategory')}
                         className="w-full pl-7 pr-3 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-0 rounded-lg bg-surface-input border border-line text-xs text-content-primary placeholder:text-content-faint focus:outline-none focus:border-indigo-500/50"
                       />
                     </div>
@@ -1125,17 +1127,17 @@ export default function SearchPanel({
                     <div className="space-y-1">
                       {searchType === 'both' && (
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] uppercase tracking-wider text-blue-400/60 font-semibold">B2B — Entreprises</p>
+                          <p className="text-[10px] uppercase tracking-wider text-blue-400/60 font-semibold">{t('search.b2bCompanies')}</p>
                           <div className="flex gap-2">
-                            <button onClick={() => selectAllCats(B2B_GROUPS)} className="text-[10px] text-blue-400/60 hover:text-blue-400 transition">Tout</button>
-                            <button onClick={() => clearAllCats(B2B_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">Aucun</button>
+                            <button onClick={() => selectAllCats(B2B_GROUPS)} className="text-[10px] text-blue-400/60 hover:text-blue-400 transition">{t('search.selectAll')}</button>
+                            <button onClick={() => clearAllCats(B2B_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">{t('search.none')}</button>
                           </div>
                         </div>
                       )}
                       {searchType === 'b2b' && (
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => selectAllCats(B2B_GROUPS)} className="text-[10px] text-blue-400/60 hover:text-blue-400 transition">Tout sélectionner</button>
-                          <button onClick={() => clearAllCats(B2B_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">Tout désélectionner</button>
+                          <button onClick={() => selectAllCats(B2B_GROUPS)} className="text-[10px] text-blue-400/60 hover:text-blue-400 transition">{t('search.selectAll')}</button>
+                          <button onClick={() => clearAllCats(B2B_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">{t('search.deselectAll')}</button>
                         </div>
                       )}
                       {Object.entries(B2B_GROUPS).map(([groupName, cats]) => {
@@ -1163,7 +1165,7 @@ export default function SearchPanel({
                                     : 'text-content-faint hover:text-content-secondary'
                                 }`}
                               >
-                                {selectedInGroup === matchingCats.length ? 'Désélect.' : 'Tout'}
+                                {selectedInGroup === matchingCats.length ? t('search.deselectAll') : t('search.selectAll')}
                               </button>
                             </button>
                             {isExpanded && (
@@ -1197,17 +1199,17 @@ export default function SearchPanel({
                     <div className="space-y-1">
                       {searchType === 'both' && (
                         <div className="flex items-center justify-between pt-2">
-                          <p className="text-[10px] uppercase tracking-wider text-purple-400/60 font-semibold">Copropriété — Syndics</p>
+                          <p className="text-[10px] uppercase tracking-wider text-purple-400/60 font-semibold">{t('search.coproSyndics')}</p>
                           <div className="flex gap-2">
-                            <button onClick={() => selectAllCats(COPRO_GROUPS)} className="text-[10px] text-purple-400/60 hover:text-purple-400 transition">Tout</button>
-                            <button onClick={() => clearAllCats(COPRO_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">Aucun</button>
+                            <button onClick={() => selectAllCats(COPRO_GROUPS)} className="text-[10px] text-purple-400/60 hover:text-purple-400 transition">{t('search.selectAll')}</button>
+                            <button onClick={() => clearAllCats(COPRO_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">{t('search.none')}</button>
                           </div>
                         </div>
                       )}
                       {searchType === 'copro' && (
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => selectAllCats(COPRO_GROUPS)} className="text-[10px] text-purple-400/60 hover:text-purple-400 transition">Tout sélectionner</button>
-                          <button onClick={() => clearAllCats(COPRO_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">Tout désélectionner</button>
+                          <button onClick={() => selectAllCats(COPRO_GROUPS)} className="text-[10px] text-purple-400/60 hover:text-purple-400 transition">{t('search.selectAll')}</button>
+                          <button onClick={() => clearAllCats(COPRO_GROUPS)} className="text-[10px] text-content-faint hover:text-content-secondary transition">{t('search.deselectAll')}</button>
                         </div>
                       )}
                       {Object.entries(COPRO_GROUPS).map(([groupName, cats]) => {
@@ -1235,7 +1237,7 @@ export default function SearchPanel({
                                     : 'text-content-faint hover:text-content-secondary'
                                 }`}
                               >
-                                {selectedInGroup === matchingCats.length ? 'Désélect.' : 'Tout'}
+                                {selectedInGroup === matchingCats.length ? t('search.deselectAll') : t('search.selectAll')}
                               </button>
                             </button>
                             {isExpanded && (
@@ -1269,7 +1271,7 @@ export default function SearchPanel({
                     disabled={selectedCats.length === 0}
                     className="flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition disabled:text-content-faint disabled:cursor-not-allowed"
                   >
-                    Continuer <ChevronRight size={14} />
+                    {t('search.continue')} <ChevronRight size={14} />
                   </button>
                 </div>
               )}
@@ -1277,9 +1279,9 @@ export default function SearchPanel({
               {step > 2 && (
                 <UserMessage>
                   {searchType === 'custom'
-                    ? `${freeSearchTerms.length} terme${freeSearchTerms.length > 1 ? 's' : ''} de recherche`
+                    ? t('search.searchTermsCount', { count: freeSearchTerms.length })
                     : <>
-                        {selectedCats.length} categories selectionnees
+                        {t('search.categoriesSelected', { count: selectedCats.length })}
                         {searchType === 'both' && ` (${b2bCount} B2B, ${coproCount} Copro)`}
                       </>
                   }
@@ -1292,7 +1294,7 @@ export default function SearchPanel({
           {step >= 3 && (
             <>
               <BotMessage icon={Search} delay={step === 3 ? 400 : 0}>
-                Voulez-vous ajouter des recherches personnalisees ? <span className="text-content-muted">(optionnel)</span>
+                {t('search.addCustomSearches')} <span className="text-content-muted">{t('search.optional')}</span>
               </BotMessage>
 
               {step === 3 && (
@@ -1303,7 +1305,7 @@ export default function SearchPanel({
                       value={customInput}
                       onChange={(e) => setCustomInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addCustom()}
-                      placeholder="Ex: plombier Paris, notaire Lyon, garage 33..."
+                      placeholder={t('search.customSearchPlaceholder')}
                       className="flex-1 bg-surface-deep border border-line rounded-xl px-4 py-2.5 text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-indigo-500/40 transition"
                     />
                     <button
@@ -1329,11 +1331,11 @@ export default function SearchPanel({
                   <div className="flex gap-3">
                     {customQueries.length > 0 ? (
                       <button onClick={confirmCustom} className="flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition">
-                        Continuer <ChevronRight size={14} />
+                        {t('search.continue')} <ChevronRight size={14} />
                       </button>
                     ) : (
                       <button onClick={skipCustom} className="flex items-center gap-1.5 text-sm font-medium text-content-muted hover:text-content-secondary transition">
-                        Passer <ChevronRight size={14} />
+                        {t('search.skip')} <ChevronRight size={14} />
                       </button>
                     )}
                   </div>
@@ -1342,11 +1344,11 @@ export default function SearchPanel({
 
               {step > 3 && customQueries.length > 0 && (
                 <UserMessage>
-                  {customQueries.length} recherche{customQueries.length > 1 ? 's' : ''} personnalisee{customQueries.length > 1 ? 's' : ''}
+                  {t('search.customSearchCount', { count: customQueries.length })}
                 </UserMessage>
               )}
               {step > 3 && customQueries.length === 0 && (
-                <UserMessage>Pas de recherche personnalisee</UserMessage>
+                <UserMessage>{t('search.noCustomSearch')}</UserMessage>
               )}
             </>
           )}
@@ -1355,7 +1357,7 @@ export default function SearchPanel({
           {step >= 4 && (
             <>
               <BotMessage icon={Folder} delay={step === 4 ? 400 : 0}>
-                Dans quelle liste stocker ces leads ?
+                {t('search.whichList')}
               </BotMessage>
 
               {step === 4 && (
@@ -1383,7 +1385,7 @@ export default function SearchPanel({
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-line-hover text-sm font-medium text-content-muted hover:border-indigo-500/30 hover:text-indigo-400 transition-all active:scale-[0.97]"
                     >
                       <FolderPlus size={15} />
-                      Creer une nouvelle liste
+                      {t('search.createNewList')}
                     </button>
                   ) : (
                     <div className="rounded-xl bg-surface-deep border border-line p-4 space-y-3">
@@ -1392,7 +1394,7 @@ export default function SearchPanel({
                         value={newFolderName}
                         onChange={(e) => setNewFolderName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
-                        placeholder="Nom de la liste..."
+                        placeholder={t('search.listNamePlaceholder')}
                         autoFocus
                         className="w-full bg-transparent border border-line rounded-lg px-3 py-2 text-sm text-content-primary placeholder-content-faint focus:outline-none focus:border-indigo-500/40 transition"
                       />
@@ -1413,13 +1415,13 @@ export default function SearchPanel({
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <Plus size={12} />
-                          Creer
+                          {t('search.create')}
                         </button>
                         <button
                           onClick={() => { setShowNewFolder(false); setNewFolderName(''); }}
                           className="px-3 py-1.5 rounded-lg text-xs text-content-muted hover:text-content-secondary transition"
                         >
-                          Annuler
+                          {t('search.cancel')}
                         </button>
                       </div>
                     </div>
@@ -1442,14 +1444,14 @@ export default function SearchPanel({
           {step >= 5 && !confirmed && (
             <BotMessage icon={Sparkles} delay={400}>
               <div className="space-y-3">
-                <p>Votre recherche est prete.</p>
+                <p>{t('search.searchReady')}</p>
                 <div className="rounded-xl bg-surface-deep border border-line p-4 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-content-muted">Departements</span>
+                    <span className="text-content-muted">{t('search.departments')}</span>
                     <span className="text-content-secondary font-mono">{selectedDepts.length}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-content-muted">Categories</span>
+                    <span className="text-content-muted">{t('search.categories')}</span>
                     <span className="text-content-secondary font-mono">{selectedCats.length}</span>
                   </div>
                   {customQueries.length > 0 && (
@@ -1459,14 +1461,14 @@ export default function SearchPanel({
                     </div>
                   )}
                   <div className="flex justify-between text-xs">
-                    <span className="text-content-muted">Liste</span>
+                    <span className="text-content-muted">{t('search.list')}</span>
                     <span className="text-content-secondary flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${folderColorClass(selectedFolder?.color)}`} />
                       {selectedFolder?.name}
                     </span>
                   </div>
                   <div className="border-t border-line pt-2 flex justify-between text-xs">
-                    <span className="text-content-tertiary font-medium">Total requetes</span>
+                    <span className="text-content-tertiary font-medium">{t('search.totalQueries')}</span>
                     <span className="text-indigo-400 font-bold font-mono">{totalQueries}</span>
                   </div>
                 </div>
@@ -1477,14 +1479,14 @@ export default function SearchPanel({
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-surface-elevated disabled:text-content-faint text-white font-semibold text-sm transition-all disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20 disabled:shadow-none active:scale-[0.97]"
                   >
                     <Play size={14} />
-                    Lancer
+                    {t('search.launch')}
                   </button>
                   <button
                     onClick={handleReset}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line-hover text-sm text-content-muted hover:text-content-secondary hover:border-content-faint transition active:scale-[0.97]"
                   >
                     <RotateCcw size={14} />
-                    Recommencer
+                    {t('search.restart')}
                   </button>
                 </div>
               </div>
@@ -1498,7 +1500,7 @@ export default function SearchPanel({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                   <span className="text-content-secondary">
-                    {searchProgress?.currentQuery || "Initialisation..."}
+                    {searchProgress?.currentQuery || t('search.initializing')}
                   </span>
                 </div>
                 <div className="h-1.5 bg-surface-elevated rounded-full overflow-hidden">
@@ -1516,7 +1518,7 @@ export default function SearchPanel({
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600/10 border border-red-600/20 hover:bg-red-600/20 text-red-400 text-sm font-medium transition active:scale-[0.97]"
                 >
                   <Square size={14} />
-                  Arreter
+                  {t('search.stopSearch')}
                 </button>
               </div>
             </BotMessage>
@@ -1526,7 +1528,7 @@ export default function SearchPanel({
           {confirmed && !isSearching && (
             <BotMessage icon={Sparkles}>
               <div className="space-y-3">
-                <p>Recherche terminee !</p>
+                <p>{t('search.searchComplete')}</p>
                 {searchProgress?.logs?.length > 0 && (
                   <p className="text-content-muted text-xs">
                     {searchProgress.logs[searchProgress.logs.length - 1]}
@@ -1537,7 +1539,7 @@ export default function SearchPanel({
                   className="flex items-center gap-2 px-4 py-2 rounded-xl border border-line-hover text-sm text-content-muted hover:text-content-secondary hover:border-content-faint transition active:scale-[0.97]"
                 >
                   <RotateCcw size={14} />
-                  Nouvelle recherche
+                  {t('search.newSearch')}
                 </button>
               </div>
             </BotMessage>
@@ -1548,7 +1550,7 @@ export default function SearchPanel({
         {isSearching && searchProgress?.logs?.length > 0 && (
           <details className="border-t border-line">
             <summary className="px-5 py-2.5 text-[10px] uppercase tracking-wider text-content-faint font-semibold cursor-pointer hover:text-content-muted">
-              Logs ({searchProgress.logs.length})
+              {t('search.logs')} ({searchProgress.logs.length})
             </summary>
             <div className="px-5 pb-4 max-h-40 overflow-y-auto">
               <div className="font-mono text-[11px] text-content-faint space-y-0.5">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { getSupabase } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
@@ -16,9 +17,9 @@ function getPasswordStrength(password) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  if (score <= 1) return { score: 1, label: 'Faible', color: 'bg-red-500' };
-  if (score <= 3) return { score: 2, label: 'Moyen', color: 'bg-yellow-500' };
-  return { score: 3, label: 'Fort', color: 'bg-green-500' };
+  if (score <= 1) return { score: 1, labelKey: 'settings.weak', color: 'bg-red-500' };
+  if (score <= 3) return { score: 2, labelKey: 'settings.medium', color: 'bg-yellow-500' };
+  return { score: 3, labelKey: 'settings.strong', color: 'bg-green-500' };
 }
 
 export default function SignupPage() {
@@ -36,6 +37,7 @@ export default function SignupPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const supabase = getSupabase();
+  const { t } = useI18n();
 
   /*
    * Google OAuth — Prérequis :
@@ -60,7 +62,7 @@ export default function SignupPage() {
       }
       // If successful, the browser will redirect — no need to setGoogleLoading(false)
     } catch (err) {
-      setError('Impossible de se connecter avec Google. Réessayez.');
+      setError(t('auth.googleError'));
       setGoogleLoading(false);
     }
   };
@@ -94,7 +96,7 @@ export default function SignupPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -109,7 +111,7 @@ export default function SignupPage() {
       if (error) {
         setError(error.message);
       } else if (data?.user?.identities?.length === 0) {
-        setError('Un compte existe deja avec cet email.');
+        setError(t('auth.accountExists'));
       } else if (data?.session) {
         // Auto-confirmed → redirect to dashboard
         router.push('/dashboard');
@@ -128,7 +130,7 @@ export default function SignupPage() {
         }
       }
     } catch (err) {
-      setError('Une erreur est survenue. Réessayez.');
+      setError(t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -147,12 +149,12 @@ export default function SignupPage() {
             <CheckCircle2 className="h-7 w-7 text-white" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-content-primary">Vérifiez votre email</h1>
+            <h1 className="text-2xl font-bold text-content-primary">{t('auth.verifyEmail')}</h1>
             <p className="text-sm text-content-tertiary leading-relaxed">
-              Un lien de confirmation a été envoyé à{' '}
+              {t('auth.verifyDesc')}{' '}
               <span className="text-content-primary font-medium">{email}</span>.
               <br />
-              Cliquez dessus pour activer votre compte.
+              {t('auth.verifyAction')}
             </p>
           </div>
 
@@ -165,17 +167,17 @@ export default function SignupPage() {
               {resending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Envoi...</span>
+                  <span>{t('auth.resendLoading')}</span>
                 </>
               ) : (
-                'Renvoyer l\'email'
+                t('auth.resendEmail')
               )}
             </button>
 
             {resendSuccess && (
               <div className="flex items-center justify-center gap-2 text-sm text-green-400">
                 <CheckCircle2 className="h-4 w-4" />
-                <span>Email renvoyé avec succes</span>
+                <span>{t('auth.resendSuccess')}</span>
               </div>
             )}
 
@@ -183,7 +185,7 @@ export default function SignupPage() {
               href="/login"
               className="inline-block text-sm text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200"
             >
-              Retour a la connexion
+              {t('auth.backToLogin')}
             </Link>
           </div>
         </div>
@@ -204,9 +206,9 @@ export default function SignupPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
             <span className="text-lg font-bold text-white">P</span>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-content-primary">Créer un compte</h1>
+          <h1 className="mt-4 text-2xl font-bold text-content-primary">{t('auth.signup')}</h1>
           <p className="mt-2 text-sm text-content-tertiary">
-            Commencez à générer des leads
+            {t('auth.signupTitle')}
           </p>
         </div>
 
@@ -228,12 +230,12 @@ export default function SignupPage() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
             )}
-            <span>Continuer avec Google</span>
+            <span>{t('auth.continueGoogle')}</span>
           </button>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-line" />
-            <span className="text-xs text-content-muted uppercase tracking-wider">ou</span>
+            <span className="text-xs text-content-muted uppercase tracking-wider">{t('common.or')}</span>
             <div className="flex-1 h-px bg-line" />
           </div>
         </div>
@@ -249,7 +251,7 @@ export default function SignupPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Email
+              {t('common.email')}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -260,14 +262,14 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-4 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="vous@exemple.com"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Mot de passe
+              {t('common.password')}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -279,7 +281,7 @@ export default function SignupPage() {
                 required
                 minLength={6}
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="button"
@@ -308,7 +310,7 @@ export default function SignupPage() {
                   strength.score === 2 ? 'text-yellow-400' :
                   'text-green-400'
                 }`}>
-                  {strength.label}
+                  {t(strength.labelKey)}
                 </p>
               </div>
             )}
@@ -316,7 +318,7 @@ export default function SignupPage() {
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-content-secondary mb-1.5">
-              Confirmer le mot de passe
+              {t('settings.confirmPassword')}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
@@ -328,7 +330,7 @@ export default function SignupPage() {
                 required
                 minLength={6}
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="button"
@@ -349,18 +351,18 @@ export default function SignupPage() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Création...</span>
+                <span>{t('auth.signupLoading')}</span>
               </>
             ) : (
-              'Créer un compte'
+              t('auth.signup')
             )}
           </button>
         </form>
 
         <p className="text-center text-sm text-content-tertiary">
-          Déjà un compte ?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link href="/login" className="text-indigo-400 hover:text-indigo-300 hover:underline underline-offset-4 font-medium transition-colors duration-200">
-            Se connecter
+            {t('auth.login')}
           </Link>
         </p>
       </div>

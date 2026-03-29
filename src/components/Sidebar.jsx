@@ -10,16 +10,19 @@ import {
   Settings,
   ShieldCheck,
 } from 'lucide-react';
-
-const NAV_ITEMS = [
-  { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard, description: 'Tableau de bord' },
-  { id: 'search', label: 'Recherche', icon: Search, description: 'Google Places' },
-  { id: 'results', label: 'Mes leads', icon: Users, description: 'Prospects trouvés' },
-  { id: 'export', label: 'Exporter', icon: Download, description: 'CSV & Zoho' },
-  { id: 'verify', label: 'Verification', icon: ShieldCheck, description: 'Validite emails', enterprise: true },
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function Sidebar({ activeView, onViewChange, onClose, isOpen, prospectCount, searchHistory, isAdmin, userPlan }) {
+  const { t, locale } = useI18n();
+
+  const NAV_ITEMS = [
+    { id: 'overview', label: t('sidebar.overview'), icon: LayoutDashboard, description: 'Tableau de bord' },
+    { id: 'search', label: t('sidebar.search'), icon: Search, description: 'Google Places' },
+    { id: 'results', label: t('sidebar.leads'), icon: Users, description: 'Prospects' },
+    { id: 'export', label: t('sidebar.export'), icon: Download, description: 'CSV & Zoho' },
+    { id: 'verify', label: t('sidebar.verify'), icon: ShieldCheck, description: t('sidebar.verifyDesc'), enterprise: true },
+  ];
+
   return (
     <>
       {/* Mobile overlay */}
@@ -42,7 +45,7 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
           <button
             onClick={onClose}
             className="md:hidden self-end p-2.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated active:scale-95 transition-all mb-3"
-            aria-label="Fermer le menu"
+            aria-label={t('sidebar.closeMenu')}
           >
             <ChevronLeft size={18} />
           </button>
@@ -101,8 +104,8 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
               <Settings size={16} />
             </div>
             <div className="flex-1 text-left">
-              <div>Parametres</div>
-              <div className="text-[10px] text-content-faint">Profil & compte</div>
+              <div>{t('sidebar.settings')}</div>
+              <div className="text-[10px] text-content-faint">{t('sidebar.settingsDesc')}</div>
             </div>
           </a>
 
@@ -116,8 +119,8 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
                 <Shield size={16} />
               </div>
               <div className="flex-1 text-left">
-                <div>Administration</div>
-                <div className="text-[10px] text-amber-400/50">Gestion utilisateurs</div>
+                <div>{t('sidebar.admin')}</div>
+                <div className="text-[10px] text-amber-400/50">{t('sidebar.adminDesc')}</div>
               </div>
             </a>
           )}
@@ -125,7 +128,7 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
           {/* Search history */}
           <div className="mt-6">
             <h3 className="px-3 text-[10px] font-semibold uppercase tracking-wider text-content-muted mb-2">
-              Historique
+              {t('sidebar.history')}
             </h3>
             <div className="space-y-0.5 max-h-48 overflow-y-auto">
               {(searchHistory || []).slice(0, 10).map(session => (
@@ -133,14 +136,14 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
                   key={session.id}
                   className="px-3 py-2 rounded-lg text-xs text-content-secondary hover:bg-surface-elevated hover:text-content-primary transition-colors"
                 >
-                  <div className="font-medium truncate">{session.label || 'Recherche'}</div>
+                  <div className="font-medium truncate">{session.label || t('sidebar.search')}</div>
                   <div className="text-[10px] text-content-muted mt-0.5">
-                    {session.results_count || 0} resultats &middot; {new Date(session.created_at).toLocaleDateString('fr-FR')}
+                    {session.results_count || 0} {t('sidebar.results')} &middot; {new Date(session.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-FR')}
                   </div>
                 </div>
               ))}
               {(!searchHistory || searchHistory.length === 0) && (
-                <div className="px-3 py-2 text-xs text-content-muted">Aucun historique</div>
+                <div className="px-3 py-2 text-xs text-content-muted">{t('sidebar.noHistory')}</div>
               )}
             </div>
           </div>
@@ -148,8 +151,8 @@ export default function Sidebar({ activeView, onViewChange, onClose, isOpen, pro
           {/* Bottom info */}
           <div className="mt-auto">
             <div className="p-4 rounded-xl bg-gradient-to-br from-surface-card to-surface-alt border border-line">
-              <p className="text-[10px] uppercase tracking-wider text-content-faint font-semibold mb-2">France entiere</p>
-              <p className="text-[10px] text-content-muted leading-relaxed">101 departements · Metropole + Outre-mer</p>
+              <p className="text-[10px] uppercase tracking-wider text-content-faint font-semibold mb-2">{t('sidebar.allFrance')}</p>
+              <p className="text-[10px] text-content-muted leading-relaxed">{t('sidebar.franceMeta')}</p>
             </div>
           </div>
         </div>

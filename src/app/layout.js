@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme';
+import { I18nProvider } from '@/lib/i18n';
 import CookieConsent from '@/components/CookieConsent';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -38,8 +39,10 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-surface-base min-h-screen antialiased">
         <ThemeProvider>
-          {children}
-          <CookieConsent />
+          <I18nProvider>
+            {children}
+            <CookieConsent />
+          </I18nProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
