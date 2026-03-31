@@ -313,9 +313,7 @@ const EMAIL_METHOD_INFO_KEYS = {
   "deep-pattern": { labelKey: "results.badges.guessed", color: "text-purple-400/70", tipKey: "results.badges.guessedDesc" },
   serper: { labelKey: "results.badges.serper", color: "text-yellow-400", tipKey: "results.badges.serperDesc" },
   apollo: { labelKey: "results.badges.apollo", color: "text-orange-400", tipKey: "results.badges.apolloDesc" },
-  enrichly: { labelKey: "results.badges.enrichly", color: "text-cyan-400", tipKey: "results.badges.enrichlyDesc" },
-  anymail: { labelKey: "results.badges.anymail", color: "text-teal-400", tipKey: "results.badges.anymailDesc" },
-  findymail: { labelKey: "results.badges.findymail", color: "text-sky-400", tipKey: "results.badges.findymailDesc" },
+  apollo_org: { labelKey: "results.badges.apolloOrg", color: "text-indigo-400", tipKey: "results.badges.apolloOrgDesc" },
   guess: { labelKey: "results.badges.fallback", color: "text-amber-400", tipKey: "results.badges.fallbackDesc" },
 };
 
@@ -332,7 +330,7 @@ function EmailBadge({ method }) {
   if (!method) return null;
 
   // Group methods into quality tiers
-  if (method === 'scrape' || method === 'deep-verified' || method === 'anymail' || method === 'findymail') {
+  if (method === 'scrape' || method === 'deep-verified') {
     return (
       <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-green-500/15 text-green-400 border border-green-500/20 whitespace-nowrap">
         <CheckCircle size={8} className="flex-shrink-0" />
@@ -350,11 +348,11 @@ function EmailBadge({ method }) {
     );
   }
 
-  if (method === 'serper' || method === 'enrichly') {
+  if (method === 'serper') {
     return (
       <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 whitespace-nowrap">
         <ShieldCheck size={8} className="flex-shrink-0" />
-        {method === 'serper' ? 'Google' : 'Enrichly'}
+        Google
       </span>
     );
   }
@@ -619,9 +617,6 @@ export default memo(function ResultsPanel({
     { id: 'scrape', label: t('results.sources.scraping'), icon: '🌐', description: t('results.sources.scrapingDesc'), cost: t('results.sources.scrapingNote') },
     { id: 'serper', label: t('results.sources.serper'), icon: '🔍', description: t('results.sources.serperDesc'), cost: t('results.sources.serperNote') },
     { id: 'apollo', label: t('results.sources.apollo'), icon: '🚀', description: t('results.sources.apolloDesc'), cost: t('results.sources.apolloNote') },
-    { id: 'enrichly', label: t('results.sources.enrichly'), icon: '📧', description: t('results.sources.enrichlyDesc'), cost: t('results.sources.enrichlyNote') },
-    { id: 'anymail', label: t('results.sources.anymail'), icon: '📬', description: t('results.sources.anymailDesc'), cost: t('results.sources.anymailNote') },
-    { id: 'findymail', label: t('results.sources.findymail'), icon: '✉️', description: t('results.sources.findymailDesc'), cost: t('results.sources.findymailNote') },
   ];
 
   const folderProspects = useMemo(() => {
@@ -656,7 +651,7 @@ export default memo(function ResultsPanel({
     const total = folderProspects.length;
     const phones = folderProspects.filter((p) => p.telephone).length;
     const emails = folderProspects.filter((p) => p.email).length;
-    const verifiedMethods = new Set(['scrape', 'deep-verified', 'anymail', 'findymail']);
+    const verifiedMethods = new Set(['scrape', 'deep-verified']);
     const verifiedEmails = folderProspects.filter((p) => p.email && verifiedMethods.has(p.email_method)).length;
     const apolloEmails = folderProspects.filter((p) => p.email && p.email_method === 'apollo').length;
     const guessedEmails = folderProspects.filter((p) => p.email && p.email_method === 'guess').length;
