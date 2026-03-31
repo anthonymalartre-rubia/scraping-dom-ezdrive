@@ -124,122 +124,6 @@ async function scrapeForEmail(url) {
   return null;
 }
 
-// ─── Apollo (People Enrichment API) ─────────────────────
-
-async function apolloEnrich(domain, name) {
-  const apiKey = process.env.APOLLO_API_KEY;
-  if (!apiKey) return null;
-
-  try {
-    // Build query params per Apollo docs
-    const params = new URLSearchParams();
-    if (domain) params.set('domain', domain);
-    if (name) params.set('organization_name', name);
-    params.set('reveal_personal_emails', 'false');
-    params.set('reveal_phone_number', 'false');
-
-    const res = await fetchWithTimeout(
-      `https://api.apollo.io/api/v1/people/match?${params.toString()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'x-api-key': apiKey,
-        },
-      }
-    );
-    trackApiCall('apollo', null, 'people/match');
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data.person?.email) {
-      if (isPersonalEmail(data.person.email)) return null;
-      return {
-        email: data.person.email,
-        source: 'apollo',
-        extra: {
-          first_name: data.person.first_name,
-          last_name: data.person.last_name,
-          title: data.person.title,
-          linkedin_url: data.person.linkedin_url,
-          organization: data.person.organization?.name || null,
-        },
-      };
-    }
-  } catch {}
-  return null;
-}
-
-// ─── Apollo (Organization Enrichment API) ───────────────
-
-async function apolloOrgEnrich(domain, name) {
-  const apiKey = process.env.APOLLO_API_KEY;
-  if (!apiKey) return null;
-  if (!domain && !name) return null;
-
-  try {
-    // Try organization search to find company emails
-    const body = { per_page: 1 };
-    if (domain) body.q_organization_domains = domain;
-    if (name) body.q_organization_name = name;
-
-    const res = await fetchWithTimeout(
-      'https://api.apollo.io/api/v1/mixed_people/search',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'x-api-key': apiKey,
-        },
-        body: JSON.stringify(body),
-      }
-    );
-    trackApiCall('apollo', null, 'mixed_people/search');
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    // Check people results for emails
-    const people = data.people || [];
-    for (const person of people) {
-      if (person.email && !isPersonalEmail(person.email)) {
-        return {
-          email: person.email,
-          source: 'apollo_org',
-          extra: {
-            first_name: person.first_name,
-            last_name: person.last_name,
-            title: person.title,
-            linkedin_url: person.linkedin_url,
-            organization: person.organization?.name || null,
-          },
-        };
-      }
-    }
-
-    // Check organization-level data
-    const orgs = data.organizations || [];
-    if (orgs.length > 0 && orgs[0].primary_domain) {
-      // If we found the org but no person email, try the org's generic email patterns
-      const orgDomain = orgs[0].primary_domain;
-      const orgPhone = orgs[0].phone;
-      // Return contact@ as last resort if we discovered the real domain
-      if (orgDomain && orgDomain !== domain) {
-        return {
-          email: `contact@${orgDomain}`,
-          source: 'apollo_org',
-          extra: {
-            organization: orgs[0].name,
-            discovered_domain: orgDomain,
-            phone: orgPhone,
-          },
-        };
-      }
-    }
-  } catch {}
-  return null;
-}
-
 // ─── Serper.dev — email search + LinkedIn matching ──────
 
 async function serperEnrich(name, domain) {
@@ -359,8 +243,6 @@ async function serperDiscoverDomain(name) {
 const WATERFALL_STEPS = [
   { name: 'scrape', label: 'Scraping site web', fn: async (ctx) => scrapeForEmail(ctx.url) },
   { name: 'serper', label: 'Serper.dev', fn: async (ctx) => serperEnrich(ctx.name, ctx.domain) },
-  { name: 'apollo', label: 'Apollo.io', fn: async (ctx) => apolloEnrich(ctx.domain, ctx.name) },
-  { name: 'apollo_org', label: 'Apollo Org', fn: async (ctx) => apolloOrgEnrich(ctx.domain, ctx.name) },
 ];
 
 export async function POST(request) {

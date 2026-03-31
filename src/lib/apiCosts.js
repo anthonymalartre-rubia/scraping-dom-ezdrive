@@ -5,7 +5,6 @@ export const API_COSTS = {
   google_places:     { cost: 1.7,   label: 'Google Places',     color: '#4285F4' },
   anthropic:         { cost: 1.5,   label: 'Anthropic Claude',  color: '#D4A574' },
   serper:            { cost: 0.1,   label: 'Serper.dev',        color: '#22C55E' },
-  apollo:            { cost: 3.0,   label: 'Apollo.io',         color: '#6366F1' },
   resend:            { cost: 0.1,   label: 'Resend',            color: '#8B5CF6' },
   millionverifier:   { cost: 0.3,   label: 'MillionVerifier',   color: '#F97316' },
 };
