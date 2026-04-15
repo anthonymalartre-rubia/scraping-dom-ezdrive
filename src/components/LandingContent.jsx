@@ -100,7 +100,7 @@ export default function LandingContent() {
           {/* Source logos ribbon */}
           <div className="mt-14 flex items-center justify-center gap-6 flex-wrap">
             <span className="text-[11px] text-zinc-600 uppercase tracking-wider">{t('landing.hero.sourcesLabel')}</span>
-            {['Google Places', 'Apollo.io', 'Serper', 'Enrichly', 'Anymail Finder', 'Findymail', 'Scraping'].map((s) => (
+            {['Google Places', 'Scraping web', 'Recherche Google'].map((s) => (
               <span key={s} className="text-xs text-zinc-500 px-3 py-1 rounded-full border border-white/[0.06] bg-white/[0.02]">{s}</span>
             ))}
           </div>
@@ -272,24 +272,20 @@ export default function LandingContent() {
             <p className="text-zinc-500 text-lg max-w-xl" dangerouslySetInnerHTML={{ __html: t('landing.waterfall.desc') }} />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
-              { name: 'Scraping', tag: t('landing.waterfall.free'), score: '100%', color: 'from-green-500/20 to-emerald-500/20 border-green-500/20', dot: 'bg-green-400' },
-              { name: 'Serper', tag: '$0.002/req', score: '90%', color: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/20', dot: 'bg-yellow-400' },
-              { name: 'Apollo', tag: t('landing.waterfall.included'), score: '85%', color: 'from-orange-500/20 to-red-500/20 border-orange-500/20', dot: 'bg-orange-400' },
-              { name: 'Enrichly', tag: t('landing.waterfall.included'), score: '80%', color: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/20', dot: 'bg-cyan-400' },
-              { name: 'Anymail', tag: t('landing.waterfall.included'), score: '75%', color: 'from-teal-500/20 to-emerald-500/20 border-teal-500/20', dot: 'bg-teal-400' },
-              { name: 'Findymail', tag: t('landing.waterfall.included'), score: '70%', color: 'from-sky-500/20 to-indigo-500/20 border-sky-500/20', dot: 'bg-sky-400' },
-              { name: 'Fallback', tag: t('landing.waterfall.pattern'), score: '30%', color: 'from-zinc-500/20 to-zinc-600/20 border-zinc-500/20', dot: 'bg-zinc-400' },
+              { name: 'Decouverte domaine', desc: 'Pas de site web ? On le trouve via Google.', tag: 'Auto', score: '100%', color: 'from-blue-500/20 to-indigo-500/20 border-blue-500/20', dot: 'bg-blue-400' },
+              { name: 'Scraping site web', desc: 'Extrait les emails du site, pages contact et mentions legales.', tag: t('landing.waterfall.free'), score: '100%', color: 'from-green-500/20 to-emerald-500/20 border-green-500/20', dot: 'bg-green-400' },
+              { name: 'Recherche Google', desc: 'Cherche l\'email sur Google si le scraping ne trouve rien.', tag: 'Inclus', score: '90%', color: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/20', dot: 'bg-yellow-400' },
             ].map((s, i) => (
-              <div key={s.name} className={`relative p-4 rounded-xl bg-gradient-to-br ${s.color} border border-white/[0.06]`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-2 h-2 rounded-full ${s.dot}`} />
+              <div key={s.name} className={`relative p-5 rounded-xl bg-gradient-to-br ${s.color} border border-white/[0.06]`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`w-2.5 h-2.5 rounded-full ${s.dot}`} />
                   <span className="text-[10px] font-mono text-zinc-500">0{i + 1}</span>
                 </div>
-                <h4 className="text-sm font-semibold mb-1">{s.name}</h4>
-                <span className="text-[10px] text-zinc-500 block">{s.tag}</span>
-                <span className="text-[10px] text-zinc-600 block mt-1">{t('landing.waterfall.confidence')} : {s.score}</span>
+                <h4 className="text-base font-semibold mb-1">{s.name}</h4>
+                <p className="text-xs text-zinc-500 mb-2">{s.desc}</p>
+                <span className="text-[10px] text-zinc-400 font-medium">{s.tag}</span>
               </div>
             ))}
           </div>

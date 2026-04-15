@@ -646,17 +646,17 @@ export default memo(function ResultsPanel({
     const emails = folderProspects.filter((p) => p.email).length;
     const verifiedMethods = new Set(['scrape', 'deep-verified']);
     const verifiedEmails = folderProspects.filter((p) => p.email && verifiedMethods.has(p.email_method)).length;
-    const apolloEmails = folderProspects.filter((p) => p.email && p.email_method === 'apollo').length;
+    const googleEmails = folderProspects.filter((p) => p.email && (p.email_method === 'serper' || p.email_method === 'apollo' || p.email_method === 'apollo_org')).length;
     const guessedEmails = folderProspects.filter((p) => p.email && p.email_method === 'guess').length;
-    const otherEmails = emails - verifiedEmails - apolloEmails - guessedEmails;
+    const otherEmails = emails - verifiedEmails - googleEmails - guessedEmails;
     const websites = folderProspects.filter((p) => p.site_web).length;
     const emailPct = total > 0 ? Math.round((emails / total) * 100) : 0;
-    return { total, phones, emails, verifiedEmails, apolloEmails, guessedEmails, otherEmails, websites, emailPct };
+    return { total, phones, emails, verifiedEmails, googleEmails, guessedEmails, otherEmails, websites, emailPct };
   }, [folderProspects]);
 
   const prospectsWithoutEmail = useMemo(() => {
-    // Count ALL prospects without email — those with a website will use waterfall,
-    // those without will be enriched via Apollo (name-based search)
+    // Count ALL prospects without email — those with a website will use scraping,
+    // those without will get domain discovery via Google first
     return folderProspects.filter((p) => !p.email).length;
   }, [folderProspects]);
 
@@ -823,15 +823,15 @@ export default memo(function ResultsPanel({
             </div>
             <div className="text-[10px] text-content-faint uppercase tracking-wider flex items-center">
               {t('results.emails')}
-              <InfoTooltip text={t('results.emailBreakdown', { verified: stats.verifiedEmails, apollo: stats.apolloEmails, guessed: stats.guessedEmails, other: stats.otherEmails > 0 ? `, ${stats.otherEmails} ${t('results.otherCount', { count: '' }).trim()}` : '' })} wide />
+              <InfoTooltip text={t('results.emailBreakdown', { verified: stats.verifiedEmails, guessed: stats.guessedEmails, other: stats.otherEmails > 0 ? `, ${stats.otherEmails} ${t('results.otherCount', { count: '' }).trim()}` : '' })} wide />
             </div>
             {stats.emails > 0 && (
               <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
                 {stats.verifiedEmails > 0 && (
                   <span className="text-[9px] text-green-400 font-medium">{t('results.verifiedCount', { count: stats.verifiedEmails })}</span>
                 )}
-                {stats.apolloEmails > 0 && (
-                  <span className="text-[9px] text-blue-400 font-medium">{t('results.apolloCount', { count: stats.apolloEmails })}</span>
+                {stats.googleEmails > 0 && (
+                  <span className="text-[9px] text-yellow-400 font-medium">{t('results.otherCount', { count: stats.googleEmails })} Google</span>
                 )}
                 {stats.guessedEmails > 0 && (
                   <span className="text-[9px] text-amber-400 font-medium">{t('results.probableCount', { count: stats.guessedEmails })}</span>
@@ -845,8 +845,8 @@ export default memo(function ResultsPanel({
               {stats.verifiedEmails > 0 && (
                 <div className="h-full bg-green-500/70 transition-all duration-500" style={{ width: `${(stats.verifiedEmails / stats.total) * 100}%` }} />
               )}
-              {stats.apolloEmails > 0 && (
-                <div className="h-full bg-blue-500/70 transition-all duration-500" style={{ width: `${(stats.apolloEmails / stats.total) * 100}%` }} />
+              {stats.googleEmails > 0 && (
+                <div className="h-full bg-yellow-500/70 transition-all duration-500" style={{ width: `${(stats.googleEmails / stats.total) * 100}%` }} />
               )}
               {stats.otherEmails > 0 && (
                 <div className="h-full bg-cyan-500/70 transition-all duration-500" style={{ width: `${(stats.otherEmails / stats.total) * 100}%` }} />
@@ -1144,7 +1144,6 @@ export default memo(function ResultsPanel({
         <span className="text-[10px] text-content-muted font-semibold uppercase tracking-wider">{t('results.emailQuality')}</span>
         {[
           { method: 'scrape', badge: <EmailBadge method="scrape" /> },
-          { method: 'apollo', badge: <EmailBadge method="apollo" /> },
           { method: 'serper', badge: <EmailBadge method="serper" /> },
           { method: 'deep-pattern', badge: <EmailBadge method="deep-pattern" /> },
           { method: 'guess', badge: <EmailBadge method="guess" /> },
