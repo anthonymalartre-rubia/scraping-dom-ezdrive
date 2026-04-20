@@ -164,7 +164,7 @@ export default function Dashboard() {
         while (true) {
           const { data, error } = await supabase
             .from('prospects')
-            .select('id,place_id,nom,adresse,telephone,email,email_method,site_web,note,nb_avis,type,departement,folder_id,search_session_id,created_at,updated_at')
+            .select('id,place_id,nom,adresse,telephone,email,email_method,site_web,note,nb_avis,type,departement,folder_id,search_session_id,created_at,updated_at,archived_at')
             .order('created_at', { ascending: false })
             .range(from, from + PAGE_SIZE - 1);
           if (error || !data || data.length === 0) break;
@@ -701,7 +701,7 @@ export default function Dashboard() {
     const initStats = { scrape: 0, serper: 0, guess: 0 };
     setWaterfallProgress({ current: 0, total: 0, currentSite: '', logs: [], stats: initStats });
 
-    const prospectsToEnrich = customList || prospects.filter((p) => !p.email);
+    const prospectsToEnrich = customList || prospects.filter((p) => !p.email && !p.archived_at);
     const total = prospectsToEnrich.length;
     setWaterfallProgress((prev) => ({ ...prev, total }));
 
@@ -772,7 +772,23 @@ export default function Dashboard() {
             stats: { ...prev.stats, [data.source]: (prev.stats[data.source] || 0) + 1 },
           }));
         } else {
-          setWaterfallProgress((prev) => addLog(prev, `  — aucun email trouvé`));
+          // No email found — archive the prospect
+          const archivedAt = new Date().toISOString();
+          setProspects((prev) =>
+            prev.map((p) =>
+              p.id === prospect.id
+                ? { ...p, archived_at: archivedAt }
+                : p
+            )
+          );
+          if (supabase && user) {
+            await supabase
+              .from('prospects')
+              .update({ archived_at: archivedAt, updated_at: archivedAt })
+              .eq('id', prospect.id)
+              .eq('user_id', user.id);
+          }
+          setWaterfallProgress((prev) => addLog(prev, `  — aucun email trouvé, archivé`));
         }
       } catch (error) {
         setWaterfallProgress((prev) => addLog(prev, `  ✗ erreur: ${error.message}`));
@@ -796,12 +812,11 @@ export default function Dashboard() {
   const handleBulkEnrich = async (folderId, method = null, selectedIds = null) => {
     let toEnrich;
     if (selectedIds && selectedIds.length > 0) {
-      // Enrich only selected prospects (even without site_web — waterfall can use name)
+      // Enrich selected prospects (can include archived — user explicitly selected)
       toEnrich = prospects.filter(p => selectedIds.includes(p.id) && !p.email);
     } else {
-      // Include ALL prospects without email — those with a website use waterfall,
-      // those without will be enriched via Apollo (name-based lookup)
-      toEnrich = prospects.filter(p => !p.email);
+      // Exclude archived prospects from bulk enrichment (they already failed once)
+      toEnrich = prospects.filter(p => !p.email && !p.archived_at);
       if (folderId) toEnrich = toEnrich.filter(p => p.folder_id === folderId);
     }
     if (toEnrich.length === 0) return;

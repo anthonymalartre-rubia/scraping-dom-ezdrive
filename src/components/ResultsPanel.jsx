@@ -23,6 +23,7 @@ import {
   Crown,
   Folder,
   FolderOpen,
+  Archive,
   X,
   ChevronDown,
   Lock,
@@ -613,9 +614,13 @@ export default memo(function ResultsPanel({
 
 
   const folderProspects = useMemo(() => {
-    if (activeFolder === 'all') return prospects;
-    if (activeFolder === 'unassigned') return prospects.filter((p) => !p.folder_id);
-    return prospects.filter((p) => p.folder_id === activeFolder);
+    // When in 'archived' view, show ONLY archived prospects
+    if (activeFolder === 'archived') return prospects.filter((p) => p.archived_at);
+    // Otherwise, exclude archived prospects from all views
+    const active = prospects.filter((p) => !p.archived_at);
+    if (activeFolder === 'all') return active;
+    if (activeFolder === 'unassigned') return active.filter((p) => !p.folder_id);
+    return active.filter((p) => p.folder_id === activeFolder);
   }, [prospects, activeFolder]);
 
   const filteredProspects = useMemo(() => {
@@ -727,10 +732,15 @@ export default memo(function ResultsPanel({
     }
   };
 
-  // Count prospects per folder
+  // Count prospects per folder (exclude archived from regular counts)
   const folderCounts = useMemo(() => {
-    const counts = { all: prospects.length, unassigned: 0 };
+    const counts = { all: 0, unassigned: 0, archived: 0 };
     for (const p of prospects) {
+      if (p.archived_at) {
+        counts.archived++;
+        continue;
+      }
+      counts.all++;
       if (!p.folder_id) counts.unassigned++;
       else counts[p.folder_id] = (counts[p.folder_id] || 0) + 1;
     }
@@ -781,7 +791,7 @@ export default memo(function ResultsPanel({
               </button>
             </div>
           ))}
-          {prospects.some((p) => !p.folder_id) && (
+          {prospects.some((p) => !p.archived_at && !p.folder_id) && (
             <button
               onClick={() => onActiveFolder('unassigned')}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium border whitespace-nowrap transition-all ${
@@ -793,6 +803,21 @@ export default memo(function ResultsPanel({
               <Folder size={13} />
               {t('results.unclassified')}
               <span className="font-mono text-[10px] opacity-60">{folderCounts.unassigned}</span>
+            </button>
+          )}
+          {folderCounts.archived > 0 && (
+            <button
+              onClick={() => onActiveFolder('archived')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium border whitespace-nowrap transition-all ${
+                activeFolder === 'archived'
+                  ? 'bg-zinc-500/10 border-zinc-500/30 text-zinc-300'
+                  : 'border-transparent text-content-faint hover:text-content-tertiary hover:bg-surface-card'
+              }`}
+              title="Prospects enrichis sans email trouve"
+            >
+              <Archive size={13} />
+              Archives
+              <span className="font-mono text-[10px] opacity-60">{folderCounts.archived}</span>
             </button>
           )}
         </div>
