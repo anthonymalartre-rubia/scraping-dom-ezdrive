@@ -92,10 +92,19 @@ export async function middleware(request) {
   // Skip auth check entirely for public routes (saves ~100ms per request)
   const isPublicRoute =
     pathname === '/' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname === '/favicon.ico' ||
+    pathname === '/opengraph-image' ||
+    pathname.startsWith('/icon') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/signup') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/cgu') ||
+    pathname.startsWith('/confidentialite') ||
+    pathname.startsWith('/rgpd') ||
+    pathname.startsWith('/opt-out') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/auth');
 
@@ -153,6 +162,6 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|txt|json|ico)$).*)',
   ],
 };
