@@ -1753,6 +1753,91 @@ Pour trouver les prospects qui matchent ton ICP en France, [Prospectia](/) te pe
 Et pour transformer ton ICP en outbound efficace, lis nos [10 templates cold email B2B en français qui convertissent en 2026](/blog/templates-cold-email-francais-2026).
 `,
   },
+  {
+    slug: 'utilitaire-diesel-vs-electrique-2026',
+    title: 'Diesel ou électrique en 2026 : faut-il encore renouveler son utilitaire en thermique ?',
+    description: 'Décision utilitaire 2026 : TAI, ZFE et TCO penchent vers le BEV dès 18 000 km/an. Analyse chiffrée pour transporteurs et artisans.',
+    publishedAt: '2026-05-18',
+    author: 'Anthony Malartre',
+    readTime: 9,
+    category: 'Mobilité',
+    keywords: ['utilitaire électrique 2026', 'Kangoo E-Tech vs diesel', 'TCO utilitaire flotte', 'ZFE Paris Lyon 2026'],
+    content: `Vous gérez une flotte d'utilitaires légers. Un véhicule arrive en fin de contrat. Vous avez le réflexe de renouveler en diesel : c'est ce que vous avez toujours fait, le réseau de stations existe partout, vous connaissez les coûts. Mais en 2026, ce réflexe peut vous coûter beaucoup d'argent. Voici les chiffres pour faire le choix correctement.
+
+## Ce qui a changé entre 2024 et 2026
+
+Trois variables ont basculé l'équation économique du diesel utilitaire :
+
+### 1. La fiscalité (TAI)
+
+Depuis 2026, la réglementation flottes 2026 impose un quota de véhicules à très faibles émissions dans les flottes >100 véhicules : **18 % en 2026, 35 % en 2028**. La pénalité par véhicule manquant : **~2 000 €/an**. Pour un transporteur de 60 utilitaires, c'est jusqu'à 22 000 €/an en pénalité dès cette année.
+
+### 2. Les ZFE
+
+Paris, Lyon, Grenoble, Strasbourg, Aix-Marseille et 8 autres métropoles appliquent désormais des **Zones à Faibles Émissions** strictes. Les utilitaires Crit'Air 3 (diesel <2011) sont interdits dans Paris depuis janvier 2025 ; les Crit'Air 2 (diesel 2011-2017) le seront en 2027. Si vous livrez dans une métropole, le diesel devient un risque opérationnel — pas une économie.
+
+### 3. La maturité technologique
+
+Les utilitaires électriques 2026 ne sont plus les jouets fragiles de 2018. **Renault Kangoo E-Tech, Citroën ë-Berlingo, Peugeot e-Partner, Stellantis ë-Jumpy, Mercedes eVito, Ford E-Transit Custom** — tous offrent 200-340 km d'autonomie réelle, charge rapide 100 kW, garantie batterie 8 ans / 160 000 km.
+
+## TCO réel sur 4 ans — comparaison Kangoo diesel vs Kangoo E-Tech
+
+Hypothèses : 28 000 km/an, livraison urbaine + péri-urbaine, parking entreprise avec borne 22 kW disponible, prix énergie moyens 2026.
+
+| Poste de coût (4 ans cumulés) | Kangoo dCi 95 diesel | Kangoo E-Tech EV45 | Économie BEV |
+|---|---|---|---|
+| Loyer LLD 48 mois | 18 000 € | 22 800 € | -4 800 € |
+| Carburant / énergie (28 000 km × 4) | 11 760 € (5,5 L/100, 1,90 €/L) | 3 360 € (15 kWh/100 × 0,15 €/kWh) | +8 400 € |
+| Entretien + révisions | 3 600 € | 1 400 € | +2 200 € |
+| Pneumatiques | 1 600 € | 1 600 € | 0 € |
+| Assurance | 2 800 € | 3 000 € | -200 € |
+| TAI cumulée 2026-2029 (flotte >100) | 6 800 € | 0 € | +6 800 € |
+| Bonus écologique (utilitaires VP) | 0 | -3 000 € | +3 000 € |
+| **TOTAL TCO 4 ans** | **44 560 €** | **29 160 €** | **+15 400 €** |
+
+**Le BEV est 15 400 € moins cher sur 4 ans par véhicule.** Sur une flotte de 30 utilitaires : **462 000 € d'économie**.
+
+## Quand le diesel reste justifié
+
+Honnêtement : il existe encore 3 cas où le thermique reste défendable.
+
+1. **Grand rouleur autoroutier rural** : >70 000 km/an dans des zones où la recharge rapide est rare (Lozère, Cantal, etc.). Là, le BEV impose des arrêts trop fréquents.
+2. **Tournée longue distance sans retour quotidien** : livraisons multi-jours sans accès garanti à une borne.
+3. **Pas de parking d'entreprise avec borne possible** : si vos chauffeurs garent les véhicules dans la rue chaque soir, la recharge devient compliquée et chère.
+
+Si vous êtes hors de ces 3 cas, **le diesel n'a plus aucun avantage économique en 2026**.
+
+## Mais le PHEV alors ?
+
+Pour des cas mixtes (livraison urbaine + occasionnels longs trajets), le PHEV (hybride rechargeable) peut sembler attractif. Méfiance : pour bénéficier du seuil 50 g/km qui le rend éligible au quota TAI, il faut une autonomie électrique réelle ≥80 km (rare sur les utilitaires PHEV actuels). Vérifiez les fiches techniques avant.
+
+En 2026, la plupart des PHEV utilitaires plafonnent à 60 km d'autonomie WLTP → 40-50 km en usage réel → considérés comme thermiques fiscalement. **Le PHEV utilitaire est une fausse bonne idée pour 80 % des flottes.**
+
+## Comment outiller la décision
+
+Si vous avez 20+ véhicules à arbitrer, faire le calcul à la main sur Excel devient un cauchemar. Les plateformes spécialisées comme **Lumea Fleet** permettent de comparer le TCO véhicule par véhicule en intégrant la fiscalité 2026, les aides ADVENIR, et les coûts énergétiques réels par région.
+
+Pour un dirigeant de PME logistique, c'est typiquement 2h de saisie initiale puis une vue actualisée mensuellement.
+
+## Décision en 5 minutes
+
+Posez-vous ces 5 questions pour chaque utilitaire en fin de contrat :
+
+1. Le véhicule roule-t-il <60 000 km/an ? (Oui → BEV ok)
+2. Le véhicule rentre-t-il à la base chaque soir ? (Oui → recharge facile)
+3. Avez-vous une borne ou pouvez-vous en installer une ? (Oui → tout ok)
+4. Le véhicule circule-t-il en ZFE ? (Oui → BEV obligatoire à court terme)
+5. Votre flotte fait-elle >50 véhicules ? (Oui → la TAI mord, BEV fortement avantagé)
+
+**Si vous répondez Oui à 3 questions sur 5, basculez en BEV.** Si vous répondez Oui à 4 ou 5 sur 5, le calcul est même évident.
+
+## Sources
+
+- Ministère de la Transition Écologique — ZFE 2026
+- ADEME — Étude TCO utilitaires électriques 2025
+- Lumea Fleet — solutions PME
+`,
+  },
 ];
 
 export function getPostBySlug(slug) {
