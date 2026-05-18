@@ -804,19 +804,20 @@ export default function Dashboard() {
             stats: { ...prev.stats, [data.source]: (prev.stats[data.source] || 0) + 1 },
           }));
         } else {
-          // No email found — archive the prospect
+          // No email found — archive + tag the prospect as "tried via waterfall"
+          // so the UI affiche "Non trouvé" (gris) plutôt que "Pas encore enrichi" (ambre).
           const archivedAt = new Date().toISOString();
           setProspects((prev) =>
             prev.map((p) =>
               p.id === prospect.id
-                ? { ...p, archived_at: archivedAt }
+                ? { ...p, archived_at: archivedAt, email_method: 'waterfall' }
                 : p
             )
           );
           if (supabase && user) {
             await supabase
               .from('prospects')
-              .update({ archived_at: archivedAt, updated_at: archivedAt })
+              .update({ archived_at: archivedAt, email_method: 'waterfall', updated_at: archivedAt })
               .eq('id', prospect.id)
               .eq('user_id', user.id);
           }
