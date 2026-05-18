@@ -20,6 +20,10 @@ export const PLANS = {
       enrichments_per_month: 500,
       folders: -1,
       exports_per_month: -1,
+      // Plafond explicite : sans ça, isLimitReached(undefined, n) renvoyait false
+      // et un user Pro pouvait faire un nombre illimité de vérifs MillionVerifier
+      // (facture API qui explose). Ref audit P0 #3.
+      verifications_per_month: 1000,
     },
   },
   enterprise: {
@@ -43,5 +47,8 @@ export function getPlan(planId) {
 
 export function isLimitReached(limit, currentUsage) {
   if (limit === -1) return false;
+  // Fail-safe : si la limite n'est pas définie pour ce plan, on refuse
+  // (au lieu d'autoriser un usage illimité par défaut).
+  if (limit === undefined || limit === null) return true;
   return currentUsage >= limit;
 }

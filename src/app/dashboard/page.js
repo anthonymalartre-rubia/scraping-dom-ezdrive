@@ -549,6 +549,9 @@ export default function Dashboard() {
               // sinon le département choisi dans la recherche, sinon null.
               departement: extractDeptFromAddress(place.adresse) || task.dept || null,
               folder_id: folderId || null,
+              // Lien vers la session de recherche pour pouvoir remonter
+              // depuis un prospect à la recherche d'origine (audit bug P1 #5).
+              search_session_id: session?.id || null,
             });
           }
           if (dupes > 0) {
@@ -567,22 +570,30 @@ export default function Dashboard() {
     if (newProspects.length > 0 && supabase) {
       try {
         let saveError = false;
-        // Insert in batches of 50 to avoid payload limits
+        // Insert in batches of 50 to avoid payload limits.
+        // CRITICAL : on doit `.select()` pour récupérer les `id` Supabase
+        // générés. Sans ça, les prospects en mémoire n'avaient pas d'id
+        // → delete/update/tag par id échouaient silencieusement (audit P0 #5).
+        const insertedRows = [];
         for (let i = 0; i < newProspects.length; i += 50) {
           const batch = newProspects.slice(i, i + 50);
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('prospects')
-            .insert(batch);
+            .insert(batch)
+            .select();
 
           if (error) {
             setSearchProgress((prev) => addLog(prev, `DB error: ${error.message} (code: ${error.code})`));
             saveError = true;
             break;
           }
+          if (data) insertedRows.push(...data);
         }
         if (!saveError) {
-          setProspects((prev) => [...prev, ...newProspects]);
-          setSearchProgress((prev) => addLog(prev, `✓ ${newProspects.length} prospects sauvegardés`));
+          // On utilise les rows retournés par Supabase (avec id + created_at)
+          // au lieu des objets locaux qui n'avaient pas ces champs.
+          setProspects((prev) => [...prev, ...insertedRows]);
+          setSearchProgress((prev) => addLog(prev, `✓ ${insertedRows.length} prospects sauvegardés`));
         }
       } catch (error) {
         setSearchProgress((prev) => addLog(prev, `Exception: ${error.message}`));
@@ -1050,30 +1061,12 @@ export default function Dashboard() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    // Increment export usage tracking
+    // Increment export usage tracking — passe par une API serveur (service_role)
+    // car la RLS UPDATE sur usage_tracking a été retirée pour empêcher les
+    // utilisateurs de remettre leur compteur à 0 depuis la console (audit P0 #2).
     try {
-      const sb = getSupabase();
-      if (sb && user) {
-        const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-        const { data: existing } = await sb
-          .from('usage_tracking')
-          .select('id, exports')
-          .eq('user_id', user.id)
-          .eq('month', month)
-          .single();
-
-        if (existing) {
-          await sb
-            .from('usage_tracking')
-            .update({ exports: (existing.exports || 0) + 1, updated_at: new Date().toISOString() })
-            .eq('id', existing.id);
-        } else {
-          await sb
-            .from('usage_tracking')
-            .insert({ user_id: user.id, month, exports: 1 });
-        }
-
-        // Update local state so the limit check stays current
+      const res = await fetch('/api/usage/track-export', { method: 'POST' });
+      if (res.ok) {
         setUserUsage((prev) => prev ? { ...prev, exports: (prev.exports || 0) + 1 } : prev);
       }
     } catch (err) {

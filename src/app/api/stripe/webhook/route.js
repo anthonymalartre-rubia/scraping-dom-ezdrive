@@ -30,6 +30,31 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
+  // ─── Idempotence (audit P0 #6) ────────────────────────────────────
+  // Stripe retransmet régulièrement les webhooks (retry sur 4xx/5xx, replays).
+  // Sans cette garde, un checkout.session.completed reçu 2x = 2 emails de
+  // confirmation envoyés au client. Pire, un customer.subscription.deleted
+  // retransmis après un nouvel abonnement = downgrade fantôme.
+  //
+  // On insère event.id dans une table avec PRIMARY KEY ; si l'insert échoue
+  // sur conflit, l'event a déjà été traité → on renvoie 200 sans rien faire
+  // (Stripe arrête de retry).
+  const { error: idempotencyError } = await supabaseAdmin
+    .from('stripe_webhook_events')
+    .insert({ id: event.id, type: event.type });
+
+  if (idempotencyError) {
+    if (idempotencyError.code === '23505') {
+      // duplicate key — event déjà traité, ack silencieusement
+      console.log(`[webhook] Duplicate event ${event.id} (${event.type}), skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    // Autre erreur DB : on log mais on continue à traiter pour ne pas perdre
+    // l'event. Le pire cas est un double-traitement qu'on cherchait à éviter,
+    // mais ça reste mieux qu'un event perdu.
+    console.error('[webhook] Idempotency insert failed (non-blocking):', idempotencyError);
+  }
+
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object;

@@ -477,6 +477,12 @@ export default memo(function ResultsPanel({
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [showExportPreview, setShowExportPreview] = useState(false);
+  // ⚠️ Ce useState DOIT rester avant tout early-return conditionnel.
+  // Avant le fix audit P0 #8, il était déclaré ligne 708, après le
+  // `if (prospects.length === 0) return ...`. Quand prospects passait de
+  // 0 à >0 sans reload, React jetait "Rendered more hooks than during
+  // the previous render" → page blanche.
+  const [showFolderDelete, setShowFolderDelete] = useState(null);
   const [visibleCols, setVisibleCols] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -704,8 +710,6 @@ export default memo(function ResultsPanel({
       </div>
     );
   }
-
-  const [showFolderDelete, setShowFolderDelete] = useState(null);
 
   const handleDeleteFolder = (folderId) => {
     if (showFolderDelete === folderId) {
