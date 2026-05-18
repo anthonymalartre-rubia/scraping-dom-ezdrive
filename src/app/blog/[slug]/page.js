@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, ArrowRight, User, Zap } from 'lucide-react';
 import { getPostBySlug, getAllPosts } from '@/lib/blog';
+import ReaderHeader from '@/components/ReaderHeader';
+import ReaderFooter from '@/components/ReaderFooter';
 
 export async function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -45,7 +47,7 @@ function renderMarkdown(md) {
 
   const flushList = () => {
     if (currentList) {
-      blocks.push(<ul key={key++} className="list-disc list-inside space-y-2 mb-4 text-zinc-300">{currentList}</ul>);
+      blocks.push(<ul key={key++} className="list-disc list-inside space-y-2 mb-4 text-content-secondary">{currentList}</ul>);
       currentList = null;
     }
   };
@@ -53,7 +55,7 @@ function renderMarkdown(md) {
   const flushCodeBlock = () => {
     if (currentCodeBlock) {
       blocks.push(
-        <pre key={key++} className="rounded-xl bg-zinc-900 border border-white/[0.06] p-4 overflow-x-auto mb-4 text-xs text-zinc-300">
+        <pre key={key++} className="rounded-xl bg-surface-deep border border-line p-4 overflow-x-auto mb-4 text-xs text-content-secondary">
           <code>{currentCodeBlock.join('\n')}</code>
         </pre>
       );
@@ -68,14 +70,14 @@ function renderMarkdown(md) {
         <div key={key++} className="overflow-x-auto mb-4">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="border-b border-white/[0.1]">
+              <tr className="border-b border-line-hover">
                 {header.map((h, i) => <th key={i} className="text-left p-2 text-violet-400 font-semibold">{h}</th>)}
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={i} className="border-b border-white/[0.04]">
-                  {row.map((cell, j) => <td key={j} className="p-2 text-zinc-300">{renderInline(cell)}</td>)}
+                <tr key={i} className="border-b border-line">
+                  {row.map((cell, j) => <td key={j} className="p-2 text-content-secondary">{renderInline(cell)}</td>)}
                 </tr>
               ))}
             </tbody>
@@ -98,8 +100,8 @@ function renderMarkdown(md) {
     let i = 0;
     while ((m = regex.exec(text)) !== null) {
       if (m.index > lastIdx) parts.push(text.slice(lastIdx, m.index));
-      if (m[1]) parts.push(<strong key={`b${i++}`} className="text-white font-semibold">{m[1]}</strong>);
-      else if (m[2]) parts.push(<code key={`c${i++}`} className="px-1.5 py-0.5 rounded bg-zinc-800 text-violet-300 text-[0.9em]">{m[2]}</code>);
+      if (m[1]) parts.push(<strong key={`b${i++}`} className="text-content-primary font-semibold">{m[1]}</strong>);
+      else if (m[2]) parts.push(<code key={`c${i++}`} className="px-1.5 py-0.5 rounded bg-surface-elevated text-violet-300 text-[0.9em]">{m[2]}</code>);
       else if (m[3] && m[4]) parts.push(<Link key={`l${i++}`} href={m[4]} className="text-violet-400 hover:underline">{m[3]}</Link>);
       lastIdx = m.index + m[0].length;
     }
@@ -140,10 +142,10 @@ function renderMarkdown(md) {
     // Headings
     if (line.startsWith('## ')) {
       flushList();
-      blocks.push(<h2 key={key++} className="text-2xl sm:text-3xl font-bold mt-10 mb-4 text-white">{renderInline(line.slice(3))}</h2>);
+      blocks.push(<h2 key={key++} className="text-2xl sm:text-3xl font-bold mt-10 mb-4 text-content-primary">{renderInline(line.slice(3))}</h2>);
     } else if (line.startsWith('### ')) {
       flushList();
-      blocks.push(<h3 key={key++} className="text-xl font-bold mt-6 mb-3 text-white">{renderInline(line.slice(4))}</h3>);
+      blocks.push(<h3 key={key++} className="text-xl font-bold mt-6 mb-3 text-content-primary">{renderInline(line.slice(4))}</h3>);
     }
     // List items
     else if (/^[-*]\s/.test(line)) {
@@ -157,7 +159,7 @@ function renderMarkdown(md) {
     // Paragraph
     else {
       flushList();
-      blocks.push(<p key={key++} className="text-zinc-300 leading-relaxed mb-4">{renderInline(line)}</p>);
+      blocks.push(<p key={key++} className="text-content-secondary leading-relaxed mb-4">{renderInline(line)}</p>);
     }
   }
 
@@ -192,31 +194,15 @@ export default async function BlogPost({ params }) {
   };
 
   return (
-    <div className="dark min-h-screen bg-[#08080c] text-white">
+    <div className="min-h-screen bg-surface-base text-content-primary">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <nav className="fixed top-0 w-full z-50 bg-[#08080c]/70 backdrop-blur-2xl border-b border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mr-1.5">
-              <span className="text-[11px] font-bold text-white">P</span>
-            </div>
-            <span className="text-lg font-bold tracking-tight">Prospectia</span>
-            <span className="text-violet-400 text-xs font-semibold">.cloud</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-zinc-400 hover:text-white transition">Se connecter</Link>
-            <Link href="/signup" className="text-sm px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold transition">
-              Essayer gratuitement
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <ReaderHeader />
 
       <main className="pt-24 pb-16">
         {/* Back to blog */}
         <div className="max-w-3xl mx-auto px-4 sm:px-6 mb-8">
-          <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-violet-400 transition">
+          <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-content-tertiary hover:text-violet-400 transition">
             <ArrowLeft size={14} />
             Tous les articles
           </Link>
@@ -224,7 +210,7 @@ export default async function BlogPost({ params }) {
 
         {/* Article header */}
         <article className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 text-xs text-zinc-500 mb-4">
+          <div className="flex items-center gap-3 text-xs text-content-tertiary mb-4">
             <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300">{post.category}</span>
             <span className="flex items-center gap-1">
               <Calendar size={11} />
@@ -240,11 +226,11 @@ export default async function BlogPost({ params }) {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight leading-tight mb-6 bg-gradient-to-b from-white to-zinc-300 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight leading-tight mb-6 text-content-primary">
             {post.title}
           </h1>
 
-          <p className="text-lg text-zinc-400 leading-relaxed mb-12 pb-8 border-b border-white/[0.06]">
+          <p className="text-lg text-content-secondary leading-relaxed mb-12 pb-8 border-b border-line">
             {post.description}
           </p>
 
@@ -257,7 +243,7 @@ export default async function BlogPost({ params }) {
           <div className="mt-12 rounded-2xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/30 p-8 text-center">
             <Zap size={32} className="text-violet-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-3">Trouvez vos prospects en quelques clics</h2>
-            <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
+            <p className="text-content-secondary mb-6 max-w-xl mx-auto">
               Prospectia trouve les emails B2B que vos concurrents ratent. 49€/mois, recherches illimitées.
             </p>
             <Link
@@ -279,10 +265,10 @@ export default async function BlogPost({ params }) {
                 <Link
                   key={p.slug}
                   href={`/blog/${p.slug}`}
-                  className="block rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-violet-500/30 transition p-4 group"
+                  className="block rounded-xl border border-line bg-surface-card hover:bg-surface-elevated hover:border-violet-500/30 transition p-4 group"
                 >
                   <h3 className="font-semibold mb-1 group-hover:text-violet-400 transition">{p.title}</h3>
-                  <p className="text-sm text-zinc-500">{p.description}</p>
+                  <p className="text-sm text-content-tertiary">{p.description}</p>
                 </Link>
               ))}
             </div>
@@ -290,16 +276,7 @@ export default async function BlogPost({ params }) {
         )}
       </main>
 
-      <footer className="border-t border-white/[0.06] py-8 mt-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-zinc-500">© 2026 Prospectia.cloud</div>
-          <div className="flex gap-4 text-xs text-zinc-500">
-            <Link href="/cgu" className="hover:text-zinc-300 transition">CGU</Link>
-            <Link href="/confidentialite" className="hover:text-zinc-300 transition">Confidentialité</Link>
-            <Link href="/rgpd" className="hover:text-zinc-300 transition">RGPD</Link>
-          </div>
-        </div>
-      </footer>
+      <ReaderFooter />
     </div>
   );
 }
