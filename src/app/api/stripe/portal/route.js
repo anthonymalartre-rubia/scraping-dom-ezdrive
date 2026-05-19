@@ -8,6 +8,14 @@ function getStripe() {
 
 export async function POST(request) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('[stripe/portal] STRIPE_SECRET_KEY missing');
+      return NextResponse.json(
+        { error: 'Configuration Stripe manquante (STRIPE_SECRET_KEY). Contactez le support.' },
+        { status: 500 }
+      );
+    }
+
     const stripe = getStripe();
     const { user, supabase } = await getAuthenticatedUser();
     if (!user) {
@@ -24,14 +32,33 @@ export async function POST(request) {
       return NextResponse.json({ error: "Pas d'abonnement actif" }, { status: 400 });
     }
 
+    const origin = request.headers.get('origin')
+      || process.env.NEXT_PUBLIC_APP_URL
+      || 'https://prospectia.cloud';
+
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://scraping-dom-ezdrive.vercel.app'}/dashboard`,
+      return_url: `${origin}/dashboard`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error('Portal error:', err);
-    return NextResponse.json({ error: 'Erreur Stripe' }, { status: 500 });
+    console.error('[stripe/portal] error:', {
+      message: err?.message,
+      type: err?.type,
+      code: err?.code,
+      raw: err?.raw,
+    });
+    const isStripeError = err?.type?.startsWith('Stripe');
+    return NextResponse.json(
+      {
+        error: isStripeError
+          ? `Stripe : ${err.message}`
+          : `Erreur portal : ${err?.message || 'inconnue'}`,
+        code: err?.code,
+        type: err?.type,
+      },
+      { status: 500 }
+    );
   }
 }

@@ -9,6 +9,15 @@ function getStripe() {
 
 export async function POST(request) {
   try {
+    // Vérification précoce des env vars (cause #1 historique d'échec)
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('[stripe/checkout] STRIPE_SECRET_KEY missing');
+      return NextResponse.json(
+        { error: 'Configuration Stripe manquante (STRIPE_SECRET_KEY). Contactez le support.' },
+        { status: 500 }
+      );
+    }
+
     const stripe = getStripe();
     const { user, supabase } = await getAuthenticatedUser();
     if (!user) {
@@ -17,8 +26,15 @@ export async function POST(request) {
 
     const { planId } = await request.json();
     const plan = PLANS[planId];
-    if (!plan || !plan.stripePriceId) {
-      return NextResponse.json({ error: 'Plan invalide' }, { status: 400 });
+    if (!plan) {
+      return NextResponse.json({ error: `Plan inconnu : ${planId}` }, { status: 400 });
+    }
+    if (!plan.stripePriceId) {
+      console.error(`[stripe/checkout] Missing STRIPE_${planId.toUpperCase()}_PRICE_ID env var for plan ${planId}`);
+      return NextResponse.json(
+        { error: `ID de prix Stripe manquant pour le plan ${plan.name}. Variable STRIPE_${planId.toUpperCase()}_PRICE_ID à configurer sur Vercel.` },
+        { status: 500 }
+      );
     }
 
     // Get or create Stripe customer
@@ -41,18 +57,44 @@ export async function POST(request) {
         .eq('id', user.id);
     }
 
+    // URL de retour : on privilégie l'origin de la requête (suit le domaine
+    // réel : prospectia.cloud, www., preview…) plutôt qu'une env var.
+    const origin = request.headers.get('origin')
+      || process.env.NEXT_PUBLIC_APP_URL
+      || 'https://prospectia.cloud';
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: plan.stripePriceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://scraping-dom-ezdrive.vercel.app'}/dashboard?upgrade=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://scraping-dom-ezdrive.vercel.app'}/dashboard?upgrade=cancelled`,
+      success_url: `${origin}/dashboard?upgrade=success`,
+      cancel_url: `${origin}/dashboard?upgrade=cancelled`,
       metadata: { supabase_user_id: user.id, plan_id: planId },
+      allow_promotion_codes: true,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error('Stripe checkout error:', err);
-    return NextResponse.json({ error: 'Erreur Stripe' }, { status: 500 });
+    // Logue le détail complet côté serveur
+    console.error('[stripe/checkout] error:', {
+      message: err?.message,
+      type: err?.type,
+      code: err?.code,
+      raw: err?.raw,
+      statusCode: err?.statusCode,
+    });
+    // Renvoie un message exploitable côté client (Stripe expose des messages
+    // utilisateur-safe pour ses propres erreurs).
+    const isStripeError = err?.type?.startsWith('Stripe');
+    return NextResponse.json(
+      {
+        error: isStripeError
+          ? `Stripe : ${err.message}`
+          : `Erreur lors de la création de la session : ${err?.message || 'inconnue'}`,
+        code: err?.code,
+        type: err?.type,
+      },
+      { status: 500 }
+    );
   }
 }
