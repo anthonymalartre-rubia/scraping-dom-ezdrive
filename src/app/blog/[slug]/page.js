@@ -5,7 +5,16 @@ import { getPostBySlug, getAllPosts } from '@/lib/blog';
 import ReaderHeader from '@/components/ReaderHeader';
 import ReaderFooter from '@/components/ReaderFooter';
 
+// ISR : on rebuild la page article toutes les 30 min, et on autorise les
+// slugs non pré-rendus (dynamicParams) → un article programmé apparaît
+// automatiquement le jour J sur sa première visite après publishedAt.
+export const revalidate = 1800;
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
+  // On ne pré-rend QUE les articles déjà publiés. Les programmés seront
+  // générés on-demand par Next.js dès qu'on les visite après publishedAt
+  // (grâce à dynamicParams = true).
   return getAllPosts().map((p) => ({ slug: p.slug }));
 }
 

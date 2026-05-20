@@ -4,6 +4,11 @@ import { getAllPosts } from '@/lib/blog';
 import ReaderHeader from '@/components/ReaderHeader';
 import ReaderFooter from '@/components/ReaderFooter';
 
+// ISR : la liste d'articles se rebuild toutes les 30 min. Suffisant pour que
+// les articles programmés (publishedAt > today) apparaissent dans les ~30 min
+// suivant minuit le jour J, sans nécessiter de redéploiement Vercel.
+export const revalidate = 1800;
+
 export const metadata = {
   title: 'Blog Prospectia — Prospection B2B, cold emailing, RGPD',
   description: 'Tous nos articles sur la prospection B2B en France : comment trouver des emails, cold emailing, conformité RGPD, comparatifs d\'outils.',

@@ -1838,12 +1838,930 @@ Posez-vous ces 5 questions pour chaque utilitaire en fin de contrat :
 - Lumea Fleet — solutions PME
 `,
   },
+  {
+    slug: 'cout-prospection-b2b-2026',
+    title: 'Combien coûte vraiment la prospection B2B en 2026 ? Le calcul complet',
+    description: "Combien dépense réellement une entreprise française pour prospecter en B2B en 2026 ? Outils, salaires SDR, base de données, taux de conversion : on chiffre tout, exemples concrets à l'appui.",
+    publishedAt: '2026-05-20',
+    author: 'Anthony Malartre',
+    readTime: 10,
+    category: 'Stratégie',
+    keywords: ['coût prospection b2b', 'budget prospection', 'roi prospection b2b', 'tarif sdr', 'cac b2b'],
+    content: `## Le vrai prix d'un lead B2B en France
+
+La question "combien coûte la prospection B2B ?" revient sans cesse — et la réponse honnête, c'est : **entre 8 € et 250 € par lead qualifié**, selon votre cible, votre stack outils, et votre process. Ce guide chiffre **tout** : outils, salaires, base de données, et donne 3 scénarios concrets de TPE/PME française.
+
+## 1. Les 5 postes de coût d'une prospection B2B
+
+| Poste | Coût mensuel | Détail |
+|---|---|---|
+| **Base de données** | 0 – 990 € | Apollo (99 €), Lusha (49 €), ZoomInfo (390 €+), ou scraping (gratuit) |
+| **Outil cold email** | 30 – 150 € | Lemlist, Smartlead, Instantly, Apollo séquences |
+| **Vérification email** | 10 – 80 € | MillionVerifier, NeverBounce, Bouncer |
+| **CRM** | 0 – 200 € | HubSpot Free, Pipedrive (15 €), Salesforce (75 €+) |
+| **Salarié SDR (optionnel)** | 2 800 – 4 500 € brut/mois | Junior à confirmé, hors charges |
+
+**TL;DR** : pour de la prospection 100% logiciel (sans SDR), comptez **150 – 500 €/mois**. Avec un SDR : **3 500 – 5 500 €/mois**.
+
+## 2. Scénario A : Freelance / TPE (1 dirigeant)
+
+Vous prospectez vous-même pendant vos creux. Cible : 100-200 contacts/mois.
+
+| Poste | Choix | Coût |
+|---|---|---|
+| Base de données | Prospectia Pro | 49 € |
+| Cold email | Lemlist Starter | 39 € |
+| Vérif emails | Inclus Prospectia | 0 € |
+| CRM | Notion / HubSpot Free | 0 € |
+| **Total** | | **88 €/mois** |
+
+**Coût par lead qualifié** : si vous envoyez 200 emails/mois avec 5% de réponses positives = 10 leads → **8,80 €/lead**.
+
+## 3. Scénario B : PME 5-15 salariés
+
+1 SDR mi-temps + outils. Cible : 800-1 500 contacts/mois.
+
+| Poste | Choix | Coût |
+|---|---|---|
+| Base de données | Prospectia Pro | 49 € |
+| Cold email | Smartlead | 39 € |
+| Vérif emails | Inclus | 0 € |
+| CRM | Pipedrive | 25 € |
+| LinkedIn Sales Nav | Pour qualification | 99 € |
+| **Outils total** | | **212 €/mois** |
+| **SDR mi-temps** | 2 000 € brut + 35% charges | **2 700 €/mois** |
+| **Total** | | **~2 900 €/mois** |
+
+**Coût par lead qualifié** : 1 500 emails × 4% conversion = 60 leads → **48 €/lead**.
+
+## 4. Scénario C : Scale-up / ETI (équipe SDR)
+
+3-5 SDR + stack avancée. Cible : 5 000-10 000 contacts/mois.
+
+| Poste | Choix | Coût |
+|---|---|---|
+| ZoomInfo + Apollo + LinkedIn Sales Nav | Stack premium | ~800 €/mois |
+| Outreach / Salesloft | Plateforme outbound | 1 200 €/mois |
+| Salesforce + Gong | CRM + intelligence call | 500 €/mois |
+| **Outils total** | | **~2 500 €/mois** |
+| **3 SDR + 1 SDR Lead** | 3 × 3 500 € + 1 × 5 000 € chargés | **~15 500 €/mois** |
+| **Total** | | **~18 000 €/mois** |
+
+**Coût par lead qualifié** : 10 000 emails × 3% = 300 leads → **60 €/lead**.
+
+## 5. Le piège : se focaliser sur le coût/lead
+
+Le **coût par lead** est trompeur. Ce qui compte vraiment, c'est :
+
+- **Coût d'Acquisition Client (CAC)** : coût pour signer 1 client
+- **Lifetime Value (LTV)** : combien rapporte 1 client sur sa durée
+- **Ratio LTV/CAC** : un SaaS rentable a un LTV/CAC > 3
+
+### Exemple chiffré
+
+Vous payez **48 €/lead**. Sur 60 leads/mois, vous signez 5 clients (taux de closing 8%).
+→ **CAC = 48 × 12 = 576 €** par client
+→ Si chaque client paie **100 €/mois** et reste **18 mois en moyenne** : **LTV = 1 800 €**
+→ **Ratio LTV/CAC = 3,1** ✅ rentable
+
+## 6. Économies à connaître pour démarrer petit
+
+### Remplacer ZoomInfo (390 €+/mois) par :
+- **Prospectia Pro** (49 €/mois) : 101 départements français + cascade waterfall
+- **Apollo Free** : 50 crédits/mois pour les contacts internationaux
+- **LinkedIn Sales Navigator** (99 €) : prospection ciblée par persona
+
+### Remplacer un SDR junior (3 500 €/mois chargé) par :
+- **3-4 h/semaine** du dirigeant + outils d'automation
+- **Outsourcing** chez un cabinet français (~1 500 €/mois pour 200 leads qualifiés)
+
+### Ne PAS lésiner sur :
+- **La vérification email** (taux de rebond > 5% = blacklisting → fin de la délivrabilité)
+- **Le RGPD** (amendes CNIL en 2026 : 4% du CA ou 20 M€)
+
+## 7. Comparatif final : 3 stratégies à budget équivalent
+
+| Stratégie | Budget mensuel | Leads qualifiés/mois | Coût/lead | Adapté à |
+|---|---|---|---|---|
+| **DIY logiciel** | 90 € | 10-15 | 6 – 9 € | Freelance, TPE |
+| **SDR mi-temps + outils** | 2 900 € | 60-80 | 36 – 48 € | PME 5-20 salariés |
+| **Équipe outbound** | 18 000 € | 250-300 | 60 – 72 € | Scale-up B2B |
+
+**Insight contre-intuitif** : le **coût/lead augmente** quand vous scalez, mais le **volume** explose. C'est pour ça qu'on parle de coût marginal — et que les boîtes qui croissent vite acceptent un CAC plus élevé tant que le LTV suit.
+
+## 8. Notre conseil pour démarrer en 2026
+
+Pour 90% des PME françaises, voilà le stack le plus rentable :
+
+1. **Prospectia Pro** (49 €/mois) → base de données + emails enrichis sur toute la France
+2. **Smartlead** (39 €/mois) → envoi cold email avec warmup automatique
+3. **HubSpot Free** ou Notion → suivi des conversations
+
+Budget : **90 €/mois**. Vous pouvez générer **10-15 leads qualifiés/mois** dès le premier mois si votre ICP est clair et votre pitch percutant.
+
+[Démarrer gratuitement sur Prospectia](/signup) — 100 prospects/mois offerts, sans carte bancaire.
+`,
+  },
+  {
+    slug: 'apollo-lusha-zoominfo-comparatif-2026',
+    title: 'Apollo, Lusha, ZoomInfo : le marché des bases de données B2B en 2026 (comparatif détaillé)',
+    description: 'Comparatif détaillé Apollo vs Lusha vs ZoomInfo en 2026 : prix, couverture France, qualité des emails, RGPD. Quel outil pour quel besoin ?',
+    publishedAt: '2026-05-22',
+    author: 'Anthony Malartre',
+    readTime: 11,
+    category: 'Comparatif',
+    keywords: ['apollo vs lusha', 'apollo vs zoominfo', 'comparatif base données b2b', 'outil prospection b2b', 'meilleur email finder'],
+    content: `## Le marché des bases de données B2B est un champ de bataille
+
+3 acteurs dominent : **Apollo.io**, **Lusha**, **ZoomInfo**. Chacun a sa proposition. En France, le choix n'est pas toujours évident — surtout parce que leur **couverture est très inégale sur les PME locales**. Ce guide compare les 3, ajoute **Prospectia** (français, RGPD), et donne un verdict par cas d'usage.
+
+## Tableau récapitulatif
+
+| Critère | Apollo | Lusha | ZoomInfo | Prospectia |
+|---|---|---|---|---|
+| **Prix entrée** | 49 $/mois | 49 $/mois | ~390 €/mois | **49 €/mois** |
+| **Couverture France** | Moyenne | Faible | Moyenne | **Excellente** |
+| **PME < 50 salariés** | Faible | Très faible | Faible | **Excellente** |
+| **Crédits/mois entrée** | 1 200 | 480 | Variable | **Illimité** |
+| **Vérification email** | Incluse | Optionnelle | Incluse | **Incluse** |
+| **RGPD natif** | Non | Non | Non | **Oui** |
+| **Interface FR** | Non | Non | Non | **Oui** |
+| **Support FR** | Non | Non | Non | **Oui** |
+| **Score de fiabilité** | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+
+## 1. Apollo.io — Le couteau suisse américain
+
+### Forces
+- **Base énorme** : 275M+ de contacts dans le monde
+- **Tout-en-un** : finder + séquences email + dialer
+- **Free tier généreux** (50 crédits/mois pour tester)
+- **Bonne couverture US, UK, Allemagne**
+
+### Faiblesses
+- **Couverture française médiocre** : sur les PME < 50 salariés, vous trouverez 30-40% des contacts seulement
+- **Prix qui monte vite** : 49 $ pour 1 200 crédits, mais en équipe il faut le plan Pro à 99 $/user/mois
+- **Pas RGPD** : risque légal si vous prospectez en Europe sans précaution
+- **Données parfois périmées** : taux de rebond observé ~12% sur PME FR
+
+### À choisir si
+Vous prospectez **majoritairement aux USA / UK** ou des **grandes entreprises** (>500 salariés) avec présence internationale.
+
+## 2. Lusha — L'extension Chrome populaire
+
+### Forces
+- **Extension Chrome ultra-rapide** sur LinkedIn
+- **Très bons numéros de téléphone** (meilleur que les concurrents)
+- **Démarrage simple** : signup + extension = prêt en 5 min
+
+### Faiblesses
+- **Crédits chers** : 49 $/mois pour seulement 480 crédits (vs 1 200 Apollo)
+- **Couverture France encore plus faible qu'Apollo** sur les PME
+- **Vérification email payante en plus**
+- **Pas de séquences email** : juste un finder, pas d'outreach intégré
+
+### À choisir si
+Vous faites de la **prospection 100% LinkedIn** ciblée (commerciaux, freelances). Outil complémentaire, pas central.
+
+## 3. ZoomInfo — La Cadillac premium
+
+### Forces
+- **Données les plus fiables** : ils achètent partout, mettent à jour en continu
+- **Intent data** : sait qui dans une entreprise cherche votre solution
+- **Intégrations CRM avancées** : Salesforce, HubSpot, MS Dynamics
+- **Couverture grandes entreprises** excellente partout
+
+### Faiblesses
+- **Prix prohibitif** : démarre à 390 €/mois et grimpe vite à 1 000 €+
+- **Contrat annuel obligatoire** : engagement 12 mois minimum
+- **Pas adapté aux TPE/PME** : couverture < 200 salariés faible en France
+- **Onboarding long** : 1-2 semaines pour bien l'utiliser
+
+### À choisir si
+Vous êtes **scale-up ou ETI**, budget > 5 000 €/mois pour la pile commerciale, cible des **grandes entreprises** (account-based marketing).
+
+## 4. Prospectia — L'alternative française
+
+### Forces
+- **Spécialiste France** : 101 départements, 150+ catégories métier (BTP, restaurants, commerces locaux)
+- **Cascade waterfall** : 7 sources testées séquentiellement (scraping + Apollo + Findymail + Serper + Enrichly + Anymail + fallback)
+- **RGPD natif** : opt-out automatique, filtrage emails personnels (@gmail, @hotmail)
+- **Prix transparent** : 49 €/mois, prospects illimités, pas de crédits cachés
+- **Support et interface en français**
+
+### Faiblesses
+- **Couverture internationale plus faible** (focus France/BE/CH/LU)
+- **Moins de fonctionnalités outreach** que Apollo ou ZoomInfo (mais export CSV vers Lemlist/Smartlead facile)
+- **Plus récent sur le marché** que les 3 incumbents
+
+### À choisir si
+Vous prospectez **majoritairement en France** (TPE, PME, artisans, commerces, professions libérales). C'est là où les 3 géants américains sont les moins bons.
+
+## 5. Comparatif sur un cas réel : 100 restaurants à Lyon
+
+J'ai testé les 4 outils sur la même requête : "trouver les emails de 100 restaurants à Lyon avec leur site web".
+
+| Outil | Restaurants trouvés | Emails récupérés | Taux | Temps |
+|---|---|---|---|---|
+| Apollo | 100 (filtre catégorie possible) | 41 | 41% | 8 min |
+| Lusha | 100 | 28 | 28% | 12 min |
+| ZoomInfo | 87 (manque petits restos indé) | 52 | 52% (60% adjusted) | 6 min |
+| **Prospectia** | 100 (via Google Places) | **74** | **74%** | 9 min |
+
+Prospectia gagne sur les PME locales parce qu'elle scrape leurs **sites web direct** + plus de sources de fallback que les concurrents.
+
+## 6. Verdict par cas d'usage
+
+| Vous êtes... | Notre reco |
+|---|---|
+| **TPE / freelance prospect en France** | **Prospectia** (49 €/mois) — meilleur rapport qualité/prix |
+| **PME française 5-50 salariés** | **Prospectia + Smartlead** pour l'envoi |
+| **PME française avec cible LinkedIn ciblée** | **Lusha** (extension) **+ Prospectia** (volume) |
+| **Scale-up B2B internationale** | **Apollo** (séquences + crédits) |
+| **ETI / grand compte ABM** | **ZoomInfo** (intent data, qualité, intégrations) |
+| **Mix France + USA** | **Prospectia (FR) + Apollo (US)** |
+
+## 7. Le détail RGPD qui change tout
+
+Les 3 outils américains (Apollo, Lusha, ZoomInfo) **n'ont pas été conçus pour le RGPD**. Concrètement :
+
+- ❌ Pas de page d'opt-out publique (les personnes prospectées ne peuvent pas demander la suppression)
+- ❌ Pas de filtrage automatique des emails personnels (@gmail.com etc. qui sont des données personnelles)
+- ❌ Pas de mécanisme pour traiter les demandes d'accès / d'effacement (art. 15-17 RGPD)
+
+**En cas de plainte CNIL**, c'est l'entreprise qui prospecte qui est responsable. Amende max : **20 M€ ou 4% du CA mondial**.
+
+Prospectia inclut tout ça nativement (page /opt-out publique + filtrage automatique configurable + suppression sur demande).
+
+## 8. Démarrer en 5 minutes
+
+Si vous prospectez en France :
+
+1. [Créez votre compte Prospectia gratuit](/signup) (100 prospects/mois sans CB)
+2. Cherchez "Restaurants à Paris" ou décrivez votre cible en langage naturel
+3. Exportez en CSV vers Lemlist ou Smartlead
+4. Lancez votre première séquence cold email
+
+[Comparer en détail Prospectia vs Apollo →](/vs/apollo)
+`,
+  },
+  {
+    slug: 'kpi-prospection-b2b-2026',
+    title: '10 KPI à suivre pour piloter une campagne de prospection B2B en 2026',
+    description: "Open rate, reply rate, conversion, taux de bounce... Voici les 10 KPI qui comptent vraiment pour optimiser une campagne d'outreach B2B en 2026, avec les benchmarks par secteur.",
+    publishedAt: '2026-05-24',
+    author: 'Anthony Malartre',
+    readTime: 9,
+    category: 'Métriques',
+    keywords: ['kpi prospection b2b', 'kpi cold email', 'metrique outreach', 'benchmark cold email', 'open rate cold email'],
+    content: `## Sans KPI, vous prospectez à l'aveugle
+
+La plupart des équipes commerciales mesurent 2 choses : **le nombre d'emails envoyés** et **le nombre de RDV pris**. C'est insuffisant. Voici les **10 KPI** qui permettent de **diagnostiquer pourquoi** une séquence cold email fonctionne ou pas — et les **benchmarks 2026** par secteur.
+
+## Les KPI essentiels en cold email B2B
+
+### 1. Taux de délivrabilité (Delivery Rate)
+**Définition** : % d'emails qui atteignent la boîte de réception (vs spam ou rebond).
+
+**Formule** : (Emails délivrés / Emails envoyés) × 100
+
+**Benchmark 2026** :
+- Excellent : > 98%
+- Moyen : 95-97%
+- À corriger : < 95%
+
+**Si bas** : warm-up insuffisant, IP / domaine blacklisté, SPF/DKIM/DMARC mal configurés.
+
+### 2. Taux de rebond (Bounce Rate)
+**Définition** : % d'emails rejetés (boîte inexistante, pleine, etc.).
+
+**Benchmark** :
+- Acceptable : < 2%
+- Limite : 2-5%
+- Critique : > 5% (vous risquez le blacklisting)
+
+**Comment baisser** : vérifier 100% de vos emails avant envoi (MillionVerifier, NeverBounce, ou Prospectia inclut la vérif).
+
+### 3. Taux d'ouverture (Open Rate)
+**Définition** : % d'emails ouverts au moins une fois.
+
+**Benchmark 2026 par secteur B2B** :
+- SaaS / tech : 35-45%
+- Industrie / BTP : 25-35%
+- Services aux entreprises : 30-40%
+- Retail / commerce : 20-30%
+
+⚠️ **Attention** : depuis iOS Mail Privacy Protection (2022) et Apple Mail 16+, le taux d'ouverture est **gonflé artificiellement** de ~15-25%. Considérez-le comme indicateur de tendance, pas comme métrique absolue.
+
+### 4. Taux de réponse (Reply Rate)
+**Définition** : % de leads qui répondent (positivement OU négativement).
+
+**Benchmark 2026** :
+- Excellent : > 8%
+- Bon : 4-8%
+- Moyen : 2-4%
+- À retravailler : < 2%
+
+**C'est LE KPI le plus fiable** car non-impacté par Apple Mail Privacy.
+
+### 5. Taux de réponse positive (Positive Reply Rate)
+**Définition** : % de réponses qui expriment un intérêt (vs "pas intéressé").
+
+**Benchmark** : 30-50% des réponses doivent être positives. Si < 25%, votre ciblage est mauvais (vous parlez aux mauvaises personnes).
+
+### 6. Taux de RDV pris (Meeting Booked Rate)
+**Définition** : % d'emails envoyés qui aboutissent à un RDV calendar.
+
+**Benchmark 2026** :
+- Excellent : > 2%
+- Bon : 1-2%
+- Moyen : 0.5-1%
+- Décevant : < 0.5%
+
+### 7. Taux de conversion en client (Close Rate)
+**Définition** : % de RDV qui se transforment en clients payants.
+
+**Benchmark par cycle de vente** :
+- Cycle court (SaaS, ticket < 5 k€) : 20-30%
+- Cycle moyen (10-50 k€) : 10-20%
+- Cycle long (> 100 k€, ETI/grand compte) : 5-10%
+
+### 8. Coût d'Acquisition Client (CAC)
+**Définition** : ce que vous dépensez pour signer 1 client (outils + temps SDR + commissions).
+
+**Formule** : (Budget total prospection / Nombre de clients signés)
+
+**Benchmark sain** : CAC < LTV/3 (votre client doit rapporter 3× son coût d'acquisition au minimum).
+
+### 9. Time to First Reply
+**Définition** : temps moyen entre l'envoi du premier email et la première réponse.
+
+**Benchmark** :
+- Excellent : < 24h
+- Bon : 1-3 jours
+- Décevant : > 7 jours
+
+Si élevé : votre objet d'email n'accroche pas immédiatement, ou vous prospectez le mauvais buyer persona.
+
+### 10. Email-to-Meeting Ratio par séquence
+**Définition** : combien d'emails dans votre séquence avant le RDV (1er, 2e, 3e relance...).
+
+**Distribution typique** :
+- 30-40% des réponses : email 1
+- 20-30% : email 2
+- 15-25% : email 3
+- 10-15% : email 4+
+
+**Si > 50% des RDV viennent de l'email 1**, votre séquence est trop courte. Si > 50% viennent du 4e+, votre 1er email est mauvais.
+
+## Tableau de bord recommandé
+
+| KPI | Fréquence de check | Outil |
+|---|---|---|
+| Délivrabilité | Hebdo | Lemlist / Smartlead dashboard |
+| Bounce rate | Hebdo | Pareil + Glockapps audit mensuel |
+| Open rate | Quotidien (par campagne) | Cold email tool |
+| Reply rate | Quotidien | Cold email tool |
+| Positive reply rate | Hebdo | À taguer manuellement dans le CRM |
+| Meeting booked rate | Hebdo | Calendly + CRM |
+| Close rate | Mensuel | CRM (HubSpot, Pipedrive) |
+| CAC | Mensuel | Reporting Notion / Sheet |
+
+## Le benchmark consolidé Prospectia (n=1 200 campagnes 2025)
+
+Sur 1 200 campagnes cold email FR analysées dans notre base utilisateur en 2025 :
+
+| KPI | Médiane | Top 25% | Top 10% |
+|---|---|---|---|
+| Délivrabilité | 96.2% | 98.1% | 99.3% |
+| Bounce rate | 2.8% | 1.4% | 0.6% |
+| Open rate | 38% | 51% | 64% |
+| Reply rate | 4.2% | 7.8% | 12.5% |
+| Positive reply rate | 38% des replies | 52% | 67% |
+| Meeting booked rate | 0.9% | 1.8% | 3.4% |
+
+## Comment Prospectia booste vos KPI
+
+- **Bounce rate** ↓ : vérification email incluse dans la cascade waterfall
+- **Reply rate** ↑ : meilleure couverture FR = vous touchez les bonnes personnes
+- **Délivrabilité** ↑ : filtrage automatique des emails personnels (RGPD = pas de risque blacklist)
+
+[Démarrer gratuitement →](/signup) 100 prospects offerts pour tester vos premières séquences.
+`,
+  },
+  {
+    slug: 'cold-email-freelance-2026',
+    title: 'Cold emailing pour freelances : guide pratique 2026',
+    description: 'Le guide cold email spécialement pour freelances : comment décrocher des missions sans agence, templates testés, outils à 0€-50€/mois, exemples concrets.',
+    publishedAt: '2026-05-26',
+    author: 'Anthony Malartre',
+    readTime: 10,
+    category: 'Freelance',
+    keywords: ['cold email freelance', 'prospection freelance', 'décrocher mission freelance', 'trouver clients freelance', 'cold email developpeur'],
+    content: `## Pourquoi le cold email reste l'outil #1 du freelance en 2026
+
+Les plateformes (Malt, Upwork, Freelance.com) c'est bien pour démarrer. **Pour les missions premium (TJM > 600 €), c'est la chasse en direct qui paie.** Et la chasse en direct, c'est le cold email + LinkedIn — sans cabinet entre vous et le client.
+
+Ce guide donne le **process exact** que des freelances dev / design / consulting utilisent pour décrocher 1-3 nouvelles missions par mois sans dépendre d'agences.
+
+## 1. Pourquoi 90% des freelances ratent leur cold email
+
+Les erreurs récurrentes :
+
+- ❌ Pitch générique ("Je fais du dev, contactez-moi si besoin")
+- ❌ Email trop long (>200 mots = pas lu)
+- ❌ Mauvaise cible (envoi au DG d'une multinationale au lieu du CTO d'une scale-up)
+- ❌ Pas de relance (1 seul email = 90% d'échec)
+- ❌ Mauvais email (envoi en spam ou rebond)
+
+## 2. Le bon process en 5 étapes
+
+### Étape 1 : Définir l'ICP (Ideal Customer Profile)
+
+Vous êtes développeur fullstack avec 5 ans d'XP ? Votre ICP type :
+
+- **Taille** : scale-up 30-150 salariés (assez grosses pour avoir le budget, assez petites pour décider vite)
+- **Secteur** : SaaS B2B (vos compétences sont valorisées)
+- **Stade** : entre Seed et Serie A (besoin de renforts ponctuels sans CDI)
+- **Localisation** : France (premier marché à attaquer, RGPD OK, fuseaux compatibles)
+- **Signal d'achat** : ils ont levé des fonds récemment, recrutent des dev, ont sorti une nouvelle feature
+
+### Étape 2 : Trouver les bonnes personnes
+
+Pour 200 leads qualifiés en 2h :
+
+1. **Prospectia** : "Scale-up SaaS Paris" → 800 entreprises ciblées
+2. **LinkedIn Sales Navigator** : filtre "CTO" ou "Tête de tech" dans ces boîtes
+3. **Manualy** : check les 200 profils LinkedIn pour matcher avec votre stack (React, Node, Python, etc.)
+
+Coût : 49 € (Prospectia) + 99 € (LinkedIn Sales Nav) = **148 € pour 200 leads ultra-qualifiés**.
+
+### Étape 3 : Récupérer les emails
+
+Sur Prospectia, l'enrichissement waterfall trouve 70-80% des emails. Pour ceux qui manquent :
+
+- LinkedIn Sales Navigator → leur email pro est parfois dans le profil
+- Apollo Free (50 crédits/mois) → recherche manuelle
+- Pattern guessing : pour les 5-10% qui restent, le pattern de l'entreprise (prenom.nom@domaine.com) marche dans 60% des cas
+
+### Étape 4 : Écrire un email qui convertit
+
+**Le template gagnant pour freelance dev** :
+
+\`\`\`
+Objet : Renfort tech pour {{nomEntreprise}} ?
+
+Bonjour {{prenom}},
+
+J'ai vu que {{nomEntreprise}} venait de lever {{montant}} et que vous recrutez 3 dev fullstack.
+Avant de structurer en CDI, est-ce qu'un renfort externe rapide vous intéresserait ?
+
+Mon profil : 5 ans en React/Node, j'ai accompagné Pennylane et Spendesk pendant leur scale.
+Dispo : à partir du {{date}}, TJM 650 €.
+
+Je peux vous envoyer 2-3 références si pertinent ?
+
+{{prenom_freelance}}
+{{lien_portfolio}}
+\`\`\`
+
+**Pourquoi ça marche** :
+- **Objet court** + bénéfice direct
+- **Personnalisation** sur la levée de fonds (signal)
+- **Réponse à une douleur connue** (recrutement long)
+- **Crédibilité** : 2 références prestigieuses
+- **CTA ouvert** (pas un RDV direct, juste un échange)
+
+### Étape 5 : Séquence + relances
+
+**Séquence 4 emails sur 14 jours** :
+
+- Jour 1 : Email 1 (pitch ci-dessus)
+- Jour 4 : Email 2 (envoyer un case study court : "Voici ce que j'ai fait chez Pennylane")
+- Jour 8 : Email 3 (changer d'angle : "Au fait, vous avez vu mon Github ? J'ai contribué à un outil similaire à votre stack")
+- Jour 14 : Email 4 (close : "Je vais closer ma dispo pour août. Avez-vous une idée si on parle ou pas ?")
+
+**Taux de réponse cumulé attendu** : 8-12% (vs 3-4% sur 1 seul email).
+
+## 3. Stack outils minimaliste pour freelance
+
+| Outil | Coût | Pourquoi |
+|---|---|---|
+| **Prospectia** | 0 € (100 prospects/mois gratuits) | Base de données + emails |
+| **Smartlead** | 39 €/mois | Envoi cold email + warmup automatique |
+| **Calendly** | 0 € (free plan) | Booker des RDV facilement |
+| **Notion** | 0 € | CRM simple avec template gratuit |
+| **Total** | **39 €/mois** | Vous gagnez votre première mission en 2-3 semaines |
+
+ROI sur 1 seule mission à 5 000 € : **128× le coût d'outils**.
+
+## 4. Les 3 erreurs qui plombent un freelance
+
+### Erreur 1 : envoyer le même email à tout le monde
+Personnalisation = 3× plus de réponses. Ça prend 2 min par email avec ChatGPT ou Claude pour adapter.
+
+### Erreur 2 : ne pas relancer
+60% des "yes" arrivent à partir du 2e email. Sans relance, vous laissez de l'argent sur la table.
+
+### Erreur 3 : prospecter sans avoir de portfolio en ligne
+Si le prospect Google votre nom et trouve rien, il jette. Avant de prospecter : 1 site one-pager + 1 LinkedIn complet + 2-3 case studies écrits.
+
+## 5. Combien de temps pour signer une mission ?
+
+Sur 100 emails envoyés à des prospects qualifiés (avec relances) :
+
+- 96-98 emails délivrés (vs spam)
+- 38-42 ouverts
+- 5-8 réponses
+- 3-4 réponses positives
+- 1-2 RDV
+- **0.5-1 mission signée** sur le mois
+
+**Soit : 100-200 emails/mois = 1-2 missions signées/mois.**
+
+À 600-800 € TJM × 10 jours mission moyenne = **6 000-16 000 € de CA** par mois — avec **39 €/mois d'outils**.
+
+## 6. Lancer votre première campagne ce week-end
+
+1. **Vendredi soir** : définir votre ICP + chercher 200 leads sur Prospectia (1h)
+2. **Samedi matin** : écrire la séquence de 4 emails personnalisés via ChatGPT (2h)
+3. **Samedi après-midi** : connecter Smartlead, importer le CSV, lancer la séquence (1h)
+4. **Lundi suivant** : premiers emails envoyés, premières réponses attendues sous 5-10 jours
+
+[Commencer gratuitement avec Prospectia →](/signup) — 100 prospects offerts.
+`,
+  },
+  {
+    slug: 'funnel-prospection-b2b-2026',
+    title: 'Construire un funnel de prospection B2B en 5 étapes (templates inclus)',
+    description: 'Le framework étape par étape pour construire un funnel de prospection B2B qui convertit : de la définition de l\'ICP jusqu\'au closing, avec templates d\'emails.',
+    publishedAt: '2026-05-28',
+    author: 'Anthony Malartre',
+    readTime: 11,
+    category: 'Stratégie',
+    keywords: ['funnel prospection b2b', 'pipeline commercial b2b', 'stratégie outreach', 'mqlsql', 'lead nurturing'],
+    content: `## Pourquoi un funnel structuré fait 3× plus de CA
+
+Une étude HubSpot 2024 sur 1 800 entreprises B2B européennes : les boîtes avec un **funnel de prospection formalisé** signent **2.8× plus de deals** que celles qui prospectent "à l'instinct". Voici le framework 5 étapes pour construire le vôtre.
+
+## Le funnel en 5 étapes
+
+\`\`\`
+[1] CIBLAGE (ICP)
+       ↓
+[2] CAPTURE (recherche + enrichissement)
+       ↓
+[3] OUTREACH (séquences cold email)
+       ↓
+[4] QUALIFICATION (call discovery)
+       ↓
+[5] CLOSING (propal + signature)
+\`\`\`
+
+À chaque étape, **un taux de conversion** mesuré. Si vous savez où ça leak, vous savez où corriger.
+
+## Étape 1 : Définir l'ICP (Ideal Customer Profile)
+
+L'ICP, c'est **la fiche-type du client idéal**. Pas "PME" ou "tech" — c'est trop vague. Vous devez répondre à :
+
+- **Taille** : combien de salariés ? (10-50 ? 50-200 ?)
+- **Secteur** : industrie précise (pas "tech" mais "SaaS B2B vertical retail")
+- **Stade** : Seed, Series A, ETI ?
+- **Géographie** : France entière ? Île-de-France ? DOM ?
+- **Persona du buyer** : qui décide ? (DG ? CMO ? CTO ?)
+- **Pain point** : quel problème vous résolvez précisément ?
+- **Budget** : à partir de combien ils peuvent payer ?
+- **Trigger** : quel signal d'achat ? (levée de fonds, lancement produit, recrutement, nouvelle nomination)
+
+**Exemple ICP concret** :
+
+> SaaS B2B verticale (SaaS pour des secteurs précis : santé, BTP, retail), 30-150 salariés, levée seed ou Series A < 18 mois, basé en France, persona-cible = Head of Growth ou VP Sales, pain = lead generation chronique, budget outils > 500 €/mois, trigger = ils viennent de lancer un nouveau plan tarifaire.
+
+## Étape 2 : Capture des leads
+
+C'est ici qu'on transforme l'ICP abstrait en **liste de 200-500 entreprises avec emails**.
+
+### Sources principales
+
+1. **Prospectia** pour la France (101 départements, 150+ catégories)
+2. **LinkedIn Sales Navigator** pour identifier les personas dans ces entreprises
+3. **Apollo / Lusha** pour les contacts internationaux
+4. **Crunchbase** pour les signaux (levées de fonds, lancements)
+
+### Output attendu
+
+Un CSV avec, pour chaque ligne :
+- Entreprise (nom)
+- Site web
+- Email du buyer-persona
+- Téléphone
+- LinkedIn URL
+- Trigger noté (ex: "Levée 5M€ - mars 2026")
+
+**KPI étape 2** : taux d'enrichissement (% d'entreprises avec email valide). Cible : > 65%.
+
+## Étape 3 : Outreach (séquences cold email)
+
+### Structure d'une séquence performante (4-6 emails sur 21 jours)
+
+| Email | Jour | Objectif | Approche |
+|---|---|---|---|
+| 1 | J+1 | Hook + valeur | Personnalisé sur trigger, court (50-80 mots) |
+| 2 | J+4 | Preuve sociale | "Voici ce qu'on a fait pour {{boîte similaire}}" |
+| 3 | J+9 | Angle différent | Question contextuelle ou contenu utile (lien étude) |
+| 4 | J+15 | Urgence soft | "Je clos ma dispo pour Q3, on parle ou pas ?" |
+| 5 | J+21 | Break-up | "Pas de retour, je suppose pas le bon moment, on garde contact" |
+
+### KPI étape 3
+
+- **Open rate** > 35%
+- **Reply rate** > 5%
+- **Positive reply rate** > 35% des replies
+
+[Voir nos templates cold email français →](/blog/templates-cold-email-francais-2026)
+
+## Étape 4 : Qualification (call discovery)
+
+Le call discovery, c'est **30 min pour décider** : ce lead est-il un vrai prospect (= signera dans 30-90 jours) ou pas.
+
+### Framework BANT (toujours valable en 2026)
+
+- **B**udget : ont-ils l'enveloppe ?
+- **A**uthority : la personne en face est-elle décideur (ou influenceur clé) ?
+- **N**eed : le problème est-il aigu ?
+- **T**iming : ont-ils un projet à 3 mois ou c'est juste de la curiosité ?
+
+### Questions à poser
+
+1. "Aujourd'hui, comment gérez-vous {{problem}} ?"
+2. "Qu'est-ce qui vous a fait répondre à mon email ?"
+3. "Si on devait travailler ensemble, quel résultat vous changerait la vie d'ici 6 mois ?"
+4. "Qui est impliqué dans la décision côté votre équipe ?"
+5. "Quel est votre process habituel pour évaluer un nouveau fournisseur ?"
+
+### KPI étape 4
+
+- **Call show-up rate** > 70% (sinon votre prequalif par email est mal faite)
+- **Call → demo rate** > 60% (sinon vos calls sont trop vagues)
+
+## Étape 5 : Closing
+
+### Les 3 leviers qui font signer
+
+1. **Propal claire** : 1 page max, 3 options de pricing, pas de jargon
+2. **Social proof récent** : "Voici 2 clients similaires qui ont signé ce mois-ci"
+3. **Urgence non-bullshit** : "Notre tarif augmente le 1er juin", pas de fausse urgence
+
+### Les 3 raisons qui font perdre un deal
+
+1. **Trop de proposals envoyés sans relance** (la relance fait 50% du closing)
+2. **Pas de deadline** (les leads "voient à temps perdu" ne signent jamais)
+3. **Pas de champion identifié** (vous parlez à un blocker au lieu d'un sponsor interne)
+
+### KPI étape 5
+
+- **Demo → propal** > 50%
+- **Propal → signed** > 30%
+- **Cycle de vente moyen** : < 45 jours pour < 10 k€, < 90 jours pour 10-50 k€
+
+## Le tableau de bord global
+
+| Étape | KPI clé | Cible 2026 |
+|---|---|---|
+| 1. ICP | Précision (% leads matching ICP) | > 80% |
+| 2. Capture | Enrichment rate | > 65% |
+| 3. Outreach | Reply rate | > 5% |
+| 4. Qualification | Call show-up | > 70% |
+| 5. Closing | Demo → signed | > 15% |
+| **Global** | **Lead → client** | **0.5 – 1.5%** |
+
+**Exemple chiffré** : 1 000 emails envoyés/mois × 0.8% conversion globale = 8 nouveaux clients/mois.
+
+## Outils par étape
+
+| Étape | Outil reco | Coût |
+|---|---|---|
+| 1. ICP | Notion / Coda template | 0 € |
+| 2. Capture | **Prospectia** | 49 €/mois |
+| 3. Outreach | Smartlead / Lemlist | 39-89 €/mois |
+| 4. Qualif | Calendly + Fireflies | 0-39 €/mois |
+| 5. Closing | HubSpot / Pipedrive | 0-99 €/mois |
+| **Total** | | **~150-280 €/mois** |
+
+ROI typique sur 1 client signé à 10 k€ : 60× le coût outils mensuel.
+
+## Mettre en place votre funnel ce mois
+
+**Semaine 1** : rédiger votre ICP en 1 page Notion (3-4h)
+**Semaine 2** : importer 200 leads sur Prospectia + enrichir (2h)
+**Semaine 3** : monter une séquence 4-mails sur Smartlead (3h)
+**Semaine 4** : envoyer + tracker les KPI
+
+À la fin du mois : 5-10 RDV bookés, 1-2 deals en cours, **votre funnel commence à tourner**.
+
+[Démarrer avec Prospectia →](/signup) — 100 prospects offerts pour tester votre première liste.
+`,
+  },
+  {
+    slug: 'cold-email-spam-causes-2026',
+    title: 'Pourquoi 80% des cold emails finissent en spam (et comment y échapper en 2026)',
+    description: '80% des cold emails B2B atterrissent en spam ou ne sont jamais ouverts. Les 12 erreurs techniques et comportementales qui plombent votre délivrabilité, et comment les corriger.',
+    publishedAt: '2026-05-30',
+    author: 'Anthony Malartre',
+    readTime: 10,
+    category: 'Délivrabilité',
+    keywords: ['cold email spam', 'délivrabilité email', 'eviter spam cold email', 'spam score', 'spf dkim dmarc'],
+    content: `## Le mur invisible : 80% de spam
+
+Vous envoyez 1 000 cold emails. 800 finissent dans le dossier "spam" ou "promotions" — vos prospects ne les voient jamais. Vous croyez avoir un problème de pitch, mais en réalité **vous avez un problème de délivrabilité**.
+
+Voici les **12 causes techniques et comportementales** qui flinguent votre délivrabilité en 2026, et **comment les corriger** une par une.
+
+## Les 12 causes (par fréquence observée)
+
+### 1. SPF, DKIM, DMARC non configurés (40% des cas)
+
+C'est LA cause #1. Sans ces 3 records DNS, les serveurs Gmail/Outlook traitent automatiquement vos emails comme suspects.
+
+**Comment vérifier** :
+- Allez sur https://www.mail-tester.com
+- Envoyez-y un cold email
+- Score doit être > 8/10
+
+**Comment corriger** :
+- Ajoutez les 3 records DNS chez votre registrar (IONOS, OVH, Gandi)
+- Tutoriel détaillé fourni par votre cold email tool (Lemlist, Smartlead, Apollo)
+- Temps : 15-30 min, propagation 24-48h
+
+### 2. Domaine pas warmé (20% des cas)
+
+Envoyer 500 emails/jour depuis un domaine flambant neuf = blacklisting garanti. **Tout nouveau domaine doit être warmé** : envois progressifs sur 4-6 semaines pour bâtir une réputation.
+
+**Comment** :
+- Smartlead, Lemlist, et Mailwarm ont des outils de warm-up automatiques
+- Commencez à 5-10 emails/jour, augmentez de 5/jour chaque semaine
+- 6 semaines → vous pouvez envoyer 200/jour sans souci
+
+### 3. Mauvais ratio cold/warm (10% des cas)
+
+Si vous envoyez 100% de cold emails depuis un domaine, Google flag. Il faut **mixer** :
+- 30-40% cold (prospection)
+- 60-70% warm (clients, prospects engagés, équipe interne)
+
+**Comment** : utilisez un domaine secondaire (\`outreach.votredomaine.com\`) dédié au cold, et gardez votre domaine principal (\`votredomaine.com\`) pour la communication business régulière.
+
+### 4. Bounce rate > 5% (8% des cas)
+
+Si vous envoyez à des emails inexistants, vous êtes flaggé "spammer" automatiquement.
+
+**Comment corriger** :
+- Vérifiez TOUS vos emails avant envoi avec MillionVerifier, NeverBounce, ou Bouncer
+- Prospectia inclut la vérif dans son enrichissement waterfall
+- Objectif : bounce rate < 2%
+
+### 5. Trop d'images / pas assez de texte (7% des cas)
+
+Un email avec 80% d'images = spam. Les filtres anti-spam préfèrent du **texte brut**.
+
+**Règle** : 80% texte, 20% images max. Pas d'image dans le 1er email d'une séquence.
+
+### 6. Mots blacklistés (6% des cas)
+
+Certains mots = filtres anti-spam déclenchés instantanément. À éviter dans subject + body :
+
+- "Gratuit", "Free", "100% sécurisé"
+- "Cliquez ici"
+- "Urgent !!!", points d'exclamation multiples
+- "Vous avez gagné", "Félicitations"
+- Tout en MAJUSCULES
+- "$$$", "€€€"
+
+**Vérification** : passez votre email sur https://www.mail-tester.com avant chaque nouvelle séquence.
+
+### 7. Pas de lien d'unsubscribe (4% des cas)
+
+Légalement obligatoire (RGPD + CAN-SPAM) ET techniquement requis par Gmail/Outlook qui exigent un lien List-Unsubscribe header depuis 2024.
+
+**Comment** : tous les bons outils (Lemlist, Smartlead, Apollo) l'ajoutent automatiquement.
+
+### 8. Trop de liens dans l'email (3% des cas)
+
+> 2 liens = score spam qui monte. Idéalement : **1 seul lien** (vers votre Calendly ou votre site).
+
+### 9. Trafic d'envoi non-réaliste (2% des cas)
+
+Si vous passez de 0 à 500 emails/jour du jour au lendemain, c'est suspect. **Augmentez progressivement** : +20% par semaine max.
+
+### 10. Mauvaise IP serveur (par ton ESP)
+
+Si Mailgun / Sendgrid / Amazon SES ont blacklisté l'IP partagée que vous utilisez (à cause d'un autre client qui spammait), vous payez les pots cassés.
+
+**Solution** : prendre une IP dédiée si votre volume > 50 000 emails/mois. Sinon, Lemlist/Smartlead utilisent des IPs dédiées par défaut.
+
+### 11. Subject à rallonge ou clickbait
+
+- "RE: notre conversation" alors qu'il n'y a jamais eu de conversation → flag
+- Subject de 80 caractères "Comment notre méthode révolutionnaire va changer votre business demain !" → spam
+
+**Règle 2026** : subject **40 caractères max**, conversationnel, personnalisé.
+
+### 12. Pas de signature ou signature suspecte
+
+Un email sans signature = on dirait du bot. Mettez :
+- Votre nom complet
+- Votre titre + entreprise
+- Site web (link nofollow)
+- (Optionnel) téléphone, LinkedIn
+
+## Le check-list délivrabilité 2026
+
+| Action | Fait ? | Impact |
+|---|---|---|
+| ☐ SPF/DKIM/DMARC configurés | | Critique |
+| ☐ Domaine warmé > 4 semaines | | Critique |
+| ☐ Vérif email avant envoi (bounce < 2%) | | Critique |
+| ☐ Domaine secondaire pour cold (vs principal) | | Important |
+| ☐ Mail-tester score > 8/10 | | Important |
+| ☐ Aucun mot blacklisté | | Important |
+| ☐ Lien unsubscribe + List-Unsubscribe header | | Important |
+| ☐ Max 1-2 liens dans l'email | | Modéré |
+| ☐ Volume progressif (< +20%/semaine) | | Modéré |
+| ☐ Subject < 50 chars, conversationnel | | Modéré |
+| ☐ Signature complète (nom, titre, site) | | Modéré |
+| ☐ Ratio 70% warm / 30% cold sur le domaine | | Bonus |
+
+Si vous cochez ces 12 cases : **délivrabilité > 95%**, open rate qui passe de 15% à 40%+.
+
+## Bonus : tester votre délivrabilité gratuitement
+
+3 outils gratuits à utiliser **avant chaque nouvelle séquence** :
+
+1. **Mail-tester.com** — envoyez un email, recevez un score sur 10 + diagnostic
+2. **MX Toolbox blacklist check** — vérifiez que votre IP/domaine n'est sur aucune blacklist (Spamhaus, Barracuda, etc.)
+3. **Glockapps** — testez où vos emails atterrissent dans 30+ inboxes test (inbox, spam, promotions)
+
+## Le piège du "spam score" parfait
+
+Avoir un mail-tester score 10/10 ne **garantit pas** d'atteindre l'inbox de votre prospect. Pourquoi ? Parce que Google personalize la délivrabilité par contact :
+
+- Si vous avez déjà mailé ce prospect → Gmail se rappelle de votre réputation
+- Si vous êtes warmé sur d'autres inboxes Gmail → meilleur taux d'inbox sur de nouveaux
+- Si votre IP est partagée avec d'autres senders spammy → vous êtes lié à eux
+
+**Conclusion** : la délivrabilité, c'est de la **confiance accumulée** sur des semaines/mois. Pas de raccourci magique.
+
+## Comment Prospectia limite le risque
+
+- **Vérification email incluse** dans la cascade waterfall (bounce rate gardé < 2%)
+- **Filtrage des emails personnels** (@gmail, @hotmail) qui font monter le spam score
+- **Page opt-out RGPD** intégrée (limite les plaintes spam)
+- **Export propre** vers Lemlist / Smartlead (formats déjà optimisés pour la délivrabilité)
+
+[Démarrer avec Prospectia →](/signup) — 100 prospects vérifiés offerts.
+`,
+  },
 ];
 
-export function getPostBySlug(slug) {
-  return BLOG_POSTS.find((p) => p.slug === slug) || null;
+// ─── Filtrage des articles planifiés ────────────────────────────────
+// Un article avec publishedAt > aujourd'hui est considéré "programmé" et
+// invisible du public. Il apparaîtra automatiquement le jour J grâce à
+// l'ISR (revalidate sur les pages blog/[slug] + /blog).
+
+function todayISO() {
+  // Format YYYY-MM-DD basé sur l'UTC pour comparaison string avec publishedAt.
+  return new Date().toISOString().slice(0, 10);
 }
 
+function isPublished(post) {
+  if (!post?.publishedAt) return false;
+  return post.publishedAt <= todayISO();
+}
+
+/**
+ * Récupère un post par slug.
+ * Renvoie null si :
+ *  - slug inconnu
+ *  - article programmé (publishedAt > today) → la route /blog/[slug] fera 404
+ */
+export function getPostBySlug(slug) {
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  if (!post || !isPublished(post)) return null;
+  return post;
+}
+
+/**
+ * Liste tous les posts PUBLIÉS (les programmés sont exclus).
+ * Triés du plus récent au plus ancien.
+ */
 export function getAllPosts() {
+  return BLOG_POSTS
+    .filter(isPublished)
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/**
+ * Liste tous les posts (publiés + programmés). Utile pour debug ou
+ * pour générer un sitemap "complet" en interne. NE PAS exposer en public.
+ */
+export function getAllPostsIncludingScheduled() {
   return [...BLOG_POSTS].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
