@@ -1,6 +1,6 @@
 // Slug helpers for programmatic SEO pages
 
-import { DEPTS, B2B_GROUPS, B2B_CATS } from './constants';
+import { DEPTS, B2B_GROUPS, B2B_CATS, REGIONS } from './constants';
 
 /**
  * Convert a string to URL-safe slug (lowercase, no accents, dashes)
@@ -73,25 +73,41 @@ export function getAllDepartments() {
 }
 
 /**
- * Get region label for a department code (simple mapping)
+ * Get region (name + slug + key) for a department code, derived from
+ * the REGIONS constant. Returns null if not found.
  */
 function getRegionForDept(code) {
-  const num = parseInt(code, 10);
-  if (['75','77','78','91','92','93','94','95'].includes(code)) return 'Île-de-France';
-  if (['01','03','07','15','26','38','42','43','63','69','73','74'].includes(code)) return 'Auvergne-Rhône-Alpes';
-  if (['21','25','39','58','70','71','89','90'].includes(code)) return 'Bourgogne-Franche-Comté';
-  if (['22','29','35','56'].includes(code)) return 'Bretagne';
-  if (['18','28','36','37','41','45'].includes(code)) return 'Centre-Val de Loire';
-  if (['2A','2B'].includes(code)) return 'Corse';
-  if (['08','10','51','52','54','55','57','67','68','88'].includes(code)) return 'Grand Est';
-  if (['02','59','60','62','80'].includes(code)) return 'Hauts-de-France';
-  if (['14','27','50','61','76'].includes(code)) return 'Normandie';
-  if (['16','17','19','23','24','33','40','47','64','79','86','87'].includes(code)) return 'Nouvelle-Aquitaine';
-  if (['09','11','12','30','31','32','34','46','48','65','66','81','82'].includes(code)) return 'Occitanie';
-  if (['44','49','53','72','85'].includes(code)) return 'Pays de la Loire';
-  if (['04','05','06','13','83','84'].includes(code)) return 'Provence-Alpes-Côte d\'Azur';
-  if (['971','972','973','974','976'].includes(code)) return 'Outre-mer';
-  return 'France';
+  for (const [key, info] of Object.entries(REGIONS)) {
+    if (info.depts.includes(code)) {
+      return {
+        key,
+        name: info.name,
+        slug: toSlug(info.name),
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * List all 14 French regions with slug + dept list.
+ * Used for /prospection/[category]/region/[region] pages.
+ */
+export function getAllRegions() {
+  return Object.entries(REGIONS).map(([key, info]) => ({
+    key,
+    name: info.name,
+    slug: toSlug(info.name),
+    depts: info.depts,
+  }));
+}
+
+/**
+ * Find a region by slug (e.g. "ile-de-france" → { name: 'Île-de-France', depts: [...] })
+ */
+export function getRegionBySlug(slug) {
+  if (!slug) return null;
+  return getAllRegions().find((r) => r.slug === slug) || null;
 }
 
 /**
@@ -157,6 +173,20 @@ export function getAllSeoUrls(baseUrl = 'https://prospectia.cloud') {
       urls.push({
         loc: `${baseUrl}/prospection/${cat.slug}/${dept.slug}`,
         priority: 0.4,
+        changefreq: 'monthly',
+      });
+    }
+  }
+
+  // Combined category × region pages (14 régions × ~150 cats ≈ 2 100 URLs)
+  // Priority intermédiaire entre /[cat] (0.6) et /[cat]/[dept] (0.4) :
+  // les pages région agrègent l'information et méritent un signal plus fort.
+  const regions = getAllRegions();
+  for (const cat of cats) {
+    for (const r of regions) {
+      urls.push({
+        loc: `${baseUrl}/prospection/${cat.slug}/region/${r.slug}`,
+        priority: 0.5,
         changefreq: 'monthly',
       });
     }

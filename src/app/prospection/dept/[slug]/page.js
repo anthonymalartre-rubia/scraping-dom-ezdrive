@@ -36,17 +36,30 @@ export default async function DepartmentPage({ params }) {
 
   // Top 12 most popular categories for internal linking
   const popularCats = ['restaurant', 'hotel', 'boulangerie-patisserie', 'avocat', 'garage-automobile', 'pharmacie', 'agence-immobiliere', 'salon-de-coiffure', 'plombier', 'electricien', 'expert-comptable', 'cabinet-de-conseil'];
-  const relatedCategories = allCategories
+  const catLinksThisDept = allCategories
     .filter((c) => popularCats.includes(c.slug))
     .map((c) => ({
       label: `${c.labelCapitalized} ${dept.name}`,
       href: `/prospection/${c.slug}/${slug}`,
     }));
 
+  // Niveau région : 4 catégories phares pointant vers /prospection/[cat]/region/[region]
+  // (pousse Google à découvrir le 3e niveau d'arborescence)
+  const catLinksRegion = dept.region
+    ? allCategories
+        .filter((c) => ['restaurant', 'hotel', 'avocat', 'expert-comptable'].includes(c.slug))
+        .map((c) => ({
+          label: `${c.labelCapitalized} en ${dept.region.name}`,
+          href: `/prospection/${c.slug}/region/${dept.region.slug}`,
+        }))
+    : [];
+
+  const relatedCategories = [...catLinksThisDept, ...catLinksRegion];
+
   // Other departments in same region
   const allDepts = getAllDepartments();
   const relatedDepartments = allDepts
-    .filter((d) => d.region === dept.region && d.slug !== slug)
+    .filter((d) => d.region?.key === dept.region?.key && d.slug !== slug)
     .slice(0, 12)
     .map((d) => ({
       label: `${d.code} · ${d.name}`,
@@ -54,7 +67,8 @@ export default async function DepartmentPage({ params }) {
     }));
 
   const title = `Prospection B2B dans le ${dept.name} (${dept.code})`;
-  const intro = `Le département ${dept.name} (${dept.code}) en région ${dept.region} regroupe des milliers d'entreprises B2B : restaurants, commerces, artisans du BTP, professions libérales, services aux entreprises. Prospectia vous permet de trouver leur email professionnel en quelques secondes grâce à notre moteur de scraping et recherche Google. Exportez ensuite vos prospects en CSV.`;
+  const regionName = dept.region?.name || 'France';
+  const intro = `Le département ${dept.name} (${dept.code}) en région ${regionName} regroupe des milliers d'entreprises B2B : restaurants, commerces, artisans du BTP, professions libérales, services aux entreprises. Prospectia vous permet de trouver leur email professionnel en quelques secondes grâce à notre moteur de scraping et recherche Google. Exportez ensuite vos prospects en CSV.`;
 
   const faq = [
     {
@@ -101,7 +115,7 @@ export default async function DepartmentPage({ params }) {
         name: dept.name,
         address: {
           '@type': 'PostalAddress',
-          addressRegion: dept.region,
+          addressRegion: regionName,
           addressCountry: 'FR',
           postalCode: dept.code.length === 2 ? `${dept.code}000` : dept.code,
         },

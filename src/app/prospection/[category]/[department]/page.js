@@ -124,6 +124,9 @@ export default async function CategoryDepartmentPage({ params }) {
     { label: 'Accueil', href: '/' },
     { label: 'Prospection B2B', href: '/prospection' },
     { label: category.labelCapitalized, href: `/prospection/${catSlug}` },
+    ...(dept.region
+      ? [{ label: dept.region.name, href: `/prospection/${catSlug}/region/${dept.region.slug}` }]
+      : []),
     { label: dept.name },
   ];
 

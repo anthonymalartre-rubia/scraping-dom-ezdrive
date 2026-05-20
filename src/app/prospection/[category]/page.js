@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import ProspectionSeoPage from '@/components/ProspectionSeoPage';
-import { getAllCategories, getAllDepartments, getCategoryBySlug } from '@/lib/slugs';
+import {
+  getAllCategories, getAllDepartments, getAllRegions, getCategoryBySlug,
+} from '@/lib/slugs';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
 
 // Generate static pages at build time (1 per category)
@@ -42,12 +44,21 @@ export default async function CategoryPage({ params }) {
     '06-alpes-maritimes', '33-gironde', '59-nord', '44-loire-atlantique',
     '67-bas-rhin', '38-isere',
   ];
-  const relatedDepartments = allDepartments
+  const popularDeptLinks = allDepartments
     .filter((d) => popularDepts.includes(d.slug))
     .map((d) => ({
       label: `${category.labelCapitalized} à ${d.name}`,
       href: `/prospection/${categorySlug}/${d.slug}`,
     }));
+
+  // 14 régions = niveau intermédiaire entre /prospection/[cat] et /prospection/[cat]/[dept]
+  // Inject d'abord les régions, puis les top départements (mix qui favorise le crawl).
+  const regionLinks = getAllRegions().map((r) => ({
+    label: `${category.labelCapitalized} en ${r.name}`,
+    href: `/prospection/${categorySlug}/region/${r.slug}`,
+  }));
+
+  const relatedDepartments = [...regionLinks, ...popularDeptLinks];
 
   // Other categories in the same group
   const relatedCategories = getAllCategories()
