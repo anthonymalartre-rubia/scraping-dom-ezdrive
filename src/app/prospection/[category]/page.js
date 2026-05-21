@@ -4,6 +4,7 @@ import {
   getAllCategories, getAllDepartments, getAllRegions, getCategoryBySlug,
 } from '@/lib/slugs';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
+import { getCategoryData } from '@/lib/category-data';
 
 // Generate static pages at build time (1 per category)
 export async function generateStaticParams() {
@@ -147,6 +148,7 @@ export default async function CategoryPage({ params }) {
         relatedCategories={relatedCategories}
         relatedDepartments={relatedDepartments}
         breadcrumbs={breadcrumbs}
+        categoryData={getCategoryData(category)}
       />
     </>
   );

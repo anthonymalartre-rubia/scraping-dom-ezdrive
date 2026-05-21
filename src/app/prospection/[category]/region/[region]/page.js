@@ -8,6 +8,8 @@ import {
   getRegionBySlug,
 } from '@/lib/slugs';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
+import { getCategoryData } from '@/lib/category-data';
+import { getRegionData } from '@/lib/region-data';
 
 // Generate static pages : 14 régions × ~150 catégories ≈ 2 100 URLs
 export async function generateStaticParams() {
@@ -192,12 +194,15 @@ export default async function CategoryRegionPage({ params }) {
         title={title}
         intro={intro}
         category={category}
-        department={{ name: region.name, code: '' }}
+        department={null}
+        region={{ slug: region.slug, name: region.name }}
         stats={inflatedStats}
         faq={faq}
         relatedCategories={relatedCategories}
         relatedDepartments={[...relatedDepartments, ...otherRegions]}
         breadcrumbs={breadcrumbs}
+        categoryData={getCategoryData(category)}
+        regionData={getRegionData(region.slug)}
       />
     </>
   );

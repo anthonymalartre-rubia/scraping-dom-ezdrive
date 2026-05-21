@@ -1,5 +1,10 @@
 import Link from 'next/link';
 import { Search, MapPin, Mail, Phone, Globe, CheckCircle2, ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
+import {
+  MarketSizeBlock, KpiBlock, PersonaBlock, SeasonalityBlock, BestApproachBlock,
+  PitchBlock, ObjectionBlock, GlossaryBlock, PainPointsBlock, TopRegionsBlock,
+  DeptContextBlock, RegionContextBlock,
+} from './ProspectionContentBlocks';
 
 /**
  * Reusable component for programmatic SEO pages.
@@ -27,6 +32,11 @@ export default function ProspectionSeoPage({
   relatedDepartments = [],
   // Breadcrumbs
   breadcrumbs = [],
+  // ── Enrichissement contenu unique ──
+  categoryData = null,   // depuis category-data.js (persona, KPIs, pitch...)
+  deptData = null,       // depuis dept-data.js (combinaison cat × dept)
+  regionData = null,     // depuis region-data.js (combinaison cat × région)
+  region = null,         // { slug, name }
 }) {
   const heroBadge = department && category
     ? `${category.labelCapitalized} • ${department.name}`
@@ -144,6 +154,43 @@ export default function ProspectionSeoPage({
             />
           </div>
         </section>
+
+        {/* ───── Contenu enrichi data-driven ──────────── */}
+        {/* Affiché uniquement si categoryData fourni : pages /[cat], /[cat]/[dept], /[cat]/region/[r], /[cat]/ville/[v] */}
+
+        {/* Taille du marché */}
+        <MarketSizeBlock data={categoryData} category={category} />
+
+        {/* Context géo (uniquement sur les pages avec dept ou region) */}
+        <DeptContextBlock deptData={deptData} dept={department} category={category} />
+        <RegionContextBlock regionData={regionData} region={region} category={category} />
+
+        {/* KPIs sectoriels */}
+        <KpiBlock data={categoryData} category={category} />
+
+        {/* Persona */}
+        <PersonaBlock data={categoryData} category={category} />
+
+        {/* Pain points */}
+        <PainPointsBlock data={categoryData} category={category} />
+
+        {/* Saisonnalité */}
+        <SeasonalityBlock data={categoryData} category={category} />
+
+        {/* Best approach */}
+        <BestApproachBlock data={categoryData} category={category} />
+
+        {/* Pitch hook */}
+        <PitchBlock data={categoryData} category={category} />
+
+        {/* Objections */}
+        <ObjectionBlock data={categoryData} category={category} />
+
+        {/* Top régions (seulement sur les pages catégorie nationales — pas si déjà sur une page geo) */}
+        {!department && !region && <TopRegionsBlock data={categoryData} category={category} />}
+
+        {/* Glossaire métier */}
+        <GlossaryBlock data={categoryData} category={category} />
 
         {/* FAQ */}
         {faq.length > 0 && (

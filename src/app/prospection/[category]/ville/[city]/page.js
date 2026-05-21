@@ -4,6 +4,8 @@ import { getAllCategories, getCategoryBySlug, getAllDepartments } from '@/lib/sl
 import { getAllCities, getCityBySlug, getCitiesByDept } from '@/lib/cities';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
 import { DEPTS } from '@/lib/constants';
+import { getCategoryData } from '@/lib/category-data';
+import { getDeptData } from '@/lib/dept-data';
 
 export const dynamicParams = true;
 export const revalidate = 86400;
@@ -177,6 +179,8 @@ export default async function CategoryCityPage({ params }) {
         relatedCategories={relatedCategories}
         relatedDepartments={relatedDepartments}
         breadcrumbs={breadcrumbs}
+        categoryData={getCategoryData(category)}
+        deptData={getDeptData(city.dept)}
       />
     </>
   );

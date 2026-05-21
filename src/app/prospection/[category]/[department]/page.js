@@ -7,6 +7,8 @@ import {
   getDepartmentBySlug,
 } from '@/lib/slugs';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
+import { getCategoryData } from '@/lib/category-data';
+import { getDeptData } from '@/lib/dept-data';
 
 // IMPORTANT: This generates 150 × 101 = ~15 000 static pages at build time.
 // To keep build times reasonable, we use Next.js ISR (dynamicParams + revalidate)
@@ -192,6 +194,8 @@ export default async function CategoryDepartmentPage({ params }) {
         relatedCategories={relatedCategories}
         relatedDepartments={relatedDepartments}
         breadcrumbs={breadcrumbs}
+        categoryData={getCategoryData(category)}
+        deptData={getDeptData(dept.code)}
       />
     </>
   );

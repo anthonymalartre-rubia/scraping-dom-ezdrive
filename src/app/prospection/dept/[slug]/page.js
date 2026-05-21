@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import ProspectionSeoPage from '@/components/ProspectionSeoPage';
 import { getAllCategories, getAllDepartments, getDepartmentBySlug } from '@/lib/slugs';
 import { breadcrumbSchema, estimateStats } from '@/lib/seo-helpers';
+import { getDeptData } from '@/lib/dept-data';
 
 export async function generateStaticParams() {
   return getAllDepartments().map((dept) => ({ slug: dept.slug }));
@@ -154,6 +155,7 @@ export default async function DepartmentPage({ params }) {
         relatedCategories={relatedCategories}
         relatedDepartments={relatedDepartments}
         breadcrumbs={breadcrumbs}
+        deptData={getDeptData(dept.code)}
       />
     </>
   );
