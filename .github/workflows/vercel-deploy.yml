@@ -1,0 +1,66 @@
+# Auto-deploy Vercel à chaque push sur main.
+#
+# Pourquoi cette action ? L'intégration native GitHub↔Vercel (via la GitHub
+# App "Vercel") ne fonctionne pas tant que la GitHub App n'est pas installée
+# sur l'organisation `anthonymalartre-rubia` (ce qui n'est pas le cas
+# actuellement et nécessite une intervention manuelle dans GitHub UI).
+#
+# Cette GitHub Action contourne ce problème en utilisant directement le token
+# Vercel pour déclencher un deploy. Elle reproduit exactement ce que
+# fait `npx vercel deploy --prod --yes` en local.
+#
+# Pré-requis (secrets GitHub à créer une seule fois) :
+#   VERCEL_TOKEN     : généré sur https://vercel.com/account/tokens
+#                      (scope : Full Access, expiration : longue ou No expiration)
+#   VERCEL_ORG_ID    : team_4M1Wikjut46HKehbRQY0T5wc
+#   VERCEL_PROJECT_ID: prj_v60RedBGprQZHZAPwCsOClOezcIf
+
+name: Deploy to Vercel (production)
+
+on:
+  push:
+    branches:
+      - main
+  # Permet aussi de déclencher manuellement depuis l'UI GitHub Actions
+  workflow_dispatch:
+
+# Concurrence : un seul deploy à la fois. Si un push arrive pendant un
+# deploy en cours, on annule le précédent et on prend le nouveau.
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build (Vercel CLI build, identique à un build sur la plateforme)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to production
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Output deploy URL
+        run: echo "Production deploy live on https://prospectia.cloud"
