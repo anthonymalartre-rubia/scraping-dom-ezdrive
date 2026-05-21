@@ -1,10 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowLeft, Shield, CheckCircle, AlertCircle, Mail } from 'lucide-react';
 
-export default function OptOutPage() {
+function OptOutInner() {
+  const searchParams = useSearchParams();
+  const oneClickOk = searchParams.get('ok') === '1';
+  const alreadyOptedOut = searchParams.get('already') === '1';
+  const oneClickChannel = searchParams.get('channel');
+  const oneClickError = searchParams.get('error');
+
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [reason, setReason] = useState('');
@@ -71,6 +78,53 @@ export default function OptOutPage() {
             <p className="text-sm text-content-secondary">Suppression de vos données personnelles</p>
           </div>
         </div>
+
+        {/* One-click confirmation banner (depuis un lien dans une campagne) */}
+        {(oneClickOk || oneClickError) && (
+          <div className={`mb-8 p-5 rounded-2xl border ${oneClickOk ? 'border-green-500/30 bg-green-500/[0.06]' : 'border-red-500/30 bg-red-500/[0.06]'}`}>
+            <div className="flex items-start gap-3">
+              {oneClickOk ? (
+                <CheckCircle size={22} className="text-green-400 mt-0.5 flex-shrink-0" />
+              ) : (
+                <AlertCircle size={22} className="text-red-400 mt-0.5 flex-shrink-0" />
+              )}
+              <div>
+                {oneClickOk && !alreadyOptedOut && (
+                  <>
+                    <p className="text-base font-semibold text-green-400 mb-1">
+                      Désinscription confirmée
+                    </p>
+                    <p className="text-sm text-content-secondary leading-relaxed">
+                      Vous ne recevrez plus de {oneClickChannel === 'sms' ? 'SMS' : 'mails'} de prospection de Prospectia.
+                      Votre {oneClickChannel === 'sms' ? 'numéro' : 'adresse'} est retirée de toutes nos listes
+                      et ajoutée à notre blocklist permanente.
+                    </p>
+                  </>
+                )}
+                {oneClickOk && alreadyOptedOut && (
+                  <>
+                    <p className="text-base font-semibold text-green-400 mb-1">
+                      Vous étiez déjà désinscrit
+                    </p>
+                    <p className="text-sm text-content-secondary leading-relaxed">
+                      Aucune action supplémentaire nécessaire. Vous ne recevrez plus de prospection de Prospectia.
+                    </p>
+                  </>
+                )}
+                {oneClickError && (
+                  <>
+                    <p className="text-base font-semibold text-red-400 mb-1">
+                      Erreur lors de la désinscription
+                    </p>
+                    <p className="text-sm text-content-secondary leading-relaxed">
+                      Code : <code>{oneClickError}</code>. Utilisez le formulaire ci-dessous pour saisir manuellement votre email.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Explanation */}
         <div className="p-6 rounded-2xl border border-line bg-surface-card mb-10">
@@ -190,5 +244,13 @@ export default function OptOutPage() {
         </p>
       </main>
     </div>
+  );
+}
+
+export default function OptOutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface-base" />}>
+      <OptOutInner />
+    </Suspense>
   );
 }

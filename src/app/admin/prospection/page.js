@@ -1,0 +1,273 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  ArrowLeft, Users, Plus, ChevronRight, Loader2, ShieldOff, LogIn,
+  Mail, Phone, AlertCircle, MessageSquare,
+} from 'lucide-react';
+import { getSupabase } from '@/lib/supabase';
+
+export default function ProspectionHubPage() {
+  const router = useRouter();
+  const supabase = getSupabase();
+  const [authState, setAuthState] = useState(null);
+  const [currentEmail, setCurrentEmail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lists, setLists] = useState([]);
+  const [creating, setCreating] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newSource, setNewSource] = useState('');
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!supabase) { setLoading(false); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setAuthState('guest'); setLoading(false); return; }
+      setCurrentEmail(user.email);
+
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profile?.is_admin) { setAuthState('no-admin'); setLoading(false); return; }
+      setAuthState('ok');
+
+      const res = await fetch('/api/admin/prospection/lists');
+      if (res.ok) {
+        const data = await res.json();
+        setLists(data.lists || []);
+      }
+      setLoading(false);
+    })();
+  }, [router, supabase]);
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    if (creating || !newName.trim()) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/prospection/lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName.trim(),
+          source: newSource.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Erreur création'); setCreating(false); return; }
+      // Redirige vers le détail pour démarrer l'import direct
+      router.push(`/admin/prospection/lists/${data.list.id}`);
+    } catch {
+      setError('Erreur réseau');
+      setCreating(false);
+    }
+  }
+
+  if (loading) return <CenteredSpinner />;
+  if (authState === 'guest') return <GuestScreen />;
+  if (authState === 'no-admin') return <NoAdminScreen email={currentEmail} signOut={async () => { await supabase.auth.signOut(); router.push('/login?return=/admin/prospection'); }} />;
+
+  return (
+    <div className="min-h-screen bg-surface-base text-content-primary p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <Link href="/admin" className="inline-flex items-center gap-2 text-sm text-content-tertiary hover:text-violet-400 transition mb-2">
+              <ArrowLeft size={14} />
+              Admin
+            </Link>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Users size={24} className="text-violet-400" />
+              Prospection — Listes de contacts
+            </h1>
+            <p className="text-sm text-content-secondary mt-1">
+              Importez vos listes (CSV) puis lancez des campagnes email / SMS multi-canal.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href="/admin/prospection/campaigns"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line hover:bg-surface-elevated text-content-secondary hover:text-content-primary text-sm font-semibold transition"
+            >
+              <Mail size={14} />
+              Campagnes email
+            </Link>
+            <Link
+              href="/admin/prospection/sms"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line hover:bg-surface-elevated text-content-secondary hover:text-content-primary text-sm font-semibold transition"
+            >
+              <MessageSquare size={14} />
+              Campagnes SMS
+            </Link>
+            <button
+              onClick={() => setShowCreate((s) => !s)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition shadow-lg shadow-violet-500/20"
+            >
+              <Plus size={14} />
+              Nouvelle liste
+            </button>
+          </div>
+        </div>
+
+        {/* Formulaire création */}
+        {showCreate && (
+          <form onSubmit={handleCreate} className="mb-6 rounded-2xl border border-violet-500/30 bg-violet-500/[0.04] p-5">
+            <h2 className="text-base font-semibold mb-3">Nouvelle liste de prospects</h2>
+            {error && (
+              <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-300">
+                {error}
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <input
+                type="text"
+                required
+                maxLength={120}
+                placeholder="Nom de la liste (ex: SaaS B2B Paris 2026)"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="px-3 py-2 rounded-lg bg-surface-base border border-line text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-violet-500 transition"
+              />
+              <input
+                type="text"
+                maxLength={200}
+                placeholder="Source (ex: Export Prospectia, LinkedIn Sales Nav…) — utile pour le registre RGPD"
+                value={newSource}
+                onChange={(e) => setNewSource(e.target.value)}
+                className="px-3 py-2 rounded-lg bg-surface-base border border-line text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-violet-500 transition"
+              />
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <button type="button" onClick={() => setShowCreate(false)} className="px-3 py-2 rounded-lg text-sm text-content-secondary hover:text-content-primary transition">
+                Annuler
+              </button>
+              <button type="submit" disabled={creating || !newName.trim()} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold transition">
+                {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                Créer & importer
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Liste des listes */}
+        {lists.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+            <Users size={28} className="mx-auto mb-2 text-content-tertiary opacity-50" />
+            <p className="text-content-tertiary mb-1">Aucune liste de prospects pour le moment.</p>
+            <p className="text-xs text-content-tertiary">Créez-en une et importez votre CSV pour lancer votre première campagne.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {lists.map((l) => (
+              <Link
+                key={l.id}
+                href={`/admin/prospection/lists/${l.id}`}
+                className="group rounded-2xl border border-line bg-surface-card hover:bg-surface-elevated hover:border-violet-500/30 transition p-5 flex flex-col"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <h3 className="text-base font-bold text-content-primary group-hover:text-violet-400 transition leading-snug">
+                    {l.name}
+                  </h3>
+                  <ChevronRight size={14} className="text-content-tertiary group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1" />
+                </div>
+                {l.description && (
+                  <p className="text-xs text-content-secondary mb-3 line-clamp-2">{l.description}</p>
+                )}
+                <div className="grid grid-cols-3 gap-2 mt-auto text-xs">
+                  <Stat icon={<Users size={11} />} value={l.contacts_count} label="contacts" />
+                  <Stat icon={<Mail size={11} />} value={l.email_count} label="emails" />
+                  <Stat icon={<Phone size={11} />} value={l.phone_count} label="tels" />
+                </div>
+                {l.opt_out_count > 0 && (
+                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-amber-400">
+                    <AlertCircle size={10} />
+                    {l.opt_out_count} opt-out{l.opt_out_count > 1 ? 's' : ''}
+                  </div>
+                )}
+                {l.source && (
+                  <div className="mt-1 text-[10px] text-content-tertiary truncate">Source : {l.source}</div>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <p className="text-xs text-content-tertiary mt-6 leading-relaxed">
+          <strong className="text-content-primary">RGPD :</strong> chaque liste doit avoir une <em>base légale</em> et une <em>source</em> documentées
+          (registre des traitements art. 30 RGPD). Toutes les campagnes incluent automatiquement un lien d&apos;opt-out 1 clic.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ icon, value, label }) {
+  return (
+    <div className="rounded-lg bg-surface-elevated px-2 py-1.5">
+      <div className="flex items-center gap-1 text-content-tertiary text-[10px] uppercase tracking-wider">
+        {icon}
+        {label}
+      </div>
+      <div className="text-sm font-mono font-semibold text-content-primary tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function CenteredSpinner() {
+  return (
+    <div className="min-h-screen bg-surface-base flex items-center justify-center text-content-secondary">
+      <Loader2 className="animate-spin" size={20} />
+    </div>
+  );
+}
+
+function GuestScreen() {
+  return (
+    <div className="min-h-screen bg-surface-base flex items-center justify-center p-6">
+      <div className="max-w-md w-full rounded-2xl border border-line bg-surface-card p-8 text-center">
+        <div className="w-12 h-12 mx-auto rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center mb-4">
+          <LogIn size={20} className="text-violet-300" />
+        </div>
+        <h1 className="text-xl font-bold mb-2">Connexion requise</h1>
+        <p className="text-sm text-content-secondary mb-6">Cette page est réservée aux administrateurs.</p>
+        <Link href="/login?return=/admin/prospection" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition">
+          <LogIn size={14} />
+          Se connecter
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function NoAdminScreen({ email, signOut }) {
+  return (
+    <div className="min-h-screen bg-surface-base flex items-center justify-center p-6">
+      <div className="max-w-md w-full rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] p-8 text-center">
+        <div className="w-12 h-12 mx-auto rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-4">
+          <ShieldOff size={20} className="text-amber-300" />
+        </div>
+        <h1 className="text-xl font-bold mb-2">Accès admin requis</h1>
+        <p className="text-sm text-content-secondary mb-2">
+          Connecté en tant que <strong className="text-content-primary">{email}</strong>, mais ce compte n&apos;a pas les droits.
+        </p>
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Link href="/dashboard" className="px-4 py-2 rounded-xl border border-line text-content-secondary hover:text-content-primary text-sm font-medium transition">
+            Dashboard
+          </Link>
+          <button onClick={signOut} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition">
+            <LogIn size={14} />
+            Changer de compte
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
