@@ -72,6 +72,10 @@
     {
       "path": "/api/cron/process-sms-campaigns",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/newsletter-monthly",
+      "schedule": "0 9 1 * *"
     }
   ]
 }

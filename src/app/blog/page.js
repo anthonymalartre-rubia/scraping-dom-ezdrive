@@ -3,6 +3,7 @@ import { Calendar, Clock, ArrowRight, Tag } from 'lucide-react';
 import { getAllPosts } from '@/lib/blog';
 import ReaderHeader from '@/components/ReaderHeader';
 import ReaderFooter from '@/components/ReaderFooter';
+import NewsletterCapture from '@/components/NewsletterCapture';
 
 // ISR : la liste d'articles se rebuild toutes les 30 min. Suffisant pour que
 // les articles programmés (publishedAt > today) apparaissent dans les ~30 min
@@ -73,6 +74,15 @@ export default function BlogIndex() {
               </Link>
             ))}
           </div>
+        </section>
+
+        {/* Newsletter capture en fin de hub */}
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 mb-16">
+          <NewsletterCapture
+            source="blog-hub"
+            title="Recevez le meilleur du blog en 1 email/mois"
+            subtitle="Sélection des articles les plus lus + 1 stat marché B2B + 1 ressource gratuite. Le 1er du mois."
+          />
         </section>
       </main>
 

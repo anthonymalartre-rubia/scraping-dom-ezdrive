@@ -683,3 +683,80 @@ export function referralRewardEmail(userName, totalBonusMonths) {
     }),
   };
 }
+
+// ───────────────────────────────────────────────────────────────
+// newsletterMonthlyEmail — Édition mensuelle Prospectia
+// Inclut : 1 article phare, 1 ressource gratuite, 1 stat marché,
+//          lien désinscription token-based.
+// ───────────────────────────────────────────────────────────────
+export function newsletterMonthlyEmail({
+  unsubscribeToken,
+  featuredArticleTitle = '',
+  featuredArticleUrl = '',
+  featuredArticleTeaser = '',
+  resourceTitle = '20 templates cold email B2B',
+  resourceUrl = `${APP_URL}/ressources/templates-cold-email-b2b-fr/telecharger`,
+  monthLabel = '',
+  statHeadline = '',
+  statBody = '',
+} = {}) {
+  const unsubUrl = `${APP_URL}/api/newsletter/unsubscribe?token=${unsubscribeToken}`;
+  return {
+    subject: `📬 Prospectia · L'édition ${monthLabel} · ${featuredArticleTitle || 'le meilleur du mois'}`,
+    html: layout({
+      preheader: featuredArticleTeaser || 'Stats sectorielles, templates qui convertissent, retours d\'expérience.',
+      accent: COLORS.brand,
+      content: `
+        ${hero({
+          emoji: '📬',
+          title: `Édition ${monthLabel}`,
+          greeting: 'Voici le meilleur du mois pour booster votre prospection B2B.',
+        })}
+
+        ${featuredArticleTitle ? `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0 0 16px;">
+          <tr>
+            <td style="padding:18px;background-color:${COLORS.brandLight};border-radius:10px;">
+              <p style="margin:0 0 6px;font-size:11px;color:${COLORS.brand};text-transform:uppercase;letter-spacing:1px;font-weight:600;">📖 Article du mois</p>
+              <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:${COLORS.text};line-height:1.3;">${featuredArticleTitle}</p>
+              ${featuredArticleTeaser ? `<p style="margin:0 0 10px;font-size:13px;color:${COLORS.textMuted};line-height:1.5;">${featuredArticleTeaser}</p>` : ''}
+              <a href="${featuredArticleUrl}" style="display:inline-block;padding:8px 14px;background-color:${COLORS.brand};color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">Lire l'article →</a>
+            </td>
+          </tr>
+        </table>
+        ` : ''}
+
+        ${statHeadline ? `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0 0 16px;">
+          <tr>
+            <td style="padding:18px;background-color:#fff;border:1px solid ${COLORS.line};border-radius:10px;">
+              <p style="margin:0 0 4px;font-size:11px;color:${COLORS.textMuted};text-transform:uppercase;letter-spacing:1px;font-weight:600;">📊 Chiffre du mois</p>
+              <p style="margin:0;font-size:24px;font-weight:700;color:${COLORS.brand};line-height:1.2;">${statHeadline}</p>
+              ${statBody ? `<p style="margin:8px 0 0;font-size:13px;color:${COLORS.textMuted};line-height:1.5;">${statBody}</p>` : ''}
+            </td>
+          </tr>
+        </table>
+        ` : ''}
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0 0 16px;">
+          <tr>
+            <td style="padding:18px;background-color:${COLORS.brandLight};border-radius:10px;">
+              <p style="margin:0 0 6px;font-size:11px;color:${COLORS.brand};text-transform:uppercase;letter-spacing:1px;font-weight:600;">📥 Ressource gratuite</p>
+              <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:${COLORS.text};line-height:1.3;">${resourceTitle}</p>
+              <a href="${resourceUrl}" style="display:inline-block;padding:8px 14px;background-color:${COLORS.brand};color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">Télécharger gratuit →</a>
+            </td>
+          </tr>
+        </table>
+
+        <div align="center">${ctaPrimary('Aller sur Prospectia', DASHBOARD_URL)}</div>
+
+        <p style="margin:24px 0 0;font-size:11px;color:${COLORS.textMuted};text-align:center;line-height:1.6;">
+          Vous recevez cet email mensuel car vous êtes inscrit à la newsletter Prospectia.<br>
+          <a href="${unsubUrl}" style="color:${COLORS.brand};text-decoration:underline;">Se désinscrire en 1 clic</a>
+        </p>
+
+        ${signOff()}
+      `,
+    }),
+  };
+}
