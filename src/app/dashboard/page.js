@@ -253,6 +253,18 @@ export default function Dashboard() {
       return;
     }
 
+    // ?upgrade=<planId> = post-signup avec plan pré-sélectionné depuis pricing.
+    // On déclenche un checkout Stripe direct (sans demander à l'user de
+    // re-cliquer un bouton — il a déjà fait le choix sur la landing).
+    if (['solo', 'pro', 'business'].includes(upgrade)) {
+      // Nettoie le cookie qui a survécu au signup
+      document.cookie = 'prospectia_signup_plan=; path=/; max-age=0';
+      // Déclenche le checkout avec un petit délai pour laisser le
+      // composant se monter et l'auth se stabiliser.
+      setTimeout(() => handleUpgrade(upgrade), 600);
+      return;
+    }
+
     if (upgrade !== 'success') return;
 
     // Affiche le toast "Paiement reçu, activation en cours..." immédiatement
@@ -750,10 +762,15 @@ export default function Dashboard() {
         body: JSON.stringify({ planId }),
       });
       const { url, error } = await res.json();
-      if (url) window.location.href = url;
-      if (error) alert(error);
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      // Erreur métier renvoyée par Stripe ou par notre backend
+      setUpgradeToast({ type: 'error', message: error || 'Erreur lors de la redirection vers le paiement.' });
     } catch (err) {
-      alert('Erreur lors de la redirection vers le paiement.');
+      // Erreur réseau ou parsing
+      setUpgradeToast({ type: 'error', message: 'Connexion impossible au serveur de paiement. Vérifiez votre connexion et réessayez.' });
     }
   };
 
@@ -1287,6 +1304,18 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-content-primary">Paiement annulé</p>
                 <p className="text-xs text-content-tertiary mt-0.5">Aucun montant n'a été débité. Vous pouvez réessayer à tout moment.</p>
+              </div>
+              <button onClick={() => setUpgradeToast(null)} className="text-content-muted hover:text-content-primary text-lg leading-none">×</button>
+            </div>
+          )}
+          {upgradeToast.type === 'error' && (
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-red-600/40 bg-red-600/[0.08] shadow-2xl">
+              <div className="p-1.5 rounded-lg bg-red-600/15 flex-shrink-0">
+                <span className="text-red-400 text-base">⚠</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-content-primary">Paiement impossible</p>
+                <p className="text-xs text-content-tertiary mt-0.5">{upgradeToast.message}</p>
               </div>
               <button onClick={() => setUpgradeToast(null)} className="text-content-muted hover:text-content-primary text-lg leading-none">×</button>
             </div>

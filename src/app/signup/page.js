@@ -5,9 +5,21 @@ import { getSupabase } from '@/lib/supabase';
 import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthBackgroundDecor from '@/components/AuthBackgroundDecor';
+
+// SVG inline Google logo officiel — pas dispo dans lucide
+function GoogleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+  );
+}
 
 function getPasswordStrength(password) {
   if (!password) return { score: 0, label: '', color: '' };
@@ -26,15 +38,15 @@ function getPasswordStrength(password) {
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const router = useRouter();
   const supabase = getSupabase();
   const { t } = useI18n();
@@ -43,16 +55,55 @@ export default function SignupPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Capture ?ref=XXX dans le cookie pour survie au signup (Supabase peut
-    // rediriger via /auth/callback et perdre le query string)
+    // Capture des paramètres viraux/marketing dans des cookies pour survie
+    // au signup (Supabase peut rediriger via /auth/callback et perdre le
+    // query string).
     try {
       const params = new URLSearchParams(window.location.search);
+
+      // ?ref=XXX → parrainage
       const ref = params.get('ref');
       if (ref && /^[a-zA-Z0-9]{4,12}$/.test(ref)) {
         document.cookie = `prospectia_ref=${encodeURIComponent(ref)}; path=/; max-age=2592000; SameSite=Lax`;
       }
+
+      // ?plan=solo|pro|business → user vient d'une card pricing.
+      // On stocke pour déclencher un checkout post-signup automatique.
+      const plan = params.get('plan');
+      if (plan && ['solo', 'pro', 'business'].includes(plan)) {
+        setSelectedPlan(plan);
+        document.cookie = `prospectia_signup_plan=${plan}; path=/; max-age=3600; SameSite=Lax`;
+      }
     } catch {}
   }, []);
+
+  // URL post-signup — si l'user a choisi un plan, le dashboard déclenchera
+  // l'upgrade automatiquement au mount.
+  const postSignupRedirect = selectedPlan ? `/dashboard?upgrade=${selectedPlan}` : '/dashboard';
+
+  // OAuth Google — bypass le signup form entièrement. Le provider doit
+  // être activé dans Supabase > Auth > Providers > Google.
+  const handleGoogleSignup = async () => {
+    setError('');
+    setOauthLoading(true);
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(postSignupRedirect)}`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+        setOauthLoading(false);
+      }
+      // Redirection auto vers Google si OK
+    } catch (err) {
+      setError(t('auth.genericError'));
+      setOauthLoading(false);
+    }
+  };
 
   // Helper : track le parrainage après login réussi
   async function trackReferralIfAny() {
@@ -91,12 +142,6 @@ export default function SignupPage() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (password !== confirmPassword) {
-      setError(t('auth.passwordMismatch'));
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -110,9 +155,10 @@ export default function SignupPage() {
       } else if (data?.user?.identities?.length === 0) {
         setError(t('auth.accountExists'));
       } else if (data?.session) {
-        // Auto-confirmed → track referral puis redirect
+        // Auto-confirmed → track referral puis redirect (avec ?upgrade=plan
+        // si l'user a cliqué depuis pricing)
         await trackReferralIfAny();
-        router.push('/dashboard');
+        router.push(postSignupRedirect);
       } else {
         // Email auto-confirmed by trigger but Supabase didn't return session
         // Sign in immediately since the trigger confirmed the email
@@ -122,7 +168,7 @@ export default function SignupPage() {
         });
         if (!signInError) {
           await trackReferralIfAny();
-          router.push('/dashboard');
+          router.push(postSignupRedirect);
         } else {
           // Fallback: show verification screen
           setSuccess(true);
@@ -196,9 +242,13 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-surface-base flex items-center justify-center px-4 relative overflow-hidden">
       <AuthBackgroundDecor />
-      <ThemeToggle className="absolute top-4 right-4" />
+      <ThemeToggle className="absolute top-4 right-4 z-10" />
+      <Link href="/" className="absolute top-4 left-4 z-10 inline-flex items-center gap-1.5 text-xs text-content-tertiary hover:text-content-primary transition">
+        <ArrowLeft size={12} />
+        Prospectia
+      </Link>
       <div
-        className={`w-full max-w-sm space-y-8 transition-all duration-700 ease-out ${
+        className={`relative w-full max-w-sm space-y-7 transition-all duration-700 ease-out ${
           mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
       >
@@ -207,13 +257,50 @@ export default function SignupPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
             <span className="text-lg font-bold text-white">P</span>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-content-primary">{t('auth.signup')}</h1>
+          <h1 className="mt-4 text-2xl font-bold text-content-primary">Prospectia<span className="text-rose-400">.ai</span></h1>
           <p className="mt-2 text-sm text-content-tertiary">
             {t('auth.signupTitle')}
           </p>
         </div>
 
-        {/* Form */}
+        {/* Bandeau "plan sélectionné" si l'user vient d'une card pricing */}
+        {selectedPlan && (
+          <div className="flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/5 px-3 py-2 text-xs">
+            <CheckCircle2 className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+            <span className="text-content-secondary">
+              Plan <strong className="capitalize text-content-primary">{selectedPlan}</strong> sélectionné — checkout après inscription.
+            </span>
+          </div>
+        )}
+
+        {/* Bouton OAuth Google — recommandé, en premier (taux conv +15-25%) */}
+        <button
+          type="button"
+          onClick={handleGoogleSignup}
+          disabled={oauthLoading || loading}
+          className="w-full rounded-lg border border-line bg-surface-card hover:bg-surface-elevated px-4 py-2.5 text-sm font-medium text-content-primary disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5"
+        >
+          {oauthLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <GoogleIcon />
+          )}
+          <span>Continuer avec Google</span>
+        </button>
+
+        {/* Séparateur */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-line" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 bg-surface-base text-[10px] uppercase tracking-wider text-content-muted font-semibold">
+              ou avec votre email
+            </span>
+          </div>
+        </div>
+
+        {/* Form email/password (simplifié — 1 champ password avec œil + force) */}
         <form onSubmit={handleSignup} className="space-y-4">
           {error && (
             <div className="flex items-start gap-3 rounded-lg border border-red-600/50 bg-red-600/10 px-4 py-3 text-sm text-red-400">
@@ -234,6 +321,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-4 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
                 placeholder={t('auth.emailPlaceholder')}
               />
@@ -253,6 +341,7 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                autoComplete="new-password"
                 className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
                 placeholder={t('auth.passwordPlaceholder')}
               />
@@ -261,6 +350,7 @@ export default function SignupPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-secondary transition-colors duration-200"
                 tabIndex={-1}
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -289,36 +379,9 @@ export default function SignupPage() {
             )}
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-content-secondary mb-1.5">
-              {t('settings.confirmPassword')}
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full rounded-lg border border-line bg-surface-card pl-10 pr-10 py-2.5 text-sm text-content-primary placeholder-content-muted focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                placeholder={t('auth.passwordPlaceholder')}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-secondary transition-colors duration-200"
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || oauthLoading}
             className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 disabled:bg-indigo-600/50 disabled:cursor-not-allowed disabled:hover:shadow-none transition-all duration-200 flex items-center justify-center gap-2"
           >
             {loading ? (
