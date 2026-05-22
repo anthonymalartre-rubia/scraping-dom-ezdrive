@@ -24,7 +24,14 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    alternates: { canonical: `https://prospectia.cloud/prospection/${categorySlug}` },
+    alternates: {
+      canonical: `https://prospectia.cloud/prospection/${categorySlug}`,
+      languages: {
+        'fr-FR': `https://prospectia.cloud/prospection/${categorySlug}`,
+        'fr-BE': `https://prospectia.cloud/prospection-be/${categorySlug}`,
+        'x-default': `https://prospectia.cloud/prospection/${categorySlug}`,
+      },
+    },
     openGraph: {
       title,
       description,

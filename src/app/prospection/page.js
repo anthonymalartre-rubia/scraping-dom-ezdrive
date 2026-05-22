@@ -6,7 +6,14 @@ import { B2B_GROUPS } from '@/lib/constants';
 export const metadata = {
   title: 'Prospection B2B France — 150 secteurs × 101 départements',
   description: 'Trouvez les emails B2B de toutes les entreprises françaises par secteur d\'activité et département. Restaurants, hôtels, avocats, garages, commerces — 15 000+ pages de prospection disponibles.',
-  alternates: { canonical: 'https://prospectia.cloud/prospection' },
+  alternates: {
+    canonical: 'https://prospectia.cloud/prospection',
+    languages: {
+      'fr-FR': 'https://prospectia.cloud/prospection',
+      'fr-BE': 'https://prospectia.cloud/prospection-be',
+      'x-default': 'https://prospectia.cloud/prospection',
+    },
+  },
   openGraph: {
     title: 'Prospection B2B France — Toutes catégories et départements',
     description: 'Trouvez les emails B2B de n\'importe quelle entreprise française. 150 secteurs × 101 départements.',

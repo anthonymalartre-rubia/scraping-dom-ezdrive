@@ -10,7 +10,14 @@ const SITE_URL = 'https://prospectia.cloud';
 export const metadata = {
   title: 'Prospection B2B Belgique francophone — Prospectia',
   description: 'Trouvez les emails B2B des entreprises de Wallonie et Bruxelles. 150 secteurs couverts, 6 provinces francophones. À partir de 19 €/mois — le ticket d\'entrée le moins cher du marché.',
-  alternates: { canonical: `${SITE_URL}/prospection-be` },
+  alternates: {
+    canonical: `${SITE_URL}/prospection-be`,
+    languages: {
+      'fr-FR': `${SITE_URL}/prospection`,
+      'fr-BE': `${SITE_URL}/prospection-be`,
+      'x-default': `${SITE_URL}/prospection`,
+    },
+  },
   openGraph: {
     title: 'Prospectia Belgique — Prospection B2B Wallonie & Bruxelles',
     description: '150 secteurs, 6 provinces francophones, scraping intelligent + recherche Google. À partir de 19 €/mois.',

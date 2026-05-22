@@ -7,7 +7,8 @@ import TopBar from '@/components/TopBar';
 import Sidebar from '@/components/Sidebar';
 import UsageBanner from '@/components/UsageBanner';
 import UpgradeBanner from '@/components/UpgradeBanner';
-import OnboardingChecklist from '@/components/OnboardingChecklist';
+// OnboardingChecklist : lazy load (widget non-critique, ne bloque pas le FCP)
+const OnboardingChecklist = lazy(() => import('@/components/OnboardingChecklist'));
 import LimitReachedModal from '@/components/LimitReachedModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -1393,8 +1394,10 @@ export default function Dashboard() {
         </Suspense>
       )}
 
-      {/* Checklist persistante (bottom-right, dismissable session) */}
-      <OnboardingChecklist />
+      {/* Checklist persistante (bottom-right, dismissable session) — lazy */}
+      <Suspense fallback={null}>
+        <OnboardingChecklist />
+      </Suspense>
 
       {limitModal && (
         <LimitReachedModal
