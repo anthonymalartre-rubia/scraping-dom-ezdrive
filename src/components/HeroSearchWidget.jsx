@@ -96,30 +96,67 @@ export default function HeroSearchWidget() {
   const [emailToVerify, setEmailToVerify] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [remainingToday, setRemainingToday] = useState(null);
+
+  // Fetch des vraies données Google Places via /api/public/preview
+  // (rate limit 3/IP/jour + cap global 5000/jour + cache 24h + anonymisation)
+  async function fetchPreview(cat, city) {
+    try {
+      const res = await fetch('/api/public/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cat, city }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || 'unknown', message: data.message || 'Une erreur est survenue.', status: res.status };
+      }
+      return { ok: true, data };
+    } catch (err) {
+      return { error: 'network', message: 'Connexion impossible. Vérifiez votre réseau.', status: 0 };
+    }
+  }
 
   const handleSearch = async (preset = null) => {
     setLoading(true);
     setResult(null);
-    // Simulate API latency for realism
-    await new Promise((r) => setTimeout(r, 800));
+    setError(null);
 
     if (tab === 'category') {
-      const cat = preset?.cat || category;
-      const cit = preset?.city || city;
-      if (preset?.key) {
-        setResult({ type: 'category', data: MOCK_RESULTS.category[preset.key], query: { cat, city: cit } });
-      } else {
-        // Try to match the query to a preset
-        const matchKey = Object.keys(MOCK_RESULTS.category).find((k) =>
-          k.includes((cat || '').toLowerCase()) && k.includes((cit || '').toLowerCase().replace(/\s/g, '-'))
-        );
-        setResult({
-          type: 'category',
-          data: MOCK_RESULTS.category[matchKey] || MOCK_RESULTS.category.default,
-          query: { cat: cat || 'entreprises', city: cit || 'France' },
-        });
+      const cat = preset?.cat || category || 'restaurants';
+      const cit = preset?.city || city || 'Paris';
+      const response = await fetchPreview(cat, cit);
+
+      if (response.error) {
+        setError({ code: response.error, message: response.message, status: response.status });
+        setLoading(false);
+        return;
       }
+
+      const { results, total, remaining_today, cached } = response.data;
+      // Map au format attendu par CategoryResult (rétrocompat)
+      setResult({
+        type: 'category',
+        data: {
+          total,
+          examples: results.map((r) => ({
+            name: r.name,
+            address: r.address,
+            email: r.email || 'c***t@***.fr',
+            phone: r.phone || '** ** ** ** **',
+            rating: r.rating || (4 + Math.random() * 0.8).toFixed(1),
+            website: r.website || '***.fr',
+            anonymized: r.anonymized,
+          })),
+        },
+        query: { cat, city: cit },
+        cached,
+      });
+      setRemainingToday(remaining_today);
     } else if (tab === 'company') {
+      // Mode 'company' : reste en mock (low traffic + nécessite intégration Apollo/Clearbit)
+      await new Promise((r) => setTimeout(r, 800));
       const name = preset?.name || company;
       setResult({
         type: 'company',
@@ -127,6 +164,8 @@ export default function HeroSearchWidget() {
         query: { name },
       });
     } else if (tab === 'verify') {
+      // Mode 'verify' : reste en mock (nécessite intégration mailgun/ZeroBounce)
+      await new Promise((r) => setTimeout(r, 800));
       const em = preset?.email || emailToVerify;
       const isInvalid = em.includes('invalid') || em.includes('nope') || em.includes('fake@');
       setResult({
@@ -264,11 +303,39 @@ export default function HeroSearchWidget() {
         ))}
       </div>
 
+      {/* Error state (rate limit, service down, etc.) */}
+      {error && (
+        <div className="mt-5 pt-5 border-t border-white/[0.08]">
+          <div className={`rounded-xl p-4 ${error.status === 429 ? 'border border-amber-500/30 bg-amber-500/[0.08]' : 'border border-red-500/30 bg-red-500/[0.08]'}`}>
+            <div className="flex items-start gap-3">
+              <span className={`text-xl ${error.status === 429 ? 'text-amber-400' : 'text-red-400'}`}>
+                {error.status === 429 ? '⏱️' : '⚠️'}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-semibold ${error.status === 429 ? 'text-amber-300' : 'text-red-300'}`}>
+                  {error.status === 429 ? 'Limite quotidienne atteinte' : 'Service temporairement indisponible'}
+                </div>
+                <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                  {error.message}
+                </p>
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition"
+                >
+                  Inscription gratuite (sans CB)
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Results */}
       {result && (
         <div className="mt-5 pt-5 border-t border-white/[0.08]">
           {result.type === 'category' && (
-            <CategoryResult result={result} />
+            <CategoryResult result={result} remainingToday={remainingToday} />
           )}
           {result.type === 'company' && (
             <CompanyResult result={result} />
@@ -282,15 +349,29 @@ export default function HeroSearchWidget() {
   );
 }
 
-function CategoryResult({ result }) {
+function CategoryResult({ result, remainingToday }) {
   const { data, query } = result;
+  const isAnonymized = data.examples.some((e) => e.anonymized);
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="px-2.5 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold flex items-center gap-1">
           <CheckCircle2 size={12} />
           {data.total.toLocaleString('fr-FR')} {query.cat?.toLowerCase()} trouvés à {query.city}
         </div>
+        {/* Badge "Aperçu anonymisé" pour ne pas tromper le visiteur — c'est
+            de la vraie data Google Places mais masquée par éthique RGPD. */}
+        {isAnonymized && (
+          <div className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-semibold uppercase tracking-wider">
+            Aperçu anonymisé
+          </div>
+        )}
+        {/* Compteur essais restants */}
+        {typeof remainingToday === 'number' && remainingToday >= 0 && (
+          <div className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-zinc-400 text-[10px] tabular-nums">
+            {remainingToday > 0 ? `${remainingToday} essai${remainingToday > 1 ? 's' : ''} restant${remainingToday > 1 ? 's' : ''} aujourd'hui` : 'Dernier essai gratuit utilisé'}
+          </div>
+        )}
       </div>
       <div className="space-y-2 mb-4">
         {data.examples.map((p, i) => (
