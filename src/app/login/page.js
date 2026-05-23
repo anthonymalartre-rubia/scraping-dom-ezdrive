@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthBackgroundDecor from '@/components/AuthBackgroundDecor';
+import { GOOGLE_OAUTH_ENABLED } from '@/lib/auth-config';
 import { Button, Input } from '@/components/ui';
 
 // SVG inline Google logo officiel — pas dispo dans lucide
@@ -108,32 +109,37 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Bouton OAuth Google */}
-        <div className="mb-6">
-          <Button
-            variant="secondary"
-            size="md"
-            fullWidth
-            onClick={handleGoogleLogin}
-            loading={oauthLoading}
-            disabled={loading}
-          >
-            {!oauthLoading && <GoogleIcon />}
-            Continuer avec Google
-          </Button>
-        </div>
+        {/* Bouton OAuth Google + séparateur — affichés uniquement si
+            Google OAuth est configuré dans Supabase + Google Cloud Console.
+            Voir src/lib/auth-config.js pour la procédure d'activation. */}
+        {GOOGLE_OAUTH_ENABLED && (
+          <>
+            <div className="mb-6">
+              <Button
+                variant="secondary"
+                size="md"
+                fullWidth
+                onClick={handleGoogleLogin}
+                loading={oauthLoading}
+                disabled={loading}
+              >
+                {!oauthLoading && <GoogleIcon />}
+                Continuer avec Google
+              </Button>
+            </div>
 
-        {/* Séparateur */}
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-line" />
-          </div>
-          <div className="relative flex justify-center">
-            <span className="px-3 bg-surface-base text-[10px] uppercase tracking-wider text-content-muted font-semibold">
-              ou avec votre email
-            </span>
-          </div>
-        </div>
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-line" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-3 bg-surface-base text-[10px] uppercase tracking-wider text-content-muted font-semibold">
+                  ou avec votre email
+                </span>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
