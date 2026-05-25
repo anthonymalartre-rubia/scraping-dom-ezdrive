@@ -3,15 +3,20 @@
 import { cleanEnv } from './envClean';
 
 // From address par défaut.
-// TODO: migrate to send.volia.fr after Resend domain re-verification (Phase D).
-// Pour l'instant, le domaine `prospectia.cloud` reste vérifié sur Resend
-// (DKIM, SPF, MX sur le sous-domaine `send`). Tant que la migration DNS
-// n'est pas faite, le fallback `onboarding@resend.dev` prendra le relai
-// si Resend refuse l'envoi depuis hello@volia.fr.
+// Domaine `volia.fr` vérifié sur Resend depuis mai 2026 (post-rebrand
+// Prospectia → Volia). Configuration hybride :
+//   - DKIM TXT à l'apex (resend._domainkey.volia.fr) → DMARC alignment OK
+//   - MX + SPF sur le sous-domaine `send.volia.fr` (isolé de l'apex,
+//     pour ne pas casser le MX Infomaniak qui sert `*@volia.fr`)
+//   - "Enable Receiving" OFF côté Resend (Infomaniak Mail gère la réception)
 //
-// IMPORTANT : pour une délivrabilité optimale, il faudrait ajouter
-// `include:amazonses.com` au SPF racine du domaine (TXT @). Sans ça,
-// SPF check échoue côté destinataire mais DKIM compense (DMARC alignment).
+// Note délivrabilité : on envoie From: hello@volia.fr. DKIM signe avec la clé
+// volia.fr → aligne avec le From. SPF check passe car Resend utilise
+// `bounce@send.volia.fr` comme envelope sender (qui a son propre SPF
+// include:amazonses.com). DMARC valide via DKIM alignment.
+//
+// Fallback `onboarding@resend.dev` : sandbox Resend qui marche même si le
+// domaine custom est rejeté (utile en preview/staging avec une clé test).
 //
 // Surchargeable via RESEND_FROM_ADDRESS pour les déploiements preview/staging.
 const DEFAULT_FROM = 'Volia <hello@volia.fr>';
