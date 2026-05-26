@@ -39,6 +39,7 @@ export default function NewDealModal({
   onCreated,
   pipelineId,
   defaultStageId,
+  defaultContactId, // Phase 3 : pré-remplit le contact (utilisé depuis la page détail contact)
   stages = [],
   contacts = [],
 }) {
@@ -57,6 +58,7 @@ export default function NewDealModal({
       setForm({
         ...EMPTY_FORM,
         stage_id: defaultStageId || stages[0]?.id || '',
+        contact_id: defaultContactId || '',
       });
       setNewContactMode(false);
       setNewContact({ ...EMPTY_CONTACT });
@@ -65,7 +67,7 @@ export default function NewDealModal({
       setError('');
       setTimeout(() => titleInputRef.current?.focus(), 50);
     }
-  }, [open, defaultStageId, stages]);
+  }, [open, defaultStageId, defaultContactId, stages]);
 
   // Escape pour fermer
   useEffect(() => {

@@ -35,6 +35,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  KanbanSquare,
+  Lock,
 } from "lucide-react";
 import { DEPTS } from "@/lib/constants";
 import { computeLeadScore, getScoreLabel } from "@/lib/scoring";
@@ -430,6 +432,8 @@ export default memo(function ResultsPanel({
   onBulkDeleteProspects,
   onBulkUpdateProspects,
   onStartSearch,
+  onSendToCrm,           // Phase 3 : ({ prospects: [...] }) => void
+  hasCrmAccess = false,  // Phase 3 : true si user.plan ∈ {business, enterprise}
 }) {
   const { t } = useI18n();
   const [searchText, setSearchText] = useState("");
@@ -1278,6 +1282,30 @@ export default memo(function ResultsPanel({
               <Trash2 size={12} />
               {t('results.delete')}
             </button>
+
+            {/* Phase 3 : Send to CRM. Toujours visible (CTA = signal de valeur
+                pour les users free → Business). Pour les non-Business on
+                affiche le lock icon ; le parent ouvre la modale upgrade.    */}
+            {onSendToCrm && (
+              <button
+                onClick={() => {
+                  const ids = Array.from(selectedIds);
+                  const list = prospects.filter((p) => ids.includes(p.id));
+                  onSendToCrm({ prospects: list });
+                }}
+                title={hasCrmAccess ? 'Envoyer ces prospects dans votre CRM' : 'Réservé au plan Business'}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition
+                  ${hasCrmAccess
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 shadow-sm shadow-emerald-500/20'
+                    : 'bg-zinc-100 text-zinc-600 border border-zinc-200 hover:bg-zinc-200'}
+                `}
+              >
+                {hasCrmAccess ? <KanbanSquare size={12} /> : <Lock size={11} />}
+                Envoyer vers CRM
+              </button>
+            )}
+
             <button
               onClick={() => setSelectedIds(new Set())}
               className="ml-auto text-[11px] text-content-muted hover:text-content-secondary transition"

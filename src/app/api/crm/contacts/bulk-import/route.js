@@ -1,9 +1,16 @@
 // POST /api/crm/contacts/bulk-import
-// Body : { contacts: [{ name, email, phone, company, position, source_ref_id }], source?: 'prospection'|'manual'|'campagnes'|'import', mode?: 'skip'|'update' }
+// Body : {
+//   contacts: [{ name, email, phone, company, position, source_ref_id }],
+//   source?: 'prospection'|'manual'|'campagnes'|'import',
+//   mode?: 'skip'|'update',
+//   createDeals?: { pipeline_id, stage_id }   // Phase 3 : crée 1 deal par contact
+// }
 // Insert bulk avec dédup par (user_id, lower(email)) :
 //   - mode 'skip' (défaut) : ignore les doublons
 //   - mode 'update'        : met à jour les champs non-vides du contact existant
-// Retourne { success, data: { created, skipped, updated, errors } }
+// Si createDeals est fourni, 1 deal est créé par contact (créé OU mis à jour)
+// dans la stage spécifiée (title = nom du contact, value = 0, status = 'open').
+// Retourne { success, data: { created, skipped, updated, deals_created, errors } }
 
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
@@ -68,6 +75,32 @@ export async function POST(request) {
   const defaultSource = VALID_SOURCES.includes(body.source) ? body.source : 'import';
   const mode = body.mode === 'update' ? 'update' : 'skip';
 
+  // Phase 3 : option pour créer 1 deal par contact dans une stage donnée.
+  // On valide le pipeline_id / stage_id avant de toucher quoi que ce soit
+  // pour ne pas se retrouver avec des contacts créés mais des deals KO.
+  let createDealsCfg = null;
+  if (
+    body.createDeals &&
+    typeof body.createDeals === 'object' &&
+    typeof body.createDeals.pipeline_id === 'string' &&
+    typeof body.createDeals.stage_id === 'string'
+  ) {
+    const { pipeline_id, stage_id } = body.createDeals;
+    const { data: stage, error: stageErr } = await supabase
+      .from('crm_stages')
+      .select('id, pipeline_id, closing_type')
+      .eq('id', stage_id)
+      .eq('pipeline_id', pipeline_id)
+      .maybeSingle();
+    if (stageErr || !stage) {
+      return NextResponse.json(
+        { success: false, error: 'Stage introuvable ou ne correspond pas au pipeline' },
+        { status: 400 }
+      );
+    }
+    createDealsCfg = { pipeline_id, stage_id, closing_type: stage.closing_type };
+  }
+
   // 1. Normalise et filtre les contacts invalides
   const normalized = [];
   let invalidCount = 0;
@@ -106,16 +139,37 @@ export async function POST(request) {
   let skipped = 0;
   let updated = 0;
   const errors = [];
+  // Phase 3 : on collecte les contacts touchés (créés OU updated) pour
+  // créer les deals associés à la fin, si createDealsCfg est défini.
+  // { id, name } — id est null si createDeals=false (on ne fait rien).
+  const touchedContacts = [];
 
   // 4. Contacts sans email : insert direct (pas de dédup)
   if (withoutEmail.length > 0) {
-    const { error: insErr, count } = await supabase
-      .from('crm_contacts')
-      .insert(withoutEmail, { count: 'exact' });
-    if (insErr) {
-      errors.push(`Insert sans email: ${insErr.message}`);
+    // Si on doit créer des deals, on récupère les ids via select().
+    // Sinon insert simple avec count (plus rapide).
+    if (createDealsCfg) {
+      const { data: inserted, error: insErr } = await supabase
+        .from('crm_contacts')
+        .insert(withoutEmail)
+        .select('id, name');
+      if (insErr) {
+        errors.push(`Insert sans email: ${insErr.message}`);
+      } else if (inserted) {
+        created += inserted.length;
+        for (const row of inserted) {
+          touchedContacts.push({ id: row.id, name: row.name });
+        }
+      }
     } else {
-      created += count ?? withoutEmail.length;
+      const { error: insErr, count } = await supabase
+        .from('crm_contacts')
+        .insert(withoutEmail, { count: 'exact' });
+      if (insErr) {
+        errors.push(`Insert sans email: ${insErr.message}`);
+      } else {
+        created += count ?? withoutEmail.length;
+      }
     }
   }
 
@@ -143,13 +197,28 @@ export async function POST(request) {
   }
 
   if (newDeduped.length > 0) {
-    const { error: insErr, count } = await supabase
-      .from('crm_contacts')
-      .insert(newDeduped, { count: 'exact' });
-    if (insErr) {
-      errors.push(`Insert avec email: ${insErr.message}`);
+    if (createDealsCfg) {
+      const { data: inserted, error: insErr } = await supabase
+        .from('crm_contacts')
+        .insert(newDeduped)
+        .select('id, name');
+      if (insErr) {
+        errors.push(`Insert avec email: ${insErr.message}`);
+      } else if (inserted) {
+        created += inserted.length;
+        for (const row of inserted) {
+          touchedContacts.push({ id: row.id, name: row.name });
+        }
+      }
     } else {
-      created += count ?? newDeduped.length;
+      const { error: insErr, count } = await supabase
+        .from('crm_contacts')
+        .insert(newDeduped, { count: 'exact' });
+      if (insErr) {
+        errors.push(`Insert avec email: ${insErr.message}`);
+      } else {
+        created += count ?? newDeduped.length;
+      }
     }
   }
 
@@ -166,6 +235,11 @@ export async function POST(request) {
         if (c.source_ref_id) patch.source_ref_id = c.source_ref_id;
         if (Object.keys(patch).length === 0) {
           skipped++;
+          // En mode update, même sans patch on considère le contact "touched"
+          // pour la création de deal si demandé.
+          if (createDealsCfg) {
+            touchedContacts.push({ id: c.id, name: c.name });
+          }
           continue;
         }
         const { error: upErr } = await supabase
@@ -176,15 +250,63 @@ export async function POST(request) {
           errors.push(`Update ${c.email}: ${upErr.message}`);
         } else {
           updated++;
+          if (createDealsCfg) {
+            touchedContacts.push({ id: c.id, name: c.name });
+          }
         }
       }
     } else {
       skipped += existingOnes.length;
+      // mode skip : on ne crée PAS de deal pour les contacts ignorés.
+      // Si l'user voulait des deals pour les doublons, qu'il choisisse update.
+    }
+  }
+
+  // ─── Phase 3 : création des deals ──────────────────────────
+  let dealsCreated = 0;
+  if (createDealsCfg && touchedContacts.length > 0) {
+    let status = 'open';
+    let closedAt = null;
+    if (createDealsCfg.closing_type === 'won') {
+      status = 'won';
+      closedAt = new Date().toISOString();
+    } else if (createDealsCfg.closing_type === 'lost') {
+      status = 'lost';
+      closedAt = new Date().toISOString();
+    }
+
+    const dealsPayload = touchedContacts.map((c) => ({
+      user_id: user.id,
+      contact_id: c.id,
+      pipeline_id: createDealsCfg.pipeline_id,
+      stage_id: createDealsCfg.stage_id,
+      title: c.name?.slice(0, 200) || 'Nouveau deal',
+      value_cents: 0,
+      currency: 'EUR',
+      status,
+      closed_at: closedAt,
+      position: 0,
+    }));
+
+    const { error: dealsErr, count } = await supabase
+      .from('crm_deals')
+      .insert(dealsPayload, { count: 'exact' });
+    if (dealsErr) {
+      errors.push(`Création deals: ${dealsErr.message}`);
+    } else {
+      dealsCreated = count ?? dealsPayload.length;
     }
   }
 
   return NextResponse.json({
     success: true,
-    data: { created, skipped, updated, invalid: invalidCount, errors: errors.length ? errors : undefined },
+    data: {
+      created,
+      skipped,
+      updated,
+      invalid: invalidCount,
+      deals_created: dealsCreated,
+      errors: errors.length ? errors : undefined,
+    },
   });
 }

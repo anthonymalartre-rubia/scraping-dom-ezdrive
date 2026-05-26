@@ -22,6 +22,9 @@ const SearchPanel = lazy(() => import('@/components/SearchPanel'));
 const ResultsPanel = lazy(() => import('@/components/ResultsPanel'));
 const ExportPanel = lazy(() => import('@/components/ExportPanel'));
 const EmailVerifier = lazy(() => import('@/components/EmailVerifier'));
+// Phase 3 : modales CRM (Send to CRM + Upgrade) — lazy car non-critique
+const SendToCrmModal = lazy(() => import('@/components/crm/SendToCrmModal'));
+const UpgradeCrmModal = lazy(() => import('@/components/crm/UpgradeCrmModal'));
 // OnboardingOverlay (5 modals plein écran) supprimé en mai 2026 :
 // pattern intrusif "tour produit" remplacé par l'approche Linear :
 // barre progress discrète en top + hints contextuels inline. Voir
@@ -190,6 +193,11 @@ export default function Dashboard() {
   const [userUsage, setUserUsage] = useState(null);
   // Toast post-Stripe (retour de checkout) — { type: 'success'|'cancelled', planName? }
   const [upgradeToast, setUpgradeToast] = useState(null);
+  // Phase 3 — Send to CRM
+  // sendToCrmList = array de prospects (vide si modal fermé)
+  // upgradeCrmOpen = bool — affiche la modale upgrade si l'user n'a pas Business
+  const [sendToCrmList, setSendToCrmList] = useState(null);
+  const [upgradeCrmOpen, setUpgradeCrmOpen] = useState(false);
   // Modal "limite atteinte" affichée quand une API renvoie 429
   // { type: 'searches'|'enrichments', current, limit, processed?, total? } | null
   const [limitModal, setLimitModal] = useState(null);
@@ -1202,6 +1210,21 @@ export default function Dashboard() {
     }
   }, [supabase]);
 
+  // Phase 3 — Envoyer une sélection de prospects vers le CRM.
+  // - Si l'user a Business : ouvre SendToCrmModal avec la liste.
+  // - Sinon : ouvre UpgradeCrmModal (CTA Business).
+  // Le bouton est rendu par ResultsPanel quand selectedIds.size > 0.
+  const handleSendToCrm = useCallback(({ prospects: list }) => {
+    const hasBusinessAccess =
+      userPlan?.id === 'business' || userPlan?.id === 'enterprise';
+    if (!hasBusinessAccess) {
+      setUpgradeCrmOpen(true);
+      return;
+    }
+    if (!Array.isArray(list) || list.length === 0) return;
+    setSendToCrmList(list);
+  }, [userPlan]);
+
   // CSV export with injection protection.
   // Signature : (filteredList?). On a retiré le param 'format' qui était
   // dead code depuis le retrait de l'export Zoho. ExportPanel et ResultsPanel
@@ -1453,6 +1476,8 @@ export default function Dashboard() {
                   onCreateTag={createTag}
                   onDeleteTag={deleteTag}
                   onToggleProspectTag={toggleProspectTag}
+                  onSendToCrm={handleSendToCrm}
+                  hasCrmAccess={userPlan?.id === 'business' || userPlan?.id === 'enterprise'}
                 />
               )}
               {activeView === 'export' && (
@@ -1488,6 +1513,25 @@ export default function Dashboard() {
           onClose={() => setLimitModal(null)}
           onUpgrade={() => { setLimitModal(null); handleUpgrade('pro'); }}
         />
+      )}
+
+      {/* Phase 3 — Modales CRM (lazy-loaded uniquement à l'ouverture) */}
+      {sendToCrmList && (
+        <Suspense fallback={null}>
+          <SendToCrmModal
+            open={true}
+            onClose={() => setSendToCrmList(null)}
+            prospects={sendToCrmList}
+          />
+        </Suspense>
+      )}
+      {upgradeCrmOpen && (
+        <Suspense fallback={null}>
+          <UpgradeCrmModal
+            open={true}
+            onClose={() => setUpgradeCrmOpen(false)}
+          />
+        </Suspense>
       )}
     </div>
   );

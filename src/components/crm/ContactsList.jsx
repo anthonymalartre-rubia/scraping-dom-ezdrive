@@ -1,0 +1,285 @@
+'use client';
+
+// ─────────────────────────────────────────────────────────────────────
+// ContactsList — table de contacts réutilisable (Phase 3).
+// ─────────────────────────────────────────────────────────────────────
+// Props :
+//   - contacts : array
+//   - onEdit?(contact) : action ligne (icône Pencil)
+//   - onDelete?(contact) : action ligne (icône Trash2 — sera confirmée par le parent)
+//   - onClick?(contact) : clic sur la ligne (ouvre détail)
+//   - loading : bool
+//   - emptyState : ReactNode (affiché si contacts.length === 0 && !loading)
+//
+// Design : light mode, accent emerald/teal (cohérent CRM Phase 2),
+// avatars en gradient violet (initiales 2 lettres).
+// ─────────────────────────────────────────────────────────────────────
+
+import { Mail, Phone, Pencil, Trash2, Loader2, Building2 } from 'lucide-react';
+
+// Palette de gradients violets/cyan/indigo pour les avatars contacts.
+// Choisi de manière déterministe selon le nom (hash basique) pour qu'un
+// même contact ait toujours la même couleur entre 2 reloads.
+const AVATAR_GRADIENTS = [
+  'from-violet-500 to-indigo-600',
+  'from-purple-500 to-violet-600',
+  'from-fuchsia-500 to-purple-600',
+  'from-indigo-500 to-blue-600',
+  'from-sky-500 to-indigo-600',
+  'from-cyan-500 to-teal-600',
+  'from-emerald-500 to-teal-600',
+  'from-rose-500 to-pink-600',
+];
+
+function avatarGradient(seed = '') {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  const idx = Math.abs(hash) % AVATAR_GRADIENTS.length;
+  return AVATAR_GRADIENTS[idx];
+}
+
+function initials(name = '') {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '??';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const SOURCE_BADGES = {
+  manual: {
+    label: 'manuel',
+    className: 'bg-violet-50 text-violet-700 border-violet-200',
+    tip: 'Contact créé manuellement',
+  },
+  prospection: {
+    label: 'prospection',
+    className: 'bg-violet-50 text-violet-700 border-violet-200',
+    tip: 'Importé depuis la Prospection',
+  },
+  campagnes: {
+    label: 'campagnes',
+    className: 'bg-blue-50 text-blue-700 border-blue-200',
+    tip: 'Provenance Campagnes',
+  },
+  import: {
+    label: 'import',
+    className: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    tip: 'Import CSV / bulk',
+  },
+};
+
+function SourceBadge({ source }) {
+  const cfg = SOURCE_BADGES[source] || SOURCE_BADGES.manual;
+  return (
+    <span
+      title={cfg.tip}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.className} whitespace-nowrap`}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return '—';
+  }
+}
+
+export default function ContactsList({
+  contacts = [],
+  onEdit,
+  onDelete,
+  onClick,
+  loading = false,
+  emptyState = null,
+}) {
+  if (loading && contacts.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={28} className="animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  if (!loading && contacts.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        {emptyState || (
+          <p className="text-sm text-content-tertiary">Aucun contact pour le moment.</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-line bg-surface-base overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-surface-card border-b border-line">
+            <tr>
+              <th className="w-12 px-4 py-3" />
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted">
+                Nom
+              </th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted">
+                Email
+              </th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted hidden md:table-cell">
+                Téléphone
+              </th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted hidden lg:table-cell">
+                Entreprise
+              </th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted hidden sm:table-cell">
+                Source
+              </th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-content-muted hidden xl:table-cell">
+                Date
+              </th>
+              <th className="w-24 px-3 py-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {contacts.map((c) => {
+              const grad = avatarGradient(c.name || c.email || c.id);
+              return (
+                <tr
+                  key={c.id}
+                  onClick={() => onClick?.(c)}
+                  className="border-b border-line/70 last:border-b-0 hover:bg-zinc-50 transition-colors cursor-pointer group"
+                >
+                  {/* Avatar */}
+                  <td className="pl-4 pr-1 py-3">
+                    <div
+                      className={`w-9 h-9 rounded-full bg-gradient-to-br ${grad} flex items-center justify-center shadow-sm ring-1 ring-white`}
+                    >
+                      <span className="text-[11px] font-bold text-white tracking-wider">
+                        {initials(c.name)}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Nom */}
+                  <td className="px-3 py-3 min-w-0">
+                    <div className="font-semibold text-content-primary truncate max-w-[200px]">
+                      {c.name || '—'}
+                    </div>
+                    {c.position && (
+                      <div className="text-[11px] text-content-tertiary truncate max-w-[200px]">
+                        {c.position}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Email */}
+                  <td className="px-3 py-3">
+                    {c.email ? (
+                      <a
+                        href={`mailto:${c.email}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 text-[12px] text-emerald-700 hover:text-emerald-900 hover:underline truncate max-w-[220px]"
+                      >
+                        <Mail size={11} className="text-emerald-500 flex-shrink-0" />
+                        <span className="truncate">{c.email}</span>
+                      </a>
+                    ) : (
+                      <span className="text-content-faint text-[11px]">—</span>
+                    )}
+                  </td>
+
+                  {/* Téléphone */}
+                  <td className="px-3 py-3 hidden md:table-cell">
+                    {c.phone ? (
+                      <a
+                        href={`tel:${c.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 text-[12px] text-content-secondary hover:text-content-primary"
+                      >
+                        <Phone size={11} className="text-content-tertiary" />
+                        <span className="font-mono">{c.phone}</span>
+                      </a>
+                    ) : (
+                      <span className="text-content-faint text-[11px]">—</span>
+                    )}
+                  </td>
+
+                  {/* Entreprise */}
+                  <td className="px-3 py-3 hidden lg:table-cell">
+                    {c.company ? (
+                      <div className="inline-flex items-center gap-1.5 text-[12px] text-content-secondary truncate max-w-[180px]">
+                        <Building2 size={11} className="text-content-tertiary flex-shrink-0" />
+                        <span className="truncate">{c.company}</span>
+                      </div>
+                    ) : (
+                      <span className="text-content-faint text-[11px]">—</span>
+                    )}
+                  </td>
+
+                  {/* Source */}
+                  <td className="px-3 py-3 hidden sm:table-cell">
+                    <SourceBadge source={c.source} />
+                  </td>
+
+                  {/* Date */}
+                  <td className="px-3 py-3 hidden xl:table-cell">
+                    <span className="text-[11px] text-content-tertiary tabular-nums">
+                      {formatDate(c.created_at)}
+                    </span>
+                  </td>
+
+                  {/* Actions hover */}
+                  <td className="pr-4 pl-1 py-3 text-right">
+                    <div className="inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {onEdit && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(c);
+                          }}
+                          className="p-1.5 rounded-md text-content-tertiary hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                          title="Éditer"
+                          aria-label="Éditer le contact"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(c);
+                          }}
+                          className="p-1.5 rounded-md text-content-tertiary hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          title="Supprimer"
+                          aria-label="Supprimer le contact"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// Exports utilitaires réutilisables ailleurs (page détail contact).
+export { initials, avatarGradient, SourceBadge, formatDate };
