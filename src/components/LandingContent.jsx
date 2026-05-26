@@ -13,6 +13,7 @@ import TrustpilotReviewsBlock from '@/components/TrustpilotReviewsBlock';
 import { LogoIcon } from '@/components/ui';
 import TrustpilotBadge from '@/components/TrustpilotBadge';
 import MotionInView from '@/components/MotionInView';
+import { useForceLightTheme } from '@/lib/use-force-light-theme';
 
 function formatPrice(cents) {
   if (cents === 0) return '0';
@@ -165,44 +166,45 @@ export default function LandingContent() {
 
             {/* ─── COLONNE GAUCHE : Copy ─── */}
             <div className="text-left animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {/* Badge "Le moins cher" */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-100 to-violet-100 border border-emerald-300 text-xs mb-6 font-medium shadow-sm">
+              {/* Badge "Le moins cher" — renforcé (border-2, shadow plus prononcé) */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-100 to-violet-100 border-2 border-emerald-300 text-xs mb-6 font-medium shadow-sm shadow-emerald-500/10">
                 <TrendingDown size={12} className="text-emerald-600" />
                 <span className="text-emerald-700 font-bold">LE MOINS CHER DU MARCHÉ FRANÇAIS</span>
               </div>
 
-              {/* H1 MASSIVE */}
+              {/* H1 MASSIVE — outcome-focused : 1 000 prospects, 30 secondes */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[80px] font-bold tracking-tight leading-[1.02] mb-6">
-                <span className="text-content-primary">L&apos;email de </span>
-                <span className="bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">toute entreprise</span>
-                <span className="text-content-primary"> française.</span>
+                <span className="text-content-primary">Trouvez </span>
+                <span className="bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">1 000 prospects</span>
+                <span className="text-content-primary"> qualifiés en France. </span>
+                <span className="bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">En 30 secondes.</span>
               </h1>
 
-              {/* Sous-titre */}
+              {/* Sous-titre — pain + benefit + preuve sociale */}
               <p className="text-lg sm:text-xl text-content-secondary mb-8 leading-relaxed max-w-xl">
-                Scraping intelligent + recherche Google.{' '}
-                <strong className="text-content-primary font-semibold">150+ secteurs, 101 départements</strong>.
-                À partir de 19 €/mois.
+                Stop les 8 h/jour sur LinkedIn. Volia extrait{' '}
+                <strong className="text-content-primary font-semibold">emails pros + téléphones</strong> de 287 000+ entreprises françaises.{' '}
+                <strong className="text-emerald-700 font-semibold">5× moins cher qu&apos;Apollo</strong>, 100 % conforme RGPD.
               </p>
 
-              {/* CTAs */}
+              {/* CTAs — py-5 (plus de présence), shadow plus prononcé */}
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Link
                   href="/signup"
-                  className="group inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all"
+                  className="group inline-flex items-center justify-center gap-2 px-8 py-5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-xl shadow-violet-500/30 hover:shadow-2xl hover:shadow-violet-500/50 hover:-translate-y-0.5 transition-all text-base"
                 >
                   Démarrer gratuitement
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link
-                  href="#pricing"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl border-2 border-line-hover hover:border-violet-400 hover:bg-violet-50 text-content-primary font-semibold transition-all"
+                <a
+                  href="#try-live"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-5 rounded-xl border-2 border-line-hover hover:border-violet-400 hover:bg-violet-50 text-content-primary font-semibold transition-all text-base"
                 >
-                  Voir les tarifs
-                </Link>
+                  Voir une démo en direct
+                </a>
               </div>
 
-              {/* Avatars stack + social proof */}
+              {/* Avatars stack + stat punchy (vs ancien "SDR, freelances...") */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex -space-x-2">
                   {[
@@ -214,15 +216,15 @@ export default function LandingContent() {
                   ].map((a, i) => (
                     <div
                       key={i}
-                      className={`w-9 h-9 rounded-full bg-gradient-to-br ${a.color} ring-2 ring-white flex items-center justify-center text-white text-xs font-bold shadow-md`}
+                      className={`w-9 h-9 rounded-full bg-gradient-to-br ${a.color} ring-2 ring-white flex items-center justify-center text-white text-xs font-bold shadow-md hover:scale-110 hover:z-10 transition-transform cursor-default`}
                     >
                       {a.initials}
                     </div>
                   ))}
                 </div>
                 <div className="text-sm">
-                  <div className="font-semibold text-content-primary">SDR, freelances, fondateurs</div>
-                  <div className="text-content-tertiary">utilisent Volia pour prospecter en France</div>
+                  <div className="font-semibold text-content-primary">287 000+ entreprises françaises</div>
+                  <div className="text-content-tertiary">déjà dans la base Volia</div>
                 </div>
               </div>
 
@@ -336,8 +338,9 @@ export default function LandingContent() {
       {/* ──────────────────────────────────────────────────────────────
           Widget interactif — section dédiée propre
           (descendu du hero pour laisser le hero respirer)
+          id="try-live" cible du CTA "Voir une démo en direct" du hero
        */}
-      <section className="relative pb-20 px-4 sm:px-6 overflow-hidden">
+      <section id="try-live" className="relative pb-20 px-4 sm:px-6 overflow-hidden scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 border border-violet-200 text-xs text-violet-700 font-semibold mb-3">
@@ -350,6 +353,50 @@ export default function LandingContent() {
             <p className="text-content-tertiary">Aucune inscription requise.</p>
           </div>
           <HeroSearchWidget />
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────
+          LIVE STATS BANNER — chiffres clés globaux Volia (mirror du
+          pattern utilisé sur /produits/prospection). Position : juste
+          après la démo, avant les profils — sert d'ancrage chiffré
+          crédible avant de continuer la narrative.
+       */}
+      <section className="relative py-20 px-4 sm:px-6 border-t border-line overflow-hidden bg-gradient-to-br from-violet-50/60 via-white to-indigo-50/40">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-200/30 rounded-full blur-3xl pointer-events-none -z-0" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-200/25 rounded-full blur-3xl pointer-events-none -z-0" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <MotionInView>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-200 bg-violet-100 text-violet-700 text-[11px] font-bold uppercase tracking-wider">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-violet-600"></span>
+                </span>
+                Volia, en chiffres
+              </span>
+            </div>
+          </MotionInView>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {[
+              { value: '287 000+', label: 'entreprises', sub: 'françaises dans la base', color: 'from-violet-600 via-indigo-600 to-violet-700' },
+              { value: '19 €', label: 'par mois', sub: 'à partir de', color: 'from-indigo-600 to-blue-700' },
+              { value: '5×', label: 'moins cher', sub: 'qu’Apollo / Hunter', color: 'from-emerald-600 to-teal-700' },
+              { value: '100 %', label: 'RGPD', sub: 'conforme by default', color: 'from-blue-600 to-cyan-700' },
+            ].map((stat, i) => (
+              <MotionInView key={stat.label} delay={i * 100}>
+                <div className="group">
+                  <div className={`text-5xl sm:text-6xl lg:text-7xl font-bold font-mono tabular-nums bg-gradient-to-br ${stat.color} bg-clip-text text-transparent leading-none mb-3 group-hover:scale-105 transition-transform`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-sm font-semibold text-content-primary">{stat.label}</div>
+                  <div className="text-xs text-content-tertiary mt-1">{stat.sub}</div>
+                </div>
+              </MotionInView>
+            ))}
+          </div>
         </div>
       </section>
 
