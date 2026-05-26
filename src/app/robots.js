@@ -11,6 +11,7 @@ export default function robots() {
         userAgent: '*',
         allow: [
           '/',
+          '/en',
           '/prospection',
           '/prospection-be',
           '/pour',

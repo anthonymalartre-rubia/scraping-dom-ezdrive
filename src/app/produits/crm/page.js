@@ -23,7 +23,15 @@ export const metadata = {
   title: 'Volia CRM — Alternative française à HubSpot, inclus dans Business 99 €',
   description:
     'HubSpot Starter 90 €. Pipedrive 49 €. Salesforce 125 €. Volia CRM : 0 € de plus si vous êtes en Business. Kanban drag-drop, auto-create deals depuis replies, timeline 360°, intégré nativement à Prospection + Campagnes.',
-  alternates: { canonical: PAGE_URL },
+  alternates: {
+    canonical: PAGE_URL,
+    languages: {
+      'fr-FR': PAGE_URL,
+      'en-US': `${SITE_URL}/en/products/crm`,
+      'en-GB': `${SITE_URL}/en/products/crm`,
+      'x-default': PAGE_URL,
+    },
+  },
   keywords: [
     'alternative hubspot',
     'alternative hubspot français',

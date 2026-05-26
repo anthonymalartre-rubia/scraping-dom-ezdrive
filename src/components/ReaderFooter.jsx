@@ -12,11 +12,15 @@ export default function ReaderFooter() {
           <Link href="/comparatif/apollo-vs-volia" className="hover:text-content-secondary transition">vs Apollo</Link>
           <Link href="/comparatif/lemlist-vs-volia" className="hover:text-content-secondary transition">vs Lemlist</Link>
           <Link href="/comparatif/hubspot-vs-volia" className="hover:text-content-secondary transition">vs HubSpot</Link>
-          <Link href="/etude/prospection-b2b-france-2026" className="hover:text-content-secondary transition">Étude 2026</Link>
+          <Link href="/etude/prospection-b2b-france-2026" className="hover:text-content-secondary transition">Étude prospection</Link>
+          <Link href="/etude/etat-cold-email-france-2026" className="hover:text-content-secondary transition">Étude cold email</Link>
           <Link href="/glossaire" className="hover:text-content-secondary transition">Glossaire</Link>
           <Link href="/cgu" className="hover:text-content-secondary transition">CGU</Link>
           <Link href="/confidentialite" className="hover:text-content-secondary transition">Confidentialité</Link>
           <Link href="/rgpd" className="hover:text-content-secondary transition">RGPD</Link>
+          <span aria-hidden="true" className="text-content-muted">|</span>
+          <Link href="/" className="hover:text-content-secondary transition" hrefLang="fr">FR</Link>
+          <Link href="/en" className="hover:text-content-secondary transition" hrefLang="en">EN</Link>
         </div>
       </div>
     </footer>

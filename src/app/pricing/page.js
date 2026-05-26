@@ -20,7 +20,15 @@ export const metadata = {
   title: 'Tarifs Volia — Suite B2B de prospection, campagnes & CRM à partir de 19 €',
   description:
     "Plans tarifaires Volia : Starter gratuit, Solo 19 €/mo, Pro 49 €/mo, Business 99 €/mo (3 modules inclus). 5× moins cher qu'Apollo + Lemlist + HubSpot. Sans engagement, RGPD France.",
-  alternates: { canonical: PAGE_URL },
+  alternates: {
+    canonical: PAGE_URL,
+    languages: {
+      'fr-FR': PAGE_URL,
+      'en-US': `${SITE_URL}/en/pricing`,
+      'en-GB': `${SITE_URL}/en/pricing`,
+      'x-default': PAGE_URL,
+    },
+  },
   keywords: [
     'tarifs volia',
     'pricing volia',

@@ -130,25 +130,56 @@ const STATUS_BADGES = {
   COMING_SOON: { label: 'BIENTÔT', className: 'bg-amber-100 text-amber-700 border-amber-300' },
 };
 
+// Labels par défaut (FR) — surchargés par le prop `labels` pour EN.
+const DEFAULT_LABELS_FR = {
+  products: 'Produits',
+  features: 'Fonctionnalités',
+  pricing: 'Tarifs',
+  blog: 'Blog',
+  faq: 'FAQ',
+  breadcrumbProducts: 'Produits',
+  featuresPill: 'Fonctionnalités',
+  featuresTitlePrefix: 'Tout pour',
+  featuresTitleDefault: 'réussir avec Volia',
+  howItWorksPill: 'Comment ça marche',
+  howItWorksTitle: "3 étapes, c'est tout",
+  suitePill: 'Suite Volia',
+  suiteTitle: 'Connecté aux autres modules Volia',
+  suiteSubtitleDefault: "Vos données circulent entre Prospection, Campagnes et CRM. Pas de copier-coller, pas d'export/import.",
+  suiteSource: 'Source',
+  suiteDestination: 'Destination',
+  suiteCtaDefault: 'Découvrir',
+  pricingPill: 'Tarification',
+  pricingCtaDefault: 'Voir les tarifs complets',
+  faqPill: 'FAQ',
+  faqTitle: 'Questions fréquentes',
+  bookDemoHero: 'Ou réserver 15 min avec le founder',
+  bookDemoFinal: 'Voir si Volia est fait pour vous',
+  breadcrumbAria: "Fil d'Ariane",
+};
+
 // ─────────────────────────────────────────────────────────────────────
 // Sous-composant : nav top (clone simplifié de LandingContent)
 // ─────────────────────────────────────────────────────────────────────
-function ProductTopNav() {
+function ProductTopNav({ labels = DEFAULT_LABELS_FR, locale = 'fr' }) {
+  const isEn = locale === 'en';
+  const home = isEn ? '/en' : '/';
+  const productsLink = isEn ? '/en/products/prospection' : '/produits/prospection';
   return (
     <header>
       <nav className="fixed top-0 w-full z-50 bg-surface-base/70 backdrop-blur-2xl border-b border-line">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5">
+          <Link href={home} className="flex items-center gap-1.5">
             <LogoIcon size="sm" />
             <span className="text-lg font-bold tracking-tight ml-1">Volia</span>
             <span className="text-violet-400 text-xs font-semibold">.fr</span>
           </Link>
           <div className="hidden sm:flex items-center gap-6">
-            <Link href="/produits/prospection" className="text-sm text-content-tertiary hover:text-content-primary transition">Produits</Link>
-            <Link href="/#features" className="text-sm text-content-tertiary hover:text-content-primary transition">Fonctionnalités</Link>
-            <Link href="/#pricing" className="text-sm text-content-tertiary hover:text-content-primary transition">Tarifs</Link>
-            <Link href="/blog" className="text-sm text-content-tertiary hover:text-content-primary transition">Blog</Link>
-            <Link href="/#faq" className="text-sm text-content-tertiary hover:text-content-primary transition">FAQ</Link>
+            <Link href={productsLink} className="text-sm text-content-tertiary hover:text-content-primary transition">{labels.products}</Link>
+            <Link href={`${home}#features`} className="text-sm text-content-tertiary hover:text-content-primary transition">{labels.features}</Link>
+            <Link href={isEn ? '/en/pricing' : '/#pricing'} className="text-sm text-content-tertiary hover:text-content-primary transition">{labels.pricing}</Link>
+            <Link href="/blog" className="text-sm text-content-tertiary hover:text-content-primary transition">{labels.blog}</Link>
+            <Link href={`${home}#faq`} className="text-sm text-content-tertiary hover:text-content-primary transition">{labels.faq}</Link>
           </div>
           <div className="flex items-center gap-3">
             <NavAuth />
@@ -162,14 +193,15 @@ function ProductTopNav() {
 // ─────────────────────────────────────────────────────────────────────
 // Sous-composant : breadcrumb sous la nav
 // ─────────────────────────────────────────────────────────────────────
-function Breadcrumb({ moduleLabel }) {
+function Breadcrumb({ moduleLabel, labels = DEFAULT_LABELS_FR, locale = 'fr' }) {
+  const isEn = locale === 'en';
   return (
     <div className="pt-20 pb-2 px-4 sm:px-6">
-      <nav className="max-w-6xl mx-auto text-xs text-content-tertiary" aria-label="Fil d'Ariane">
+      <nav className="max-w-6xl mx-auto text-xs text-content-tertiary" aria-label={labels.breadcrumbAria}>
         <ol className="flex items-center gap-2">
-          <li><Link href="/" className="hover:text-content-primary transition">Volia</Link></li>
+          <li><Link href={isEn ? '/en' : '/'} className="hover:text-content-primary transition">Volia</Link></li>
           <li aria-hidden="true">·</li>
-          <li><Link href="/produits/prospection" className="hover:text-content-primary transition">Produits</Link></li>
+          <li><Link href={isEn ? '/en/products/prospection' : '/produits/prospection'} className="hover:text-content-primary transition">{labels.breadcrumbProducts}</Link></li>
           <li aria-hidden="true">·</li>
           <li className="font-semibold text-content-primary">{moduleLabel}</li>
         </ol>
@@ -215,7 +247,55 @@ function FAQAccordion({ items }) {
 // ─────────────────────────────────────────────────────────────────────
 // Sous-composant : footer (clone simplifié de LandingContent)
 // ─────────────────────────────────────────────────────────────────────
-function ProductFooter() {
+function ProductFooter({ locale = 'fr' }) {
+  const isEn = locale === 'en';
+  if (isEn) {
+    return (
+      <footer className="border-t border-line py-12 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-10 pb-10 border-b border-line">
+            <div>
+              <h3 className="text-xs font-semibold text-content-secondary uppercase tracking-wider mb-3">Products</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/en/products/prospection" className="text-content-tertiary hover:text-violet-400 transition">Prospecting</Link></li>
+                <li><Link href="/en/products/campaigns" className="text-content-tertiary hover:text-blue-500 transition">Campaigns</Link></li>
+                <li><Link href="/en/products/crm" className="text-content-tertiary hover:text-emerald-500 transition">CRM</Link></li>
+                <li><Link href="/en/pricing" className="text-content-tertiary hover:text-violet-400 transition">Pricing</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-content-secondary uppercase tracking-wider mb-3">Resources</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/blog" className="text-content-tertiary hover:text-violet-400 transition">Blog</Link></li>
+                <li><Link href="/en" className="text-content-tertiary hover:text-violet-400 transition">Home</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-content-secondary uppercase tracking-wider mb-3">Language</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/" className="text-content-tertiary hover:text-violet-400 transition">FR Francais</Link></li>
+                <li><Link href="/en" className="text-content-tertiary hover:text-violet-400 transition font-semibold">EN English</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-1.5">
+              <LogoIcon size="xs" />
+              <span className="text-sm font-bold tracking-tight ml-1">Volia</span>
+              <span className="text-violet-400 text-[10px] font-semibold">.fr</span>
+            </div>
+            <div className="flex items-center gap-6 text-xs text-content-tertiary">
+              <Link href="/cgu" className="hover:text-content-secondary transition">Terms</Link>
+              <Link href="/confidentialite" className="hover:text-content-secondary transition">Privacy</Link>
+              <Link href="/rgpd" className="hover:text-content-secondary transition">GDPR</Link>
+              <Link href="/opt-out" className="hover:text-content-secondary transition">Opt-out</Link>
+            </div>
+            <p className="text-[11px] text-content-muted">&copy; 2026 Volia.fr - Built in France</p>
+          </div>
+        </div>
+      </footer>
+    );
+  }
   return (
     <footer className="border-t border-line py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
@@ -311,17 +391,23 @@ export default function ProductPageLayout({
   afterHero,       // ReactNode rendu juste après le hero (ex: stats banner)
   afterFeatures,   // ReactNode rendu après les features bento (ex: use cases)
   beforeFaq,       // ReactNode rendu juste avant la FAQ (ex: before/after compare)
+  // i18n : labels override + locale ('fr' | 'en'). EN bascule la nav, le
+  // breadcrumb, le footer et tous les titres de sections en anglais.
+  locale = 'fr',
+  labels: labelsOverride,
+  moduleLabelOverride, // override le nom du module dans le breadcrumb (ex: "Prospecting" en EN)
 }) {
   const theme = MODULE_THEMES[module];
   const statusBadge = STATUS_BADGES[status];
+  const labels = { ...DEFAULT_LABELS_FR, ...(labelsOverride || {}) };
 
   // Force light mode sur les pages produit (marketing = toujours light)
   useForceLightTheme();
 
   return (
     <div className="min-h-screen bg-surface-base text-content-primary overflow-hidden">
-      <ProductTopNav />
-      <Breadcrumb moduleLabel={theme.label} />
+      <ProductTopNav labels={labels} locale={locale} />
+      <Breadcrumb moduleLabel={moduleLabelOverride || theme.label} labels={labels} locale={locale} />
 
       <main>
         {/* ───────────────────────────────────────────────────────────
@@ -393,7 +479,7 @@ export default function ProductPageLayout({
                 {/* CTA tertiaire — booking démo perso (ghost discret) */}
                 <div className="mb-8">
                   <BookDemoButton
-                    label="Ou réserver 15 min avec le founder"
+                    label={labels.bookDemoHero}
                     variant="ghost"
                     size="sm"
                     source={`produit_${module}_hero`}
@@ -432,10 +518,10 @@ export default function ProductPageLayout({
             <MotionInView>
               <div className="text-center mb-16">
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${theme.pill} text-[11px] font-bold uppercase tracking-wider mb-4`}>
-                  Fonctionnalités
+                  {labels.featuresPill}
                 </span>
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight bg-gradient-to-b from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
-                  Tout pour {features.headline || `réussir avec Volia ${theme.label}`}
+                  {labels.featuresTitlePrefix} {features.headline || `${labels.featuresTitleDefault} ${theme.label}`}
                 </h2>
                 <p className="text-content-tertiary text-lg max-w-2xl mx-auto">
                   {features.subline || ''}
@@ -478,10 +564,10 @@ export default function ProductPageLayout({
             <MotionInView>
               <div className="text-center mb-20">
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${theme.pill} text-[11px] font-bold uppercase tracking-wider mb-4`}>
-                  Comment ça marche
+                  {labels.howItWorksPill}
                 </span>
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight bg-gradient-to-b from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
-                  3 étapes, c'est tout
+                  {labels.howItWorksTitle}
                 </h2>
               </div>
             </MotionInView>
@@ -521,13 +607,13 @@ export default function ProductPageLayout({
               <MotionInView>
                 <div className="text-center mb-12">
                   <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${theme.pill} text-[11px] font-bold uppercase tracking-wider mb-4`}>
-                    Suite Volia
+                    {labels.suitePill}
                   </span>
                   <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight bg-gradient-to-b from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
-                    Connecté aux autres modules Volia
+                    {labels.suiteTitle}
                   </h2>
                   <p className="text-content-tertiary text-lg max-w-2xl mx-auto">
-                    {crossSell.subtitle || 'Vos données circulent entre Prospection, Campagnes et CRM. Pas de copier-coller, pas d\'export/import.'}
+                    {crossSell.subtitle || labels.suiteSubtitleDefault}
                   </p>
                 </div>
               </MotionInView>
@@ -540,20 +626,20 @@ export default function ProductPageLayout({
                   return (
                     <MotionInView key={m.module} delay={i * 120}>
                       <Link
-                        href={`/produits/${m.module}`}
+                        href={locale === 'en' ? `/en/products/${m.module === 'campagnes' ? 'campaigns' : m.module}` : `/produits/${m.module}`}
                         className={`group block h-full p-7 rounded-2xl border-2 ${otherTheme.cardBorder} bg-gradient-to-br ${otherTheme.cardBg} shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
                       >
                         <div className="flex items-center justify-between mb-5">
                           <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${otherTheme.iconBg} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
                             <OtherIcon size={22} className="text-white" />
                           </div>
-                          <span className={`text-xs font-bold ${otherTheme.linkText}`}>{arrow} {m.direction === 'in' ? 'Source' : 'Destination'}</span>
+                          <span className={`text-xs font-bold ${otherTheme.linkText}`}>{arrow} {m.direction === 'in' ? labels.suiteSource : labels.suiteDestination}</span>
                         </div>
                         <div className="text-xs text-content-tertiary uppercase tracking-wider mb-1">Volia</div>
                         <h3 className="text-xl font-bold text-content-primary mb-2">{otherTheme.label}</h3>
                         <p className="text-sm text-content-secondary leading-relaxed mb-5">{m.desc}</p>
                         <div className={`inline-flex items-center gap-1.5 text-sm font-semibold ${otherTheme.linkText} group-hover:gap-2 transition-all`}>
-                          {m.cta || 'Découvrir'}
+                          {m.cta || labels.suiteCtaDefault}
                           <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </div>
                       </Link>
@@ -576,7 +662,7 @@ export default function ProductPageLayout({
               ) : null}
               <div className={`rounded-2xl border-2 ${theme.cardBorder} bg-gradient-to-br ${theme.cardBg} p-8 sm:p-10 text-center shadow-lg`}>
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${theme.pill} text-[11px] font-bold uppercase tracking-wider mb-4`}>
-                  Tarification
+                  {labels.pricingPill}
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-content-primary tracking-tight">
                   {pricing.label}
@@ -585,10 +671,10 @@ export default function ProductPageLayout({
                   <p className="text-content-secondary mb-6 max-w-xl mx-auto">{pricing.subtext}</p>
                 )}
                 <Link
-                  href={pricing.ctaHref || '/#pricing'}
+                  href={pricing.ctaHref || (locale === 'en' ? '/en/pricing' : '/#pricing')}
                   className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r ${theme.ctaGradient} text-white font-semibold shadow-lg ${theme.ctaShadow} hover:-translate-y-0.5 transition-all`}
                 >
-                  {pricing.cta || 'Voir les tarifs complets'}
+                  {pricing.cta || labels.pricingCtaDefault}
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -608,10 +694,10 @@ export default function ProductPageLayout({
               <MotionInView>
                 <div className="text-center mb-12">
                   <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${theme.pill} text-[11px] font-bold uppercase tracking-wider mb-4`}>
-                    FAQ
+                    {labels.faqPill}
                   </span>
                   <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight bg-gradient-to-b from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
-                    Questions fréquentes
+                    {labels.faqTitle}
                   </h2>
                 </div>
               </MotionInView>
@@ -658,7 +744,7 @@ export default function ProductPageLayout({
                   </Link>
                 )}
                 <BookDemoButton
-                  label="Voir si Volia est fait pour vous"
+                  label={labels.bookDemoFinal}
                   variant="secondary"
                   size="lg"
                   source={`produit_${module}_final_cta`}
@@ -673,7 +759,7 @@ export default function ProductPageLayout({
         </section>
       </main>
 
-      <ProductFooter />
+      <ProductFooter locale={locale} />
     </div>
   );
 }

@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 
-export default function EtudeCopyCitation({ studyUrl, publishedAt }) {
+export default function EtudeCopyCitation({ studyUrl, publishedAt, studyTitle }) {
   const [copied, setCopied] = useState(null);
 
   const year = publishedAt ? publishedAt.slice(0, 4) : '2026';
-  const apa = `Malartre, A. (${year}). L'État de la Prospection B2B en France ${year}. Volia. ${studyUrl}`;
-  const html = `<p>Source : <a href="${studyUrl}">L'État de la Prospection B2B en France ${year}</a> — Volia (${year})</p>`;
-  const markdown = `[L'État de la Prospection B2B en France ${year}](${studyUrl}) — Volia (${year})`;
+  // Titre par défaut pour rétro-compatibilité avec l'étude prospection
+  const title = studyTitle || `L'État de la Prospection B2B en France ${year}`;
+  const apa = `Malartre, A. (${year}). ${title}. Volia. ${studyUrl}`;
+  const html = `<p>Source : <a href="${studyUrl}">${title}</a> — Volia (${year})</p>`;
+  const markdown = `[${title}](${studyUrl}) — Volia (${year})`;
 
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);

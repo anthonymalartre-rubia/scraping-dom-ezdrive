@@ -23,7 +23,15 @@ export const metadata = {
   title: 'Volia Campagnes — Cold email B2B qui finit en Inbox, pas en Spam',
   description:
     'Alternative française à Lemlist + Instantly + Smartlead. Cold email illimité, warmup automatique 28 jours, multi-tenant Resend, auto-create CRM depuis replies. Inclus dans Pro à 49€/mois vs 108€/mo cumulés. 62 % taux ouverture moyen.',
-  alternates: { canonical: PAGE_URL },
+  alternates: {
+    canonical: PAGE_URL,
+    languages: {
+      'fr-FR': PAGE_URL,
+      'en-US': `${SITE_URL}/en/products/campaigns`,
+      'en-GB': `${SITE_URL}/en/products/campaigns`,
+      'x-default': PAGE_URL,
+    },
+  },
   keywords: [
     'cold email b2b',
     'alternative lemlist',

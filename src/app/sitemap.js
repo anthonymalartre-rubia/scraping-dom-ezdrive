@@ -48,15 +48,23 @@ export default async function sitemap({ id }) {
   if (id === 0) {
     // ─── Pages "manuelles" (peu nombreuses, mises à jour fréquentes) ────
     const staticPages = [
-      { url: `${baseUrl}/`, priority: 1.0, changeFrequency: 'weekly', lastModified: now },
+      { url: `${baseUrl}/`, priority: 1.0, changeFrequency: 'weekly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/`, 'en-US': `${baseUrl}/en`, 'x-default': `${baseUrl}/` } } },
       { url: `${baseUrl}/signup`, priority: 0.9, changeFrequency: 'monthly', lastModified: now },
       { url: `${baseUrl}/login`, priority: 0.8, changeFrequency: 'monthly', lastModified: now },
       { url: `${baseUrl}/demo`, priority: 0.9, changeFrequency: 'monthly', lastModified: now },
-      { url: `${baseUrl}/produits/prospection`, priority: 0.8, changeFrequency: 'monthly', lastModified: now },
-      { url: `${baseUrl}/produits/campagnes`, priority: 0.8, changeFrequency: 'monthly', lastModified: now },
-      { url: `${baseUrl}/produits/crm`, priority: 0.8, changeFrequency: 'monthly', lastModified: now },
+      { url: `${baseUrl}/pricing`, priority: 0.95, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/pricing`, 'en-US': `${baseUrl}/en/pricing`, 'x-default': `${baseUrl}/pricing` } } },
+      { url: `${baseUrl}/produits/prospection`, priority: 0.8, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/prospection`, 'en-US': `${baseUrl}/en/products/prospection`, 'x-default': `${baseUrl}/produits/prospection` } } },
+      { url: `${baseUrl}/produits/campagnes`, priority: 0.8, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/campagnes`, 'en-US': `${baseUrl}/en/products/campaigns`, 'x-default': `${baseUrl}/produits/campagnes` } } },
+      { url: `${baseUrl}/produits/crm`, priority: 0.8, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/crm`, 'en-US': `${baseUrl}/en/products/crm`, 'x-default': `${baseUrl}/produits/crm` } } },
+      // EN versions for US/UK markets (boost SEO international)
+      { url: `${baseUrl}/en`, priority: 0.95, changeFrequency: 'weekly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/`, 'en-US': `${baseUrl}/en`, 'x-default': `${baseUrl}/` } } },
+      { url: `${baseUrl}/en/pricing`, priority: 0.9, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/pricing`, 'en-US': `${baseUrl}/en/pricing`, 'x-default': `${baseUrl}/pricing` } } },
+      { url: `${baseUrl}/en/products/prospection`, priority: 0.75, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/prospection`, 'en-US': `${baseUrl}/en/products/prospection`, 'x-default': `${baseUrl}/produits/prospection` } } },
+      { url: `${baseUrl}/en/products/campaigns`, priority: 0.75, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/campagnes`, 'en-US': `${baseUrl}/en/products/campaigns`, 'x-default': `${baseUrl}/produits/campagnes` } } },
+      { url: `${baseUrl}/en/products/crm`, priority: 0.75, changeFrequency: 'monthly', lastModified: now, alternates: { languages: { 'fr-FR': `${baseUrl}/produits/crm`, 'en-US': `${baseUrl}/en/products/crm`, 'x-default': `${baseUrl}/produits/crm` } } },
       { url: `${baseUrl}/comparatif-outils-prospection-b2b-france`, priority: 0.9, changeFrequency: 'monthly', lastModified: now },
       { url: `${baseUrl}/etude/prospection-b2b-france-2026`, priority: 1.0, changeFrequency: 'monthly', lastModified: now },
+      { url: `${baseUrl}/etude/etat-cold-email-france-2026`, priority: 0.95, changeFrequency: 'monthly', lastModified: now },
       { url: `${baseUrl}/api`, priority: 0.6, changeFrequency: 'monthly', lastModified: now },
       { url: `${baseUrl}/cgu`, priority: 0.3, changeFrequency: 'yearly', lastModified: now },
       { url: `${baseUrl}/confidentialite`, priority: 0.3, changeFrequency: 'yearly', lastModified: now },

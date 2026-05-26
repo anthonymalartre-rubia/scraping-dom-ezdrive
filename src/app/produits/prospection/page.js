@@ -28,7 +28,15 @@ export const metadata = {
   title: 'Volia Prospection — Alternative française à Apollo, 5× moins chère (19 €/mois)',
   description:
     "Trouvez 1 000 prospects qualifiés en France en 30 secondes. 287 000+ entreprises avec emails + téléphones vérifiés. À partir de 19 €/mois — 5× moins cher qu'Apollo. 100% conforme RGPD.",
-  alternates: { canonical: PAGE_URL },
+  alternates: {
+    canonical: PAGE_URL,
+    languages: {
+      'fr-FR': PAGE_URL,
+      'en-US': `${SITE_URL}/en/products/prospection`,
+      'en-GB': `${SITE_URL}/en/products/prospection`,
+      'x-default': PAGE_URL,
+    },
+  },
   keywords: [
     'alternative Apollo France',
     'alternative Apollo.io',
